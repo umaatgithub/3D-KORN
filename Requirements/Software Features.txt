@@ -1,0 +1,38 @@
+General Features:
+	- Save and load editor states (Pointclouds and its groups, Redo/undo stack, )
+	- Settings (¿?)
+
+Editor Features:
+- Select one or multiple pcs
+- 3D OPERATIONS:
+	- For one or a group of pcs:
+		- Move
+		- Scale
+		- Rotate
+		- Plane crop?
+	- For two or more pcs:
+		- Merge
+- Undo/Redo any of the operations
+- For each pointcloud or group of pointclouds:
+	- Toggle visibility
+	- Lock their position 
+
+Scan Features:
+- Have multiple views of camera to assess correctness of captures
+	- Color Camera output
+	- Depth map
+	- Pointcloud View
+	- Current 3D registered model
+- ¿? Until we select algorithm no more can be added
+
+Export Features:
+- Select output dimensions (in mm)
+- Limit number of faces in exported geometry
+- Change model orientation for export
+- Output file format
+
+
+
+
+
+
