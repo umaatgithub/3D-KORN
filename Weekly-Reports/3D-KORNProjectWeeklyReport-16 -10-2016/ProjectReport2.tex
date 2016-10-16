@@ -70,85 +70,70 @@
 
 \section{Tasks completed}
 \begin{itemize}
-	\item Issue solved: Fixed building problems	with PCL library for all team members.
+	\item Knowledge transfer session from \emph{operation with pointclouds} for all team on the usage of PCL library.
 	
-	\item Assigned the deadlines of main sections for software development:
+	\item Issue solved: Fixed building problems	with PCL 1.6.0 with MSVC2010 compiler and Qt 4.8.0 for all team members.
+	
+	\item POC progress with pointclouds operation making watertight meshes with Poisson algorithm from PCL library.
+	
+	\item Understood Mesh Handling through \texttt{vtkRenderWindowInteractor} class and \texttt{PCLVisual- izerInteractorStyle} for customization of mouse and keyboard input commands through GUI.
+	
+	\item Completed the skillset analysis table:
+\begin{table}[h]
+	\centering
+	\label{my-label}
+	\begin{tabular}{lrrrrrr}
+		\textbf{First Name}   & \textbf{Managing} & \textbf{Research} & \textbf{UML} & \textbf{OOP} & \textbf{Qt} & \textbf{Documentation} \\
+		LUCA       & 1                  & 3        & 1   & 1   & 1         & 3             \\
+		EZEQUIEL   & 2                  & 4        & 1   & 1   & 2         & 3             \\
+		BENJAMIN   & 2                  & 2        & 1   & 2   & 3         & 3             \\
+		ROBERTO    & 2                  & 2        & 1   & 4   & 2         & 3             \\
+		UMA        & 4                  & 3        & 4   & 4   & 3         & 3             \\
+		SAVINIEN   & 3                  & 3        & 1   & 4   & 3         & 2             \\
+		ALBERT     & 4                  & 3        & 3   & 4   & 1         & 2             \\
+		DANIEL     & 3                  & 3        & 1   & 3   & 1         & 3             \\
+		NAYEEM     & 4                  & 3        & 2   & 3   & 2         & 3             \\
+		PAMIR      & 2                  & 4        & 1   & 3   & 2         & 3             \\
+		DI         & 2                  & 2        & 1   & 3   & 1         & 2                    
+	\end{tabular}
+\caption{Member analysis of skills evaluated from 1 - Beginner to 4 - Excellent}
+\end{table}
+	
+	\item Assigned the timeline for project development based on availability of members:
 	\begin{itemize}
 		\item INSERT GANTT DIAGRAM
 	\end{itemize}
-
-	\item Defined the minimal software features that clearly define the scope of our work
-	\begin{itemize}
-		\item Editor Features:
-		\begin{itemize}
-			\item Save and load editor states (pointclouds and its groups, Redo/undo stack...)
-			\item Select one or more PCs.
-			\item Operations for one or more pointclouds: Move, scale, rotate, plane crop.
-			\item Operations for two or more pointclouds: Merge.
-			\item Undo/Redo any of the operations.
-		\end{itemize}
-		
-		\item Scan Features:
-		\begin{itemize}
-			\item Have multiple views of camera to assess correctness of captures and identifying possible sources of problems in real-time, such as color camera output, depth map, pointcloud or current partial 3D registered model.
-		\end{itemize}
-		
-		\item Export Features:
-		\begin{itemize}
-			\item Select output dimensions (in mm).
-			\item Limit number of faces in exported geometry.
-			\item Change model orientation for export
-			\item Output file format
-		\end{itemize}	
-	\end{itemize}
-
-	\item Understood Mesh Handling through \texttt{vtkRenderWindowInteractor} class and \texttt{PCLVisual- izerInteractorStyle} for customization of mouse and keyboard input commands through GUI.
 	
-	\item POC progress made at translation, plane cropping and mesh watertighting. With some issues on hole filling that will be discussed in Section 2: Issues.
-	
-	\item Discarded KinectFusion and DynamicFusion algorithms and finally decided to use 3D registration algorithms from PCL library, the specific algorithm used is still to be discussed. We choose this option as it will work regardless of the final sensor used (KinectV2 or Intel R200) and other team members can continue with development related to this part.
-
 \end{itemize}
 
-\section{Issues encountered}
-\begin{itemize}
-	\item Issues with hole filling and watertighting after plane crop, as hole is not reconstructed as expected. The work scheduled for next week will be specified in Section 3.
-	
-	\item With our current version of PCL (1.6.0) interface through OpenNI is not compatible with KinectV2 and the OpenNI2 interface is not fully implemented. Moreover, the Kinect SDK 2.0, which is the minimum required for interfacing with KinectV2, is compiled with MSVC2012 and is not compatible with our compilation of PCL (MSVC 2010).
+\section{Issue Handling}
+\begin{itemize}	
+	\item With our current version of PCL (1.6.0) interface through OpenNI is not compatible with KinectV2 and the OpenNI2 interface is not fully implemented. Moreover, the Kinect SDK 2.0, which is the minimum required for interfacing with KinectV2, is compiled with MSVC2012 and is not compatible with our compilation of PCL (MSVC 2010). Two branches of development will try to solve the issue, one trying to install PCL 1.8.0 in Windows to use the Kinect SDK 2.0 and the other will try to interface the Intel R200.
 
-	\item Rough UI layout and the UML work couldn't progress as expected as we still don't have all specifications clear for the project. The main bottleneck has been interfacing with the sensor and deciding on an algorithm for 3D registration. Some members have been reassigned to the teams that have the most trouble to help with the bottlenecks identified. 
+	This has caused a delay in the specification of scanning process and, as a result, GUI and UML work couldn't progress as expected due to the relation with it. Albert and Eze have been reassigned to the Interfacing with sensor team to try and overcome this issue.
+\end{itemize}
+
+\section{Work in Progress}
+
+\begin{itemize}
+	\item Reviewed KinectFusion and DynamicFusion algorithms  as they seem no to be suited for the project due to their complexity and time requirements. We finally decided to use 3D registration algorithms from PCL library as it will work regardless of the final sensor used (KinectV2 or Intel R200) and development that depended on this particular algorithm is now free to continue.
+	
+	\item Reassignment of tasks for \emph{Interfacing} with sensors team based on priority:\\
+		~\\Tasks:
+		\begin{itemize}
+			\item Try to interface with both Intel R200 and KinectV2, to see which one is more compatible and simple to interface.
+			\item  Generate PCL point cloud from scan.
+		\end{itemize}
+		Members: Pamir, Dani, Albert, Eze. 
+		
 \end{itemize}
 
 \section{Tasks for this week}
+\begin{itemize}
+	\item KT session on coding standards for the whole team
+	\item Complete POC and start work on UML design with a Use Case diagram and Class diagrams.
+\end{itemize}
 
-
-
-	\begin{itemize}
-	\item Interfacing with sensor~\\
-	
-	~\\Tasks:
-	\begin{itemize}
-	\item Interfacing the sensor from Windows
-	\item  Generate point cloud from scan
-	\end{itemize}
-	Members: Pamir, Dani, Albert, Eze
-
-	\item Operations on point cloud~\\
-	~\\Tasks:
-	\begin{itemize}
-	\item Find workaround for regenerating a watertight mesh after plane cropping.
-	\item Adapt and study the POC code for project coding standards.
-	\end{itemize}
-	Members: Clement, Nayeem, Luca, Roberto, Meng
-	
-
-	\item Software Architecture~\\
-	~\\Tasks:
-	\begin{itemize}
-	\item Complete the stable high level design (UseCase diagram) and make the low level design(Class diagram). 
-	\end{itemize}
-	Members: Umamashwaren, Benjamin
-	\end{itemize}	
 %\section{Tasks completed}
 %\begin{itemize}
 %\item Infrastructure setup which enables us to work as a team
