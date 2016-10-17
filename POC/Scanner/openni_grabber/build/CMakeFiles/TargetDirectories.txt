@@ -1,1 +1,0 @@
-/home/dani/Escritorio/openni-grabber/openni_grabber/build/CMakeFiles/openni_grabber.dir
