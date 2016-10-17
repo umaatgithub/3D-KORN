@@ -1,0 +1,46 @@
+Story of one scan
+-----------------
+
+Jack is taking scans at the Mall, many people are waiting to get scanned. 
+
+Jack makes a new project, presses the scan button and performs many captures of the subject using all camera outputs until he sees there are no holes in the aligned meshes and detailed areas are covered. Jack imports the scanned meshes to the editor and saves the project. 
+Jack is informed that the Client wants a parrot on his shoulder for the final print. He then closes and opens a new one to scan the next client.
+
+The next day, Jack opens the program and loads the project of the Client, he smoothes some of the meshes of his legs due to the many wrinkles in the pants and hair. He also box-crops some of the meshes as some points from other objects are there. When he is happy with all the scans, he merges them all. He then imports a 3d parrot model he found on the internet and imports it to the project, the parrot is the same size as our subject, so he resizes it and moves it to his shoulder. 
+
+After that he presses the export button, the program automatically fills the holes and generates a single watertight mesh. The program then presents the final single closed mesh to Jack, that adjusts some options for the output file and hits the export button. An .stl is saved. The program shows the editor tab again, Jack saves and closes the project to go to the next one.
+
+|---------------------------------------------|
+|		       GUI outline					  |
+|---------------------------------------------|
+
+The GUI will be organized in three main screens, being EDIT the main one, from where you can access the SCAN and EXPORT one:
+
+------>SCAN 
+Goal: capture one single static object. It will take many individual 3d scans, align them and import them to the editor space as a group of aligned meshes.
+
+We can start a full scan (full rotation in case of rotating base) or a single scan shot (for example to capture detailed areas)
+
+During the scan of one object, it should be possible to see realtime info about:
+Camera output
+Depth map
+Current pointcloud
+Last captured mesh
+All meshes captured already aligned
+
+At any moment we should be able to delete any captured mesh.
+
+
+------>EDITOR
+Goal: Scale and place diferent scans or imported meshes and process all pointclouds to ensure :
+Meshes are correctly aligned and merged into a single mesh.
+Smoothing of sharp or noisy meshes. (Even if already smoothed previously)
+
+We can proceed to export all the editor space or a subselection of objects:
+
+------>EXPORT
+Goal: Process already aligned and merged meshes to ensure:
+Holes are patched
+Watertight mesh
+Color is right?
+Then output is presented to user along some options to do export (format...)
