@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.10.16)  23 OCT 2016 22:17
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.10.16)  24 OCT 2016 01:18
 entering extended mode
 **./ProjectReport3.tex
 (ProjectReport3.tex
@@ -760,16 +760,38 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <10.95> on input line 71.
 
+Overfull \hbox (5.09035pt too wide) in paragraph at lines 77--78
+[]\OT1/cmr/m/n/10.95 Completed Gantt chart and cre-ated set of mile-stones ([]$
+\OT1/cmtt/m/n/10.95 https : / / github . com / umaatgithub /
+ []
+
+
+Overfull \hbox (12.80743pt too wide) in paragraph at lines 77--78
+\OT1/cmtt/m/n/10.95 3D-[]KORN / blob / master / Project-[]Management / 3D-[]KOR
+N _ GanttChart % 26MilestoneOutput .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--118
+
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 120--123
 
  []
 
-
+[2]
 Underfull \hbox (badness 10000) in paragraph at lines 128--131
 
  []
 
-[2]
+
 Underfull \hbox (badness 10000) in paragraph at lines 138--141
 
  []
@@ -790,13 +812,13 @@ Package rerunfilecheck Info: File `ProjectReport3.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 154.
  ) 
 Here is how much of TeX's memory you used:
- 7846 strings out of 493334
- 117025 string characters out of 3139242
+ 7845 strings out of 493334
+ 117007 string characters out of 3139242
  217306 words of memory out of 3000000
- 11295 multiletter control sequences out of 15000+200000
+ 11294 multiletter control sequences out of 15000+200000
  9580 words of font info for 34 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 44i,10n,43p,291b,425s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 44i,10n,43p,291b,443s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Pr
 ogram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Fi
 les/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTe
@@ -805,9 +827,9 @@ ts/type1/public/amsfonts/cm/cmr17.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/
 public/amsfonts/cm/cmss12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/a
 msfonts/cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/
 cm/cmtt10.pfb>
-Output written on ProjectReport3.pdf (3 pages, 107000 bytes).
+Output written on ProjectReport3.pdf (3 pages, 111118 bytes).
 PDF statistics:
- 69 PDF objects out of 1000 (max. 8388607)
+ 72 PDF objects out of 1000 (max. 8388607)
  7 named destinations out of 1000 (max. 500000)
  25 words of extra memory for PDF output out of 10000 (max. 10000000)
 
