@@ -8,6 +8,7 @@
 #include <pcl/io/ply_io.h>
 #include <pcl/point_types.h>
 #include <pcl/registration/icp.h>
+//#include <pcl/registration/sample_consensus_prerejective.h>
 #include <QDebug>
 
 typedef pcl::PointXYZRGBA PointType;
@@ -22,14 +23,15 @@ int main( int argc, char* argv[] )
     pcl::PointCloud<PointType>::Ptr cloud1((new pcl::PointCloud<PointType>));
     pcl::PointCloud<PointType>::Ptr cloud2((new pcl::PointCloud<PointType>));
 
+    //std::string filename1 = "../eze_2.ply";
+    //std::string filename2 = "../eze_3.ply";
 
-    std::string filename1 = "../eze_2.ply";
-    std::string filename2 = "../eze_3.ply";
-
-    pcl::io::loadPLYFile(filename1, *cloud1);
-    pcl::io::loadPLYFile(filename2, *cloud2);
+    pcl::io::loadPLYFile("../eze_2.ply", *cloud1);
+    pcl::io::loadPLYFile("../eze_3.ply", *cloud2);
 
     qDebug() << "Read PlY";
+
+    pcl::SampleConsensusInitialAlignment<PointT, PointT, DescriptorT> sac;
 
     pcl::IterativeClosestPoint<PointType, PointType> icp;
     icp.setInputCloud(cloud1);
