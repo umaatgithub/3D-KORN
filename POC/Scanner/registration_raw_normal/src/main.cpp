@@ -20,8 +20,9 @@ int
 main (int argc, char** argv)
 {
 
+  //Create temporal cloud to load files and then filter the null points, result will be stored in target_cloud
   pcl::PointCloud<pcl::PointXYZ>::Ptr temporal_input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  // Loading first scan of room.
+  // Loading first scan of eze
   pcl::PointCloud<pcl::PointXYZ>::Ptr target_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 
   if (pcl::io::loadPLYFile("../eze_2.ply", *temporal_input_cloud) == -1)
@@ -30,11 +31,11 @@ main (int argc, char** argv)
     return (-1);
   }
 
-  //Eliminate null points
+  //Eliminate null points from temporal input cloud into target_cluoud  int numberGoodPoints = 0;
   int numberGoodPoints = 0;
   for (size_t i = 0; i < temporal_input_cloud->points.size (); ++i){
      if(temporal_input_cloud->points[i].x != 0 || temporal_input_cloud->points[i].y != 0
-             || temporal_input_cloud->points[i].z != 0){ //1 sweet spot
+             || temporal_input_cloud->points[i].z != 0){ 
          numberGoodPoints++;
          target_cloud->resize(numberGoodPoints);
          target_cloud->points[numberGoodPoints-1] = temporal_input_cloud->points[i];
@@ -44,7 +45,7 @@ main (int argc, char** argv)
 
   std::cout << "Loaded " << target_cloud->size () << " data points from eze_2.ply" << std::endl;
 
-  // Loading second scan of room from new perspective.
+  // Loading second pointcloud into temporal input to then filter it
   pcl::PointCloud<pcl::PointXYZ>::Ptr input_cloud (new pcl::PointCloud<pcl::PointXYZ>);
   if (pcl::io::loadPLYFile("../eze_3.ply", *temporal_input_cloud) == -1)
   {
@@ -67,10 +68,13 @@ main (int argc, char** argv)
 
   // Filtering input scan to roughly 10% of original size to increase speed of registration.
   pcl::PointCloud<pcl::PointXYZ>::Ptr filtered_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  // Approximate voxel filter will overlay a 3d grid over the pointcloud and simplify the geometry
+  // It will do so by creating voxels (3d pixels) from the point distribution
   pcl::ApproximateVoxelGrid<pcl::PointXYZ> approximate_voxel_filter;
 
+  //LeafSize is the size of the voxel cube, the smaller, the more voxels the final pointcloud will have
   //LeafSize should assure 6points per voxel, but not many more than that :O
-  float leafSize = 0.025;
+  float leafSize = 0.02;
   approximate_voxel_filter.setLeafSize (leafSize, leafSize, leafSize);
   approximate_voxel_filter.setInputCloud (input_cloud);
   approximate_voxel_filter.filter (*filtered_cloud);
@@ -96,8 +100,8 @@ main (int argc, char** argv)
   // Setting point cloud to be aligned to.
   ndt.setInputTarget (target_cloud);
 
-  // Set initial alignment estimate found using robot odometry.
-  Eigen::AngleAxisf init_rotation (1.5, Eigen::Vector3f::UnitY ());
+  // Set initial alignment estimate found using *robot odometry* intuition really
+  Eigen::AngleAxisf init_rotation (0, Eigen::Vector3f::UnitY ());
   Eigen::Translation3f init_translation (0.02, -0.01, 0);
   Eigen::Matrix4f init_guess = (init_translation * init_rotation).matrix ();
 
