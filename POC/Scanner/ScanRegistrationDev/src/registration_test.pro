@@ -18,8 +18,7 @@ INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Boost\include\boost-1_61"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Qhull\include"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\FLANN\include"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Eigen\eigen3"
-INCLUDEPATH += "C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc"
-INCLUDEPATH += "C:\Program Files\OpenNI2\Include"
+
 
 LIBS += opengl32.lib advapi32.lib Ws2_32.lib user32.lib shell32.lib gdi32.lib kernel32.lib
 
@@ -194,7 +193,8 @@ LIBS += -lvtkViewsCore-7.0
 LIBS += -lvtkViewsInfovis-7.0
 LIBS += -lvtkzlib-7.0
 
-
+#INCLUDEPATH += "C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc"
+#INCLUDEPATH += "C:\Program Files\OpenNI2\Include"
 #LIBS += "-LC:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64"
 #LIBS += "-LC:\Program Files\OpenNI2\Lib"
 #LIBS += -lOpenNI2
