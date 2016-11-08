@@ -1,0 +1,16 @@
+#ifndef TDK_SCANREGISTRATION_H
+#define TDK_SCANREGISTRATION_H
+
+#include <vector>
+#include <pcl/point_types.h>
+
+class TDK_ScanRegistration
+{
+public:
+    TDK_ScanRegistration();
+
+private:
+    vector<pcl::PointCl
+};
+
+#endif // TDK_SCANREGISTRATION_H
