@@ -14,7 +14,6 @@
 #include <QDebug>
 #include <limits>
 #include "tdk_scanregistration.h"
-#include <pcl/io/pcd_io.h>
 
 typedef pcl::PointXYZRGBA PointType;
 const float bad_point = std::numeric_limits<float>::quiet_NaN();
@@ -22,40 +21,45 @@ const float bad_point = std::numeric_limits<float>::quiet_NaN();
 int
 main (int argc, char** argv)
 {
-  TDK_ScanRegistration myRegistrator;
+    int numPointclouds = 5;
 
-  //Load pc
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGB>);
+    TDK_ScanRegistration scanRegistrator;
 
-  pcl::io::loadPCDFile("../alb1.pcd", *cloud);
+    //Load pc
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
 
-  //add to myRegistrator
-  myRegistrator.addNextPointCloud(cloud);
+    for (int i = 1; i <= numPointclouds; ++i) {
+        cloud = boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>>(new pcl::PointCloud<pcl::PointXYZRGB>);
+        pcl::io::loadPLYFile("../alb" + to_string(i) +".ply", *cloud);
+        //add to myRegistrator
+        scanRegistrator.addNextPointCloud(cloud);
+        qDebug() << "../alb" << QString::fromStdString(to_string(i)) << ".ply " << " anyadido y procesado";
+    }
 
-  //get from myRegsitrator
-  cloud = myRegistrator.getLastOriginalPointcloud();
 
+    // Initializing point cloud visualizer
+    boost::shared_ptr<pcl::visualization::PCLVisualizer>
+            viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+    viewer->setBackgroundColor (0, 0, 0);
 
+    //add to viewer
+    vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getAlignedPointClouds();
 
-  // Initializing point cloud visualizer
-  boost::shared_ptr<pcl::visualization::PCLVisualizer>
-  viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-  viewer->setBackgroundColor (0, 0, 0);
+    for (int i = 0; i < (*alignedPCs).size(); ++i) {
+        viewer->addPointCloud( (*alignedPCs)[i], "pc"+to_string(i) );
+        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "pc"+to_string(i));
+        //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0, 0, 0.8, "pc2");
+    }
 
-  //add to viewer
-  viewer->addPointCloud( cloud, "final2" );
-  viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "final2");
+    // Starting visualizer
+    viewer->addCoordinateSystem (1.0, "global");
 
-  // Starting visualizer
-  viewer->addCoordinateSystem (1.0, "global");
-  viewer->initCameraParameters ();
+    // Wait until visualizer window is closed.
+    while (!viewer->wasStopped ())
+    {
+        viewer->spinOnce (100);
+        boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+    }
 
-  // Wait until visualizer window is closed.
-  while (!viewer->wasStopped ())
-  {
-    viewer->spinOnce (100);
-    boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-  }
-
-  return (0);
+    return (0);
 }

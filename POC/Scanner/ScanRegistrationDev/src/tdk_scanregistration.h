@@ -2,9 +2,13 @@
 #define TDK_SCANREGISTRATION_H
 
 #include <vector>
+#include <Eigen/Core>
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
+#include <pcl/common/transforms.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/registration/icp.h>
+#include <pcl/registration/ia_ransac.h>
 #include <pcl/features/fpfh.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree_flann.h>
@@ -22,6 +26,8 @@ public:
     TDK_ScanRegistration();
     bool addNextPointCloud(const PointCloudT::Ptr &inputPointcloud);
     PointCloudT::Ptr getLastOriginalPointcloud();
+    vector<PointCloudT::Ptr>* mf_getOriginalPointClouds();
+    vector<PointCloudT::Ptr>* mf_getAlignedPointClouds();
 
 private:
     //General Approach
@@ -29,18 +35,28 @@ private:
 
     vector<PointCloudT::Ptr> mv_originalPointClouds;
     vector<PointCloudT::Ptr> mv_downSampledPointClouds;
+    vector<PointCloudT::Ptr> mv_alignedPointClouds;
+    vector<PointCloudT::Ptr> mv_alignedDownSampledPointClouds;
+    vector<Eigen::Matrix4f> mv_transformationMatrixAlignment;
 
     vector<SurfaceNormalsT::Ptr> mv_downSampledNormals;
     SurfaceNormalsT::Ptr mf_computeNormals(const PointCloudT::Ptr &cloud_in, const float &searchRadius);
 
     vector<LocalFeaturesT::Ptr> mv_downSampledFeatures;
 
-
     //Approach 1: Voxel + SAC + ICP
     float mv_voxelSideLength;
-    PointCloudT::Ptr mf_voxelDownSamplePointCloud(const PointCloudT::Ptr &cloud_in, const float &voxelSideLength);
+    float mv_SAC_MinSampleDistance;
+    float mv_SAC_MaxCorrespondenceDistance;
+    int mv_SAC_MaximumIterations;
+
+    float mv_ICP_MaxCorrespondenceDistance;
+
     bool mf_processVoxelSacIcp();
+    PointCloudT::Ptr mf_voxelDownSamplePointCloud(const PointCloudT::Ptr &cloud_in, const float &voxelSideLength);
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr mf_computeLocalFPFH33Features (const PointCloudT::Ptr &cloud_in, const SurfaceNormalsT::Ptr &normal_in, const float &searchRadius);
+    void mf_sampleConsensusInitialAlignment();
+    void mf_iterativeClosestPointFinalAlignment();
 
     //Approach 2: Correspondent Keypoints + SAC + ICP
 
