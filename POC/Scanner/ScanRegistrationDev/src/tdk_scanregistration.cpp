@@ -16,18 +16,19 @@ TDK_ScanRegistration::TDK_ScanRegistration()
 
 bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud)
 {
-    mv_originalPointClouds.push_back(inputPointcloud);
+//    mv_originalPointClouds.push_back(inputPointcloud);
 
-    //Downsample pointcloud and push to Downsampled vector
-    mv_downSampledPointClouds.push_back(mf_voxelDownSamplePointCloud(inputPointcloud, mv_voxelSideLength));
-    mv_downSampledNormals.push_back(mf_computeNormals(*(--mv_downSampledPointClouds.end()),mv_FeatureRadiusSearch));
-    //mf_computeNormals(*(--mv_downSampledPointClouds.end()),mv_FeatureRadiusSearch);
+//    //Downsample pointcloud and push to Downsampled vector
+//    mv_downSampledPointClouds.push_back(mf_voxelDownSamplePointCloud(inputPointcloud, mv_voxelSideLength));
+//    mv_downSampledNormals.push_back(mf_computeNormals(*(--mv_downSampledPointClouds.end()),mv_FeatureRadiusSearch));
+//    //mf_computeNormals(*(--mv_downSampledPointClouds.end()),mv_FeatureRadiusSearch);
 
-    qDebug() << "Donwsampled Point Cloud Dimension is " << (--mv_downSampledPointClouds.end())->get()->points.size()  <<endl;
-    qDebug() << "Normals Donwsampled Point Cloud Dimension is " << (--mv_downSampledNormals.end())->get()->points.size()  <<endl;
+//    qDebug() << "Donwsampled Point Cloud Dimension is " << (--mv_downSampledPointClouds.end())->get()->points.size()  <<endl;
+//    qDebug() << "Normals Donwsampled Point Cloud Dimension is " << (--mv_downSampledNormals.end())->get()->points.size()  <<endl;
 
 
-    return true;
+//    return true;
+
 }
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::getLastOriginalPointcloud()

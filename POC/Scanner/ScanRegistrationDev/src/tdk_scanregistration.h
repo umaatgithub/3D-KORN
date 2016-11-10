@@ -14,26 +14,29 @@ class TDK_ScanRegistration
 {
 public:
     typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloudT;
+    typedef pcl::PointCloud<pcl::Normal> SurfaceNormalsT;
 
     TDK_ScanRegistration();
     bool addNextPointCloud(const PointCloudT::Ptr &inputPointcloud);
     PointCloudT::Ptr getLastOriginalPointcloud();
 
 private:
-    typedef pcl::PointCloud<pcl::Normal> SurfaceNormalsT;
-    //Configuration parameters
-    float mv_voxelSideLength;
+    //General Approach
     float mv_FeatureRadiusSearch;
 
-
-    //Member variables
     vector<PointCloudT::Ptr> mv_originalPointClouds;
     vector<PointCloudT::Ptr> mv_downSampledPointClouds;
-    vector<SurfaceNormalsT::Ptr> mv_downSampledNormals;
 
-    //Private Member functions
-    PointCloudT::Ptr mf_voxelDownSamplePointCloud(const PointCloudT::Ptr &cloud_in, const float &voxelSideLength);
+    vector<SurfaceNormalsT::Ptr> mv_downSampledNormals;
     SurfaceNormalsT::Ptr mf_computeNormals(const PointCloudT::Ptr &cloud_in, const float &searchRadius);
+
+
+    //Approach 1: Voxel + SAC + ICP
+    float mv_voxelSideLength;
+    PointCloudT::Ptr mf_voxelDownSamplePointCloud(const PointCloudT::Ptr &cloud_in, const float &voxelSideLength);
+
+    //Approach 2: Correspondent Keypoints + SAC + ICP
+
 };
 
 #endif // TDK_SCANREGISTRATION_H
