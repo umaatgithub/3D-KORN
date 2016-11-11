@@ -201,6 +201,8 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
     mv_downSampledNormals.push_back(mf_computeNormals(mv_downSampledPointClouds.back(),mv_FeatureRadiusSearch));
     mv_downSampledFeatures.push_back(mf_computeLocalFPFH33Features(mv_downSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch));
 
+    
+    
 //    if(mv_originalPointClouds.size() > 1){
 //        mf_sampleConsensusInitialAlignment();
 //        mf_iterativeClosestPointFinalAlignment();
