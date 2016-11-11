@@ -14,7 +14,7 @@ TEMPLATE = app
 
 # PCL
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\include\pcl-1.8"
-INCLUDEPATH += "C:\Program Files\VTK\include\vtk-7.0"
+INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\VTK\include\vtk-7.0"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Boost\include\boost-1_61"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Qhull\include"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\FLANN\include"
