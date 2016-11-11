@@ -12,6 +12,8 @@
 #include <pcl/features/fpfh.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/keypoints/iss_3d.h>
+#include <pcl/features/boundary.h>
 
 
 using namespace std;
@@ -59,7 +61,18 @@ private:
     void mf_iterativeClosestPointFinalAlignment();
 
     //Approach 2: Correspondent Keypoints + SAC + ICP
+    double mv_ISS_SalientRadius;
+    double mv_ISS_NonMaxRadius;
+    double mv_ISS_Gamma21;
+    double mv_ISS_Gamma32;
+    double mv_ISS_MinNeighbors;
+    int mv_ISS_Threads;
 
+    bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP();
+
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mf_computeISS3DKeyPoints(const PointCloudT::Ptr &cloud_in,
+        const double &SalientRadius, const double &NonMaxRadius, const double &Gamma21, const double &Gamma32 , const double &MinNeighbors, const int &Threads);
 };
 
 #endif // TDK_SCANREGISTRATION_H

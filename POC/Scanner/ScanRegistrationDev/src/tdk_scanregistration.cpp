@@ -18,6 +18,16 @@ TDK_ScanRegistration::TDK_ScanRegistration()
     mv_SAC_MaximumIterations = 500;
 
     mv_ICP_MaxCorrespondenceDistance = 0.12;
+
+    float modelResolution (0.005);
+    mv_ISS_SalientRadius = 6*modelResolution;
+    mv_ISS_NonMaxRadius = 4*modelResolution;
+    mv_ISS_Gamma21 =0.975;
+    mv_ISS_Gamma32 =0.975;
+    mv_ISS_MinNeighbors =5;
+    mv_ISS_Threads =4;
+
+
 }
 
 bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud)
@@ -151,4 +161,49 @@ vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* TDK_ScanRegistration::mf_getAlig
 vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* TDK_ScanRegistration::mf_getOriginalPointClouds()
 {
     return &mv_originalPointClouds;
+}
+
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::mf_computeISS3DKeyPoints(const PointCloudT::Ptr &cloud_in,
+    const double &SalientRadius, const double &NonMaxRadius, const double &Gamma21, const double &Gamma32 , const double &MinNeighbors, const int &Threads)
+{
+    pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB> ());
+    PointCloudT::Ptr downSampledPointCloud(new PointCloudT);
+
+    pcl::ISSKeypoint3D<pcl::PointXYZRGB, pcl::PointXYZRGB> iss_detector;
+
+    iss_detector.setSearchMethod (tree);
+    iss_detector.setSalientRadius (SalientRadius);
+    iss_detector.setNonMaxRadius (NonMaxRadius);
+    iss_detector.setThreshold21 (Gamma21);
+    iss_detector.setThreshold32 (Gamma32);
+    iss_detector.setMinNeighbors (MinNeighbors);
+    iss_detector.setNumberOfThreads (1);
+    iss_detector.setInputCloud (cloud_in);
+    iss_detector.compute (*downSampledPointCloud);
+
+    return downSampledPointCloud;
+}
+
+
+bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
+{
+    //Downsample pointcloud and push to Downsampled vector
+    mv_downSampledPointClouds.push_back(mf_computeISS3DKeyPoints(mv_originalPointClouds.back(),mv_ISS_SalientRadius, mv_ISS_NonMaxRadius,mv_ISS_Gamma21, mv_ISS_Gamma32, mv_ISS_MinNeighbors, mv_ISS_Threads));
+    mv_downSampledNormals.push_back(mf_computeNormals(mv_downSampledPointClouds.back(),mv_FeatureRadiusSearch));
+    mv_downSampledFeatures.push_back(mf_computeLocalFPFH33Features(mv_downSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch));
+
+    if(mv_originalPointClouds.size() > 1){
+        mf_sampleConsensusInitialAlignment();
+        mf_iterativeClosestPointFinalAlignment();
+
+        mv_downSampledNormals.back() = mf_computeNormals(mv_alignedDownSampledPointClouds.back(),mv_FeatureRadiusSearch);
+        mv_downSampledFeatures.back() = mf_computeLocalFPFH33Features(mv_alignedDownSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch);
+    }else{
+        mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
+        mv_alignedPointClouds.push_back(mv_originalPointClouds.back());
+    }
+    //qDebug() << "Donwsampled Point Cloud Dimension is " << (--mv_downSampledPointClouds.end())->get()->points.size()  <<endl;
+    //qDebug() << "features Dimension is " << mv_downSampledFeatures.back().get()->points.size()  <<endl;
+
+    return true;
 }
