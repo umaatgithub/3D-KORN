@@ -31,8 +31,17 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionImport_from_scan"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionImport_from_scan">
+   <property name="text">
+    <string>Import from scan</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

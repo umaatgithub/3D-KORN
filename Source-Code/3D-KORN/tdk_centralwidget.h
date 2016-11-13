@@ -12,6 +12,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
+
+#include <pcl/registration/icp.h>
 
 #include <pcl/visualization/pcl_visualizer.h>
 #include <vtkRenderWindow.h>
@@ -24,16 +27,20 @@ class TDK_CentralWidget : public QWidget
     Q_OBJECT
 public:
     explicit TDK_CentralWidget(QWidget *parent = 0);
+    ~TDK_CentralWidget();
 
 private:
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-    PointCloudT::Ptr cloud;
+//    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+//    PointCloudT::Ptr cloudSource1;
+//    PointCloudT::Ptr cloudSource2;
+//    PointCloudT::Ptr cloudRegistered;
     /** @brief 0 = x | 1 = y | 2 = z */
     int filtering_axis;
 
     /** @brief Holds the color mode for @ref colorCloudDistances */
     int color_mode;
     QGridLayout *layout;
+
 
 
 signals:
