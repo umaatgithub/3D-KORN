@@ -10,8 +10,5 @@ int main(int argc, char *argv[])
     w.showMaximized();
     w.setMinimumSize(w.size());
 
-//    TDK_ScanWindow tdk;
-//    tdk.showMaximized();
-
     return a.exec();
 }

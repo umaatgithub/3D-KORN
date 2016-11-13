@@ -202,10 +202,14 @@ LIBS += -lvtkzlib-7.0
 SOURCES += main.cpp\
         mainwindow.cpp \
     tdk_centralwidget.cpp \
-    tdk_scanwindow.cpp
+    tdk_scanwindow.cpp \
+    tdk_database.cpp \
+    tdk_edit.cpp
 
 HEADERS  += mainwindow.h \
     tdk_centralwidget.h \
-    tdk_scanwindow.h
+    tdk_scanwindow.h \
+    tdk_database.h \
+    tdk_edit.h
 
 FORMS    += mainwindow.ui

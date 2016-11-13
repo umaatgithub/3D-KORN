@@ -6,7 +6,6 @@
 #include <QGridLayout>
 #include <QDockWidget>
 #include <QScrollArea>
-#include <QVTKWidget.h>
 
 //Include PCL headers
 #include <pcl/point_cloud.h>
@@ -15,6 +14,7 @@
 #include <pcl/io/ply_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 #include <vtkRenderWindow.h>
+#include <QVTKWidget.h>
 
 class TDK_ScanWindow : public QMainWindow
 {

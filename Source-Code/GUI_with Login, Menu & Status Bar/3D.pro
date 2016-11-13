@@ -15,11 +15,9 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     tdk_centralwidget.cpp \
-    tdk_centralwidget.cpp \
     dialog.cpp
 
 HEADERS  += mainwindow.h \
-    tdk_centralwidget.h \
     tdk_centralwidget.h \
     secdialog.h \
     dialog.h
