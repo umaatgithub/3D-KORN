@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.9.24)  13 NOV 2016 22:00
+This is pdfTeX, Version 3.14159265-2.6-1.40.17 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2016.9.24)  13 NOV 2016 22:32
 entering extended mode
 **./3D-KORNProjectWeeklyReport(14-11-2016).tex
 (3D-KORNProjectWeeklyReport(14-11-2016).tex
@@ -762,7 +762,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <10.95> on input line 77.
 
 ! Undefined control sequence.
-l.79 ...{Uniformly downsampling function} (\textin
+l.79 ...it{Uniform Downsampling Function} (\textin
                                                   {using} $VoxelGrid Filter)...
 The control sequence at the end of the top line
 of your error message was never \def'ed. If you have
@@ -773,66 +773,65 @@ and I'll forget about whatever was undefined.
 <ScanR1.png, id=24, 613.54219pt x 588.69937pt>
 File: ScanR1.png Graphic file (type png)
  <use ScanR1.png>
-Package pdftex.def Info: ScanR1.png used on input line 85.
-(pdftex.def)             Requested size: 153.38516pt x 147.17447pt.
+Package pdftex.def Info: ScanR1.png used on input line 86.
+(pdftex.def)             Requested size: 135.89174pt x 130.38559pt.
 
 <ScanR2.png, id=26, 613.54219pt x 588.69937pt>
 File: ScanR2.png Graphic file (type png)
  <use ScanR2.png>
-Package pdftex.def Info: ScanR2.png used on input line 86.
-(pdftex.def)             Requested size: 153.38516pt x 147.17447pt.
+Package pdftex.def Info: ScanR2.png used on input line 87.
+(pdftex.def)             Requested size: 135.89174pt x 130.38559pt.
 
 <ScanR3.png, id=27, 613.54219pt x 588.69937pt>
 File: ScanR3.png Graphic file (type png)
  <use ScanR3.png>
-Package pdftex.def Info: ScanR3.png used on input line 87.
-(pdftex.def)             Requested size: 153.38516pt x 147.17447pt.
+Package pdftex.def Info: ScanR3.png used on input line 88.
+(pdftex.def)             Requested size: 135.89174pt x 130.38559pt.
 
 <PoinOp3.png, id=28, 249.93375pt x 344.78813pt>
 File: PoinOp3.png Graphic file (type png)
  <use PoinOp3.png>
-Package pdftex.def Info: PoinOp3.png used on input line 103.
-(pdftex.def)             Requested size: 124.96657pt x 172.39363pt.
+Package pdftex.def Info: PoinOp3.png used on input line 105.
+(pdftex.def)             Requested size: 123.75pt x 170.71652pt.
 
 <PoinOp1.png, id=29, 252.945pt x 292.09125pt>
 File: PoinOp1.png Graphic file (type png)
  <use PoinOp1.png>
-Package pdftex.def Info: PoinOp1.png used on input line 104.
-(pdftex.def)             Requested size: 126.47218pt x 146.04526pt.
- [2 <./ScanR1.png> <./ScanR2.png> <./ScanR3.png>] <GUI1.png, id=42, 1371.1225pt
- x 730.73pt>
-File: GUI1.png Graphic file (type png)
+Package pdftex.def Info: PoinOp1.png used on input line 106.
+(pdftex.def)             Requested size: 147.84293pt x 170.71652pt.
 
-<use GUI1.png>
-Package pdftex.def Info: GUI1.png used on input line 115.
+<GUI1.png, id=30, 1371.1225pt x 730.73pt>
+File: GUI1.png Graphic file (type png)
+ <use GUI1.png>
+Package pdftex.def Info: GUI1.png used on input line 117.
 (pdftex.def)             Requested size: 411.33992pt x 219.22069pt.
- <Kinect.png, id=43, 576.65437pt x 361.35pt>
+ [2 <./ScanR1.png> <./ScanR2.png> <./ScanR3.png> <./PoinOp3.png> <./PoinOp1.png
+>]
+<Kinect.png, id=46, 576.65437pt x 361.35pt>
 File: Kinect.png Graphic file (type png)
  <use Kinect.png>
-Package pdftex.def Info: Kinect.png used on input line 133.
-(pdftex.def)             Requested size: 172.99763pt x 108.40584pt.
-
-[3 <./PoinOp3.png> <./PoinOp1.png> <./GUI1.png> <./Kinect.png>]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 193.
+Package pdftex.def Info: Kinect.png used on input line 136.
+(pdftex.def)             Requested size: 294.42636pt x 184.5011pt.
+ [3 <./GUI1.png> <./Kinect.png>]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 196.
  [4]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 193.
-
-(3D-KORNProjectWeeklyReport(14-11-2016).aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 193.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 193.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 196.
+ (3D-KORNProjectWeeklyReport(14-11-2016).aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 196.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 196.
 Package rerunfilecheck Info: File `3D-KORNProjectWeeklyReport(14-11-2016).out' 
 has not changed.
 (rerunfilecheck)             Checksum: 1765857F8222DB2B6BC13A26E22C8C9A;163.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 193.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 196.
  ) 
 Here is how much of TeX's memory you used:
- 7891 strings out of 493334
- 117894 string characters out of 3139240
- 213194 words of memory out of 3000000
- 11323 multiletter control sequences out of 15000+200000
+ 7900 strings out of 493334
+ 118020 string characters out of 3139240
+ 212194 words of memory out of 3000000
+ 11328 multiletter control sequences out of 15000+200000
  9926 words of font info for 35 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
- 36i,10n,43p,316b,459s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 36i,10n,43p,316b,534s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Pr
 ogram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Fi
 les/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi10.pfb><C:/Program Files/MiKT
@@ -842,10 +841,10 @@ nts/type1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1
 msfonts/cm/cmss12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/
 cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti1
 0.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on 3D-KORNProjectWeeklyReport(14-11-2016).pdf (4 pages, 1301783 
+Output written on 3D-KORNProjectWeeklyReport(14-11-2016).pdf (4 pages, 1301216 
 bytes).
 PDF statistics:
- 103 PDF objects out of 1000 (max. 8388607)
- 15 named destinations out of 1000 (max. 500000)
+ 108 PDF objects out of 1000 (max. 8388607)
+ 19 named destinations out of 1000 (max. 500000)
  60 words of extra memory for PDF output out of 10000 (max. 10000000)
 

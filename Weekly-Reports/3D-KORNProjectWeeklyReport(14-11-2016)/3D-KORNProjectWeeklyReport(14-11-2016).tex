@@ -76,17 +76,17 @@
 
 	\item \textbf{Scan Registration Class} $(Albert, Ezequiel)$
 	\begin{itemize}
-		\item \textit{Uniformly downsampling function} (\textin{using} $VoxelGrid Filter)$ takes as input the original Point Cloud and downsamples it to about $10 \% $ of the points.
+		\item \textit{Uniform Downsampling Function} (\textin{using} $VoxelGrid Filter)$ takes as input the original Point Cloud and downsamples it to about $10 \% $ of the points.
 		\item \textit{Rough Alignment Function} using sample alignment consesus $(SAC)$ 
 		\item \textit{ICP Alignment Function}	
 	\end{itemize}
 	
-	\begin{center}
-		\includegraphics[scale = 0.25]{ScanR1.png} 
-		\includegraphics[scale = 0.25]{ScanR2.png}
-		\includegraphics[scale = 0.25]{ScanR3.png} 	
-		
-	\end{center}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width = 0.3\columnwidth]{ScanR1.png} 
+		\includegraphics[width = 0.3\columnwidth]{ScanR2.png}
+		\includegraphics[width = 0.3\columnwidth]{ScanR3.png} 	
+	\end{figure}
 	
 	
 	\item \textbf{Point Cloud Operations Class} $(Savinien,Luca,Roberto,MengDi)$
@@ -94,28 +94,31 @@
 			\item \textit{Conversion Function} of Point Cloud object from type $<XYZRGB>$ to type $<XYZ>$
 			\item \textit{Passthrough Filter function}
 			\item \textit{Normal Estimation function}
-			\item \textit{Poisson Meshes function} takes in input the original Point Cloud and gives in output a mesh using all the fucntion that we presented above.
+			\item \textit{Poisson Meshes function} takes in input the original Point Cloud and gives in output a mesh using all the functions that we presented above.
 		
 		
 		\end{itemize}
+
 		
-			\begin{center}
-				\includegraphics[scale = 0.5]{PoinOp3.png} 
-				\includegraphics[scale = 0.5]{PoinOp1.png}	
+			\begin{figure}[H]
+				\centering
+				\includegraphics[height = 6cm]{PoinOp3.png} 
+				\includegraphics[height = 6cm]{PoinOp1.png}	
 				
-			\end{center}	
+			\end{figure}	
 	
 	\item \textbf{GUI Class} $(Nayeem,Benjamin,Umamaheswaran)$
 		\begin{itemize}
-			\item Load pointcloud in the GUI using QVTK Widget.
-			\item Login, Menu and Status Bar.
+			\item Separate windows for Point Cloud scan and edit.
+			\item Start work on menubar, toolbar and statusbar.
 		\end{itemize}
-\begin{center}
-        
+\begin{figure}[H]
+        \centering
 		\includegraphics[scale = 0.3]{GUI1.png} 
+		
 	
 	
-\end{center}
+\end{figure}
 		
 	
 	
@@ -128,12 +131,10 @@
 		\item \textit{Point Cloud Get function}
 	\end{itemize}
 	
-	\begin{center}
-		
-		\includegraphics[scale = 0.3]{Kinect.png} 
-		
-		
-	\end{center}
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width = 0.65\columnwidth]{Kinect.png} 
+	\end{figure}
 	
 	
 \end{itemize}
@@ -185,7 +186,9 @@
 \begin{itemize}
 \item Task allocation and progress  (\url{https://goo.gl/WDHEjf)}
 \item Github repository (\url{https://github.com/umaatgithub/3D-KORN})
-\item Group's work Integration Branch  (\url{https://github.com/umaatgithub/3D-KORN/tree/integration-branch/Source-Code}) 
+\item Group's work (integration branch) (\url{https://github.com/umaatgithub/3D-KORN/tree/integration-branch/Source-Code}) 
+
+
 \end{itemize}
 
 
