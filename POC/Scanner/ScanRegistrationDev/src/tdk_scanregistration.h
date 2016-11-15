@@ -32,7 +32,9 @@ public:
     typedef pcl::PointCloud<pcl::FPFHSignature33> LocalFeaturesT;
 
     TDK_ScanRegistration();
+
     bool addNextPointCloud(const PointCloudT::Ptr &inputPointcloud);
+
     PointCloudXYZ::Ptr getLastDownSampledPointcloud();
     vector<PointCloudT::Ptr>* mf_getOriginalPointClouds();
     vector<PointCloudT::Ptr>* mf_getAlignedPointClouds();
@@ -43,14 +45,10 @@ private:
 
     vector<PointCloudT::Ptr> mv_originalPointClouds;
     vector<PointCloudXYZ::Ptr> mv_downSampledPointClouds;
-    vector<PointCloudT::Ptr> mv_alignedPointClouds;
     vector<PointCloudXYZ::Ptr> mv_alignedDownSampledPointClouds;
     vector<Eigen::Matrix4f> mv_transformationMatrixAlignment;
+    vector<PointCloudT::Ptr> mv_alignedPointClouds;
 
-    vector<SurfaceNormalsT::Ptr> mv_downSampledNormals;
-    SurfaceNormalsT::Ptr mf_computeNormals(const PointCloudXYZ::Ptr &cloud_in, const float &searchRadius);
-
-    vector<LocalFeaturesT::Ptr> mv_downSampledFeatures;
 
     //Approach 1: Voxel + SAC + ICP
     float mv_voxelSideLength;
@@ -60,11 +58,17 @@ private:
 
     float mv_ICP_MaxCorrespondenceDistance;
 
-    bool mf_processVoxelSacIcp();
-    PointCloudXYZ::Ptr mf_voxelDownSamplePointCloud(const PointCloudT::Ptr &cloud_in, const float &voxelSideLength);
+    vector<SurfaceNormalsT::Ptr> mv_downSampledNormals;
+    SurfaceNormalsT::Ptr mf_computeNormals(const PointCloudXYZ::Ptr &cloud_in, const float &searchRadius);
+
+    vector<LocalFeaturesT::Ptr> mv_downSampledFeatures;
     pcl::PointCloud<pcl::FPFHSignature33>::Ptr mf_computeLocalFPFH33Features (const PointCloudXYZ::Ptr &cloud_in, const SurfaceNormalsT::Ptr &normal_in, const float &searchRadius);
+
+    PointCloudXYZ::Ptr mf_voxelDownSamplePointCloud(const PointCloudT::Ptr &cloud_in, const float &voxelSideLength);
+
     void mf_sampleConsensusInitialAlignment();
     void mf_iterativeClosestPointFinalAlignment();
+    bool mf_processVoxelSacIcp();
 
     //Approach 2: Correspondent Keypoints + SAC + ICP
     double mv_ISS_SalientRadius;
@@ -74,12 +78,14 @@ private:
     double mv_ISS_MinNeighbors;
     int mv_ISS_Threads;
 
-    bool mf_processCorrespondencesSVDICP();
 
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr mf_computeISS3DKeyPoints(const PointCloudT::Ptr &cloud_in,
         const double &SalientRadius, const double &NonMaxRadius, const double &Gamma21, const double &Gamma32 , const double &MinNeighbors, const int &Threads);
-    void mf_estimateCorrespondencesTransformation(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance);
+    pcl::Correspondences mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance);
+
+
+    bool mf_processCorrespondencesSVDICP();
 };
 
 #endif // TDK_SCANREGISTRATION_H

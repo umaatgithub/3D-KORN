@@ -201,6 +201,8 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
     mv_downSampledNormals.push_back(mf_computeNormals(mv_downSampledPointClouds.back(),mv_FeatureRadiusSearch));
     mv_downSampledFeatures.push_back(mf_computeLocalFPFH33Features(mv_downSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch));
 
+    
+    //From VoxelICPSAC function
 //    if(mv_originalPointClouds.size() > 1){
 //        mf_sampleConsensusInitialAlignment();
 //        mf_iterativeClosestPointFinalAlignment();
@@ -217,7 +219,7 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
     return true;
 }
 
-void TDK_ScanRegistration::estimateCorrespondencesTransformation(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance)
+pcl::Correspondences TDK_ScanRegistration::mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance)
 {
     pcl::registration::CorrespondenceEstimation<pcl::PointXYZ, pcl::PointXYZ> corr_est;
 
@@ -227,18 +229,18 @@ void TDK_ScanRegistration::estimateCorrespondencesTransformation(const pcl::Poin
     pcl::Correspondences all_correspondences;
     corr_est.determineReciprocalCorrespondences(all_correspondences);
 
-    //pcl::registration::CorrespondenceRejectorSampleConsensus rejector;
-    //rejector.setInputCorrespondences(all_correspondences);
+    pcl::registration::CorrespondenceRejectorSampleConsensus rejector;
+    rejector.setInputCorrespondences(all_correspondences);
+    //Add source and target pointcloud data to rejector?
+    //rejector.applyRejection();
 
-    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ> TESVD;
-    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ>::Matrix4 transformation_matrix;
-    TESVD.estimateRigidTransformation(cloud1, cloud2, all_correspondences, transformation_matrix);
+    //TODO Move to SVD function
+//    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ> TESVD;
+//    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ>::Matrix4 transformation_matrix;
+//    TESVD.estimateRigidTransformation(*cloud1.get(), *cloud2.get(), all_correspondences, transformation_matrix);
 
-    mv_transformationMatrixAlignment.push_back(transformation_matrix);
+//    mv_transformationMatrixAlignment.push_back(transformation_matrix);
 
-    PointCloudT::Ptr alignedOriginalSource(new PointCloudT);
-    pcl::transformPointCloud(*mv_originalPointClouds.back(), *alignedOriginalSource, mv_transformationMatrixAlignment.back());
-    mv_alignedPointClouds.push_back(alignedOriginalSource);
 }
 
 void PointCloudXYZRGBtoXYZ(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in, pcl::PointCloud<pcl::PointXYZ>::Ptr &out){
