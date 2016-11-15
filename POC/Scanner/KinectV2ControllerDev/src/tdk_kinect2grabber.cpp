@@ -30,5 +30,5 @@ TDK_Kinect2Grabber::TDK_Kinect2Grabber()
 void TDK_Kinect2Grabber::getPointCloudFrame(pcl::PointCloud<PointType>::Ptr &cloud)
 {
     boost::mutex::scoped_lock lock(mv_mutex );
-    cloud = mv_cloud;
+    //cloud = mv_cloud;
 }
