@@ -17,12 +17,12 @@ public:
     //returns true if a new frame is available
     //bool hasFrame();
 
-    void closeKinect();
+    void mf_closeKinect();
 
     //You will change the address pointed by cloud, but if you dont pass by reference,
     //the pointer will not be updated in the calling code, it will point to the same dir.
     //fills the address of assigned cloud-pointer with a XYZRGB point cloud
-    void getPointCloudFrame(pcl::PointCloud<PointType>::Ptr &cloud);
+    void mf_getPointCloudFrame(pcl::PointCloud<PointType>::Ptr &cloud);
 
 
     // Gives you frame in im
@@ -39,6 +39,7 @@ public:
 private:
     //mutex
     boost::mutex mv_mutex;
+    boost::shared_ptr<pcl::Grabber> mv_grabber;
 
     //point cloud
     pcl::PointCloud<PointType>::Ptr mv_cloud;
@@ -52,7 +53,7 @@ private:
 
     //call-back updates a member variable with a new point cloud when available
     //          also projects/throws the cloud into the display window
-    boost::function<void( const pcl::PointCloud<PointType>::ConstPtr& )> function =
+    boost::function<void( const pcl::PointCloud<PointType>::ConstPtr& )> mv_pointCloudCallback =
             [this]( const pcl::PointCloud<PointType>::ConstPtr& ptr ){
         boost::mutex::scoped_lock lock(mv_mutex );
 
@@ -62,8 +63,6 @@ private:
         //mv_imageViewer->addRGBImage<PointType>(mv_cloud, "rgb", 1.0 );
         //mv_cloudViewer->addPointCloud<PointType>(mv_cloud, "cloud", 0);
     };
-
-    boost::shared_ptr<pcl::Grabber> grabber;
 
     //bool displayRGBSet;
     //Widget wRGB;

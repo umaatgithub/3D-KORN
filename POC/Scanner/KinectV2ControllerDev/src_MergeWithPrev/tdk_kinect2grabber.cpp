@@ -11,21 +11,21 @@ TDK_Kinect2Grabber::TDK_Kinect2Grabber()
     //PSP
 
     //start the grabber
-    grabber = boost::make_shared<pcl::Kinect2Grabber>();
+    mv_grabber = boost::make_shared<pcl::Kinect2Grabber>();
 
     // Register Callback Function
-    boost::signals2::connection connection = grabber->registerCallback( function );
-    grabber->start();
+    boost::signals2::connection connection = mv_grabber->registerCallback( mv_pointCloudCallback );
+    mv_grabber->start();
 
 }
 
-void TDK_Kinect2Grabber::getPointCloudFrame(pcl::PointCloud<PointType>::Ptr &cloud)
+void TDK_Kinect2Grabber::mf_getPointCloudFrame(pcl::PointCloud<PointType>::Ptr &cloud)
 {
-    boost::mutex::scoped_lock lock(mv_mutex );
+    boost::mutex::scoped_try_lock lock( mv_mutex );
     cloud = mv_cloud;
 }
 
-void TDK_Kinect2Grabber::closeKinect()
+void TDK_Kinect2Grabber::mf_closeKinect()
 {
-    grabber->stop();
+    mv_grabber->stop();
 }

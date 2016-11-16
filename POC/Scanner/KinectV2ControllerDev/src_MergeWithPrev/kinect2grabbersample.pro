@@ -198,10 +198,12 @@ LIBS += -lvtkzlib-7.0
 LIBS += -lOpenNI2
 LIBS += -lkinect20
 
-SOURCES += \
-    kinect2_grabber.cpp \
-    main.cpp
-SOURCES += tdk_kinect2grabber.cpp
 
 HEADERS  += kinect2_grabber.h
-HEADERS += tdk_kinect2grabber.h
+HEADERS  += tdk_kinect2grabber.h
+
+SOURCES += \
+    kinect2_grabber.cpp \
+    tdk_kinect2grabber.cpp \
+    main.cpp
+

@@ -33,7 +33,7 @@ int main()
 
     while( !viewer->wasStopped() ){
         //if(kinect.hasNewFrame()){
-            kinect.getPointCloudFrame(cloud);
+            kinect.mf_getPointCloudFrame(cloud);
 
             //If cloud already added, update, if not added, add for first time
             if( !viewer->updatePointCloud( cloud, "cloud" ) ){
@@ -48,7 +48,7 @@ int main()
     }
 
     // Stop Kinect
-    kinect.closeKinect();
+    kinect.mf_closeKinect();
 
     return 0;
 }
