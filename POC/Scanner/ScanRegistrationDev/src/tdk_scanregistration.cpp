@@ -17,17 +17,17 @@ TDK_ScanRegistration::TDK_ScanRegistration()
     mv_SAC_MaxCorrespondenceDistance = 0.3;
     mv_SAC_MaximumIterations = 500;
 
-    mv_ICP_MaxCorrespondenceDistance = 0.2; //0.12
+    mv_ICP_MaxCorrespondenceDistance = 0.1; //0.12
 
-    float modelResolution (0.002);  //0.004 ,767 points
-    mv_ISS_SalientRadius = 6*modelResolution;
-    mv_ISS_NonMaxRadius = 4*modelResolution;
+    mv_ISS_resolution = 0.004;  //0.004 ,767 points
+    mv_ISS_SalientRadius = 6*mv_ISS_resolution;
+    mv_ISS_NonMaxRadius = 4*mv_ISS_resolution;
     mv_ISS_Gamma21 =0.975;
     mv_ISS_Gamma32 =0.975;
-    mv_ISS_MinNeighbors =5;
+    mv_ISS_MinNeighbors = 6; //5
     mv_ISS_Threads =2;
 
-    mv_SVD_MaxDistance=0.30;
+    mv_SVD_MaxDistance=0.8;
 }
 
 bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud)
@@ -37,6 +37,7 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
     //Approach 1 SAC ICP
     //    mf_processVoxelSacIcp();
     mf_processCorrespondencesSVDICP();
+    //mf_processCorrespondencesSACICP();
 
     return true;
 }
@@ -94,6 +95,21 @@ bool TDK_ScanRegistration::mf_processVoxelSacIcp()
     //qDebug() << "features Dimension is " << mv_downSampledFeatures.back().get()->points.size()  <<endl;
 
     return true;
+}
+
+void TDK_ScanRegistration::setMv_ISS_resolution(double value)
+{
+    mv_ISS_resolution = value;
+}
+
+void TDK_ScanRegistration::setMv_SVD_MaxDistance(double value)
+{
+    mv_SVD_MaxDistance = value;
+}
+
+void TDK_ScanRegistration::setMv_ICP_MaxCorrespondenceDistance(float value)
+{
+    mv_ICP_MaxCorrespondenceDistance = value;
 }
 
 pcl::PointCloud<pcl::FPFHSignature33>::Ptr
@@ -199,18 +215,18 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
 {
     //Downsample pointcloud and push to Downsampled vector
     mv_downSampledPointClouds.push_back(mf_computeISS3DKeyPoints(mv_originalPointClouds.back(),mv_ISS_SalientRadius, mv_ISS_NonMaxRadius,mv_ISS_Gamma21, mv_ISS_Gamma32, mv_ISS_MinNeighbors, mv_ISS_Threads));
-    //TODO Correspondences estimation
-
-    //    mv_downSampledNormals.push_back(mf_computeNormals(mv_downSampledPointClouds.back(),mv_FeatureRadiusSearch));
-//    mv_downSampledFeatures.push_back(mf_computeLocalFPFH33Features(mv_downSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch));
+    mv_downSampledNormals.push_back(mf_computeNormals(mv_downSampledPointClouds.back(),mv_FeatureRadiusSearch));
+    //mv_downSampledFeatures.push_back(mf_computeLocalFPFH33Features(mv_downSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch));
 
     
     //From VoxelICPSAC function
     if(mv_originalPointClouds.size() > 1){
-
-        mv_downsampledCorrespondences.push_back(boost::shared_ptr<pcl::Correspondences>(mf_estimateCorrespondencesRejection(mv_downSampledPointClouds.back(),*(mv_downSampledPointClouds.end()-2),mv_SVD_MaxDistance)));
+        mv_downsampledCorrespondences.push_back(boost::shared_ptr<pcl::Correspondences>(mf_estimateCorrespondencesRejection(mv_downSampledPointClouds.back(),*(mv_downSampledPointClouds.end()-2),mv_SVD_MaxDistance, mv_downSampledNormals.back(),  *(mv_downSampledNormals.end()-2))));
         mf_SVDInitialAlignment();
         mf_iterativeClosestPointFinalAlignment();
+
+        mv_downSampledNormals.back() = mf_computeNormals(mv_alignedDownSampledPointClouds.back(),mv_FeatureRadiusSearch);
+        //mv_downSampledFeatures.back() = mf_computeLocalFPFH33Features(mv_alignedDownSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch);
     }else{
         mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
         mv_alignedOriginalPointClouds.push_back(mv_originalPointClouds.back());
@@ -221,23 +237,56 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
     return true;
 }
 
-pcl::CorrespondencesPtr TDK_ScanRegistration::mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance)
+bool TDK_ScanRegistration::mf_processCorrespondencesSACICP()
 {
-    pcl::registration::CorrespondenceEstimation<pcl::PointXYZ, pcl::PointXYZ> corr_est;
+    //Downsample pointcloud and push to Downsampled vector
+    mv_downSampledPointClouds.push_back(mf_computeISS3DKeyPoints(mv_originalPointClouds.back(),mv_ISS_SalientRadius, mv_ISS_NonMaxRadius,mv_ISS_Gamma21, mv_ISS_Gamma32, mv_ISS_MinNeighbors, mv_ISS_Threads));
+    mv_downSampledNormals.push_back(mf_computeNormals(mv_downSampledPointClouds.back(),mv_FeatureRadiusSearch));
+    mv_downSampledFeatures.push_back(mf_computeLocalFPFH33Features(mv_downSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch));
+
+
+    //From VoxelICPSAC function
+    if(mv_originalPointClouds.size() > 1){
+        mv_downsampledCorrespondences.push_back(boost::shared_ptr<pcl::Correspondences>(mf_estimateCorrespondencesRejection(mv_downSampledPointClouds.back(),*(mv_downSampledPointClouds.end()-2),mv_SVD_MaxDistance, mv_downSampledNormals.back(),  *(mv_downSampledNormals.end()-2))));
+        mf_sampleConsensusInitialAlignment();
+        mf_iterativeClosestPointFinalAlignment();
+
+        mv_downSampledNormals.back() = mf_computeNormals(mv_alignedDownSampledPointClouds.back(),mv_FeatureRadiusSearch);
+        mv_downSampledFeatures.back() = mf_computeLocalFPFH33Features(mv_alignedDownSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch);
+    }else{
+        mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
+        mv_alignedOriginalPointClouds.push_back(mv_originalPointClouds.back());
+    }
+    //qDebug() << "Donwsampled Point Cloud Dimension is " << (--mv_downSampledPointClouds.end())->get()->points.size()  <<endl;
+    //qDebug() << "features Dimension is " << mv_downSampledFeatures.back().get()->points.size()  <<endl;
+
+    return true;
+}
+
+pcl::CorrespondencesPtr TDK_ScanRegistration::mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance, pcl::PointCloud<pcl::Normal>::Ptr &normals1, pcl::PointCloud<pcl::Normal>::Ptr &normals2)
+{
+    pcl::registration::CorrespondenceEstimationBackProjection<pcl::PointXYZ, pcl::PointXYZ, pcl::Normal> corr_est;
 
     corr_est.setInputSource(cloud1);
+    corr_est.setSourceNormals(normals1);
+
     corr_est.setInputTarget(cloud2);
+    corr_est.setTargetNormals(normals2);
 
     pcl::CorrespondencesPtr all_correspondences(new pcl::Correspondences());
-    corr_est.determineCorrespondences(*all_correspondences);
+    corr_est.determineReciprocalCorrespondences(*all_correspondences);
 
     pcl::registration::CorrespondenceRejectorSampleConsensus<pcl::PointXYZ> rejector;
-    rejector.setInputCorrespondences(all_correspondences);
+    rejector.setInputSource(cloud1);
+    rejector.setInputTarget(cloud2);
+
     //Add source and target pointcloud data to rejector?
-    //rejector.applyRejection();
-    return all_correspondences;
+    pcl::CorrespondencesPtr remaining_correspondences(new pcl::Correspondences());
+    rejector.getRemainingCorrespondences(*all_correspondences, *remaining_correspondences);
 
+    qDebug() << "Original corresp size: " << all_correspondences->size() << " -> " << remaining_correspondences->size() ;
 
+    return remaining_correspondences;
 }
 
 void TDK_ScanRegistration::mf_SVDInitialAlignment()

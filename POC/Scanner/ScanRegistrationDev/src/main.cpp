@@ -25,6 +25,16 @@ main (int argc, char** argv)
 
     TDK_ScanRegistration scanRegistrator;
 
+    if(argc == 4 && false){
+        scanRegistrator.setMv_ISS_resolution((float)atof(argv[1]));
+        scanRegistrator.setMv_SVD_MaxDistance((float)atof(argv[2]));
+        scanRegistrator.setMv_ICP_MaxCorrespondenceDistance((float)atof(argv[3]));
+
+        for (int i = 0; i < argc; ++i) {
+            qDebug() << (float)atof(argv[i]);
+        }
+    }
+
     //Load pc
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
 
@@ -58,6 +68,7 @@ main (int argc, char** argv)
     for (int i = 0; i < (*alignedPCs).size(); ++i) {
         viewer->addPointCloud( (*alignedPCs)[i], "pc"+to_string(i) );
         viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "pc"+to_string(i));
+
         //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0, 0, 0.8, "pc2");
     }
 
