@@ -47,7 +47,7 @@ private:
     vector<PointCloudXYZ::Ptr> mv_downSampledPointClouds;
     vector<PointCloudXYZ::Ptr> mv_alignedDownSampledPointClouds;
     vector<Eigen::Matrix4f> mv_transformationMatrixAlignment;
-    vector<PointCloudT::Ptr> mv_alignedPointClouds;
+    vector<PointCloudT::Ptr> mv_alignedOriginalPointClouds;
 
 
     //Approach 1: Voxel + SAC + ICP
@@ -77,13 +77,16 @@ private:
     double mv_ISS_Gamma32;
     double mv_ISS_MinNeighbors;
     int mv_ISS_Threads;
+    double mv_SVD_MaxDistance;
+    vector<pcl::CorrespondencesPtr> mv_downsampledCorrespondences;
+
 
 
 
     pcl::PointCloud<pcl::PointXYZ>::Ptr mf_computeISS3DKeyPoints(const PointCloudT::Ptr &cloud_in,
         const double &SalientRadius, const double &NonMaxRadius, const double &Gamma21, const double &Gamma32 , const double &MinNeighbors, const int &Threads);
-    pcl::Correspondences mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance);
-
+    pcl::CorrespondencesPtr mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance);
+    void mf_SVDInitialAlignment();
 
     bool mf_processCorrespondencesSVDICP();
 };

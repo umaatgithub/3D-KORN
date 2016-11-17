@@ -21,7 +21,7 @@ const float bad_point = std::numeric_limits<float>::quiet_NaN();
 int
 main (int argc, char** argv)
 {
-    int numPointclouds = 1;
+    int numPointclouds = 10;
 
     TDK_ScanRegistration scanRegistrator;
 
@@ -33,7 +33,9 @@ main (int argc, char** argv)
         pcl::io::loadPLYFile("../alb" + to_string(i) +".ply", *cloud);
         //add to myRegistrator
         scanRegistrator.addNextPointCloud(cloud);
-        qDebug() << "../alb" << QString::fromStdString(to_string(i)) << ".ply " << " anyadido y procesado";
+        qDebug() << "Number of keypoints = " << scanRegistrator.getLastDownSampledPointcloud()->points.size();
+
+        //qDebug() << "../alb" << QString::fromStdString(to_string(i)) << ".ply " << " anyadido y procesado";
     }
 
 
@@ -42,26 +44,25 @@ main (int argc, char** argv)
             viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
     viewer->setBackgroundColor (0, 0, 0);
 
-    viewer->addPointCloud( cloud, "pc2");
-    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "pc2");
+//    viewer->addPointCloud( cloud, "pc2");
+//    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "pc2");
 
 
-    qDebug() << "Number of keypoints = " << scanRegistrator.getLastDownSampledPointcloud()->points.size();
-    viewer->addPointCloud( scanRegistrator.getLastDownSampledPointcloud(), "pc1");
-    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "pc1");
-    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0, 1, 0, "pc1");
+    //    viewer->addPointCloud( scanRegistrator.getLastDownSampledPointcloud(), "pc1");
+//    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 5, "pc1");
+//    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0, 1, 0, "pc1");
     //add to viewer
-//    vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getAlignedPointClouds();
+    vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getAlignedPointClouds();
 
 
-//    for (int i = 0; i < (*alignedPCs).size(); ++i) {
-//        viewer->addPointCloud( (*alignedPCs)[i], "pc"+to_string(i) );
-//        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "pc"+to_string(i));
-//        //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0, 0, 0.8, "pc2");
-//    }
+    for (int i = 0; i < (*alignedPCs).size(); ++i) {
+        viewer->addPointCloud( (*alignedPCs)[i], "pc"+to_string(i) );
+        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "pc"+to_string(i));
+        //viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0, 0, 0.8, "pc2");
+    }
 
     // Starting visualizer
-    viewer->addCoordinateSystem (1.0, "global");
+    //viewer->addCoordinateSystem (1.0, "global");
 
     // Wait until visualizer window is closed.
     while (!viewer->wasStopped ())
