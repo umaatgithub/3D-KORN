@@ -18,7 +18,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_Kinect2Wrapper::getMv_cloud() const
     return mv_cloud;
 }
 
-void TDK_Kinect2Wrapper::setMv_cloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &value)
+void TDK_Kinect2Wrapper::setMv_cloud(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &value)
 {
     mv_cloud = value->makeShared();
     emit signalCloudUpdated(mv_cloud);

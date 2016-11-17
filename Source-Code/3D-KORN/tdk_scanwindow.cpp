@@ -2,10 +2,13 @@
 
 TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     centralWidget(new QWidget(this)),
-    gridLayoutCentralWidget(new QGridLayout)
+    gridLayoutCentralWidget(new QGridLayout),
+    tdk_Kinect2Wrapper(new TDK_Kinect2Wrapper),
+    qvtkWidget(new QVTKWidget)
 {
-    connect(tdk_Kinect2Wrapper, SIGNAL(signalCloudUpdated(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr)),
-            this, SLOT(slotUpdateSensorOutputWidget(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr)));
+    connect(tdk_Kinect2Wrapper, SIGNAL(signalCloudUpdated(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr)),this, SLOT(slotUpdateSensorOutputWidget(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr)));
+
+    tdk_Kinect2Wrapper->startKinect();
     vtkObject::GlobalWarningDisplayOff();
     this->setWindowFlags(Qt::Dialog);
     resize(300, 400);
@@ -32,7 +35,7 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
 void TDK_ScanWindow::mf_SetupSensorOutputWidget()
 {
     QDockWidget *dockWidget = new QDockWidget(tr("Sensor Output"));
-    QVTKWidget *qvtkWidget = new QVTKWidget;
+
 
     dockWidget->setWidget(qvtkWidget);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
@@ -116,10 +119,11 @@ void TDK_ScanWindow::mf_SetupPointcloudListWidget()
     gridLayoutCentralWidget->addWidget(dockWidget, 1, 0);
 }
 
-void TDK_ScanWindow::slotUpdateSensorOutputWidget(const pcl::PointCloud::ConstPtr &ptr)
+void TDK_ScanWindow::slotUpdateSensorOutputWidget(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &ptr)
 {
     if( !viewer->updatePointCloud( ptr, "cloud" ) ){
         viewer->addPointCloud( ptr, "cloud" );
         viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
     }
+    qvtkWidget->update();
 }

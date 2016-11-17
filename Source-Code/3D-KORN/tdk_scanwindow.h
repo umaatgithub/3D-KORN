@@ -27,7 +27,8 @@ public:
     QGridLayout *gridLayoutCentralWidget;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 //    pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr cloudSource1;
-    TDK_Kinect2Wrapper tdk_Kinect2Wrapper;
+    TDK_Kinect2Wrapper *tdk_Kinect2Wrapper;
+    QVTKWidget *qvtkWidget;
 
     void mf_SetupSensorOutputWidget();
     void mf_SetupSensorWidget();
