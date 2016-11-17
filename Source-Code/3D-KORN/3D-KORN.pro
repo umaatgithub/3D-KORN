@@ -204,12 +204,16 @@ SOURCES += main.cpp\
     tdk_centralwidget.cpp \
     tdk_scanwindow.cpp \
     tdk_database.cpp \
-    tdk_edit.cpp
+    tdk_edit.cpp \
+    kinect2_grabber.cpp \
+    tdk_kinect2wrapper.cpp
 
 HEADERS  += mainwindow.h \
     tdk_centralwidget.h \
     tdk_scanwindow.h \
     tdk_database.h \
-    tdk_edit.h
+    tdk_edit.h \
+    kinect2_grabber.h \
+    tdk_kinect2wrapper.h
 
 FORMS    += mainwindow.ui

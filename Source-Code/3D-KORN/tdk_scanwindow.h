@@ -16,6 +16,8 @@
 #include <vtkRenderWindow.h>
 #include <QVTKWidget.h>
 
+#include "tdk_kinect2wrapper.h"
+
 class TDK_ScanWindow : public QMainWindow
 {
     Q_OBJECT
@@ -24,7 +26,8 @@ public:
     QWidget *centralWidget;
     QGridLayout *gridLayoutCentralWidget;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloudSource1;
+//    pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr cloudSource1;
+    TDK_Kinect2Wrapper tdk_Kinect2Wrapper;
 
     void mf_SetupSensorOutputWidget();
     void mf_SetupSensorWidget();
@@ -35,6 +38,8 @@ public:
 signals:
 
 public slots:
+    void slotUpdateSensorOutputWidget(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr);
+
 };
 
 #endif // TDK_SCANWINDOW_H
