@@ -25,6 +25,11 @@ void TDK_Kinect2Grabber::mf_getPointCloudFrame(pcl::PointCloud<PointType>::Ptr &
     cloud = mv_cloud;
 }
 
+void TDK_Kinect2Grabber::mf_SetScanBoxLimits(int& x_min,int& x_max,int& y_min,int& y_max,int& z_min,int& z_max)
+{
+    mv_grabber->SetScanBoxLimits( x_min, x_max, y_min, y_max, z_min, z_max);
+}
+
 void TDK_Kinect2Grabber::mf_closeKinect()
 {
     mv_grabber->stop();

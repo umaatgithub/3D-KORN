@@ -47,6 +47,8 @@ namespace pcl
             typedef void ( signal_Kinect2_PointXYZRGB )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZRGB>>& );
             typedef void ( signal_Kinect2_PointXYZRGBA )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZRGBA>>& );
 
+            void SetScanBoxLimits(int& x_min,int& x_max,int& y_min,int& y_max,int& z_min,int& z_max);
+
         protected:
             boost::signals2::signal<signal_Kinect2_PointXYZ>* signal_PointXYZ;
             boost::signals2::signal<signal_Kinect2_PointXYZI>* signal_PointXYZI;
@@ -87,6 +89,10 @@ namespace pcl
             int infraredWidth;
             int infraredHeight;
             std::vector<UINT16> infraredBuffer;
+
+            int x_min, x_max, y_min, y_max, z_min, z_max;
+
+
     };
 
 

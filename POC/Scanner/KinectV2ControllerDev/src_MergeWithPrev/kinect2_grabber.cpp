@@ -134,6 +134,10 @@ Kinect2Grabber::Kinect2Grabber()
     signal_PointXYZI = createSignal<signal_Kinect2_PointXYZI>();
     signal_PointXYZRGB = createSignal<signal_Kinect2_PointXYZRGB>();
     signal_PointXYZRGBA = createSignal<signal_Kinect2_PointXYZRGBA>();
+
+    //From default values min and max of x,y,z
+    x_min=-15; x_max=15; y_min=-15; y_max=15; z_min=0.1; z_max=30;
+
 }
 
 Kinect2Grabber::~Kinect2Grabber() throw()
@@ -276,6 +280,17 @@ void Kinect2Grabber::threadFunction()
     }
 }
 
+void Kinect2Grabber::SetScanBoxLimits(int &x_m, int &x_M, int &y_m, int &y_M, int &z_m, int &z_M)
+{
+    x_min = x_m;
+    x_max = x_M;
+    y_min = y_m;
+    y_max = y_M;
+    z_min = z_m;
+    z_max = z_M;
+
+}
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr Kinect2Grabber::convertDepthToPointXYZ( UINT16* depthBuffer )
 {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud( new pcl::PointCloud<pcl::PointXYZ>() );
@@ -298,9 +313,9 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr Kinect2Grabber::convertDepthToPointXYZ( UINT
             CameraSpacePoint cameraSpacePoint = { 0.0f, 0.0f, 0.0f };
             mapper->MapDepthPointToCameraSpace( depthSpacePoint, depth, &cameraSpacePoint );
 
-                point.x = cameraSpacePoint.X;
-                point.y = cameraSpacePoint.Y;
-                point.z = cameraSpacePoint.Z;
+            point.x = cameraSpacePoint.X;
+            point.y = cameraSpacePoint.Y;
+            point.z = cameraSpacePoint.Z;
 
 
             *pt = point;
@@ -354,47 +369,49 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Kinect2Grabber::convertRGBDepthToPointXYZ
     cloud->height = static_cast<uint32_t>( depthHeight );
     cloud->is_dense = false;
 
-    cloud->points.resize( cloud->height * cloud->width );
+    //Afegixen tots els ceros
+    //cloud->points.resize( cloud->height * cloud->width );
 
-    pcl::PointXYZRGB* pt = &cloud->points[0];
+    //pcl::PointXYZRGB* pt = &cloud->points[0];
     for( int y = 0; y < depthHeight; y++ ){
-        for( int x = 0; x < depthWidth; x++, pt++ ){
+        for( int x = 0; x < depthWidth; x++){
             pcl::PointXYZRGB point;
+
+            // Coordinate Mapping Depth to Camera Space, and Setting PointCloud XYZ
 
             DepthSpacePoint depthSpacePoint = { static_cast<float>( x ), static_cast<float>( y ) };
             UINT16 depth = depthBuffer[y * depthWidth + x];
 
-            // Coordinate Mapping Depth to Color Space, and Setting PointCloud RGB
-            ColorSpacePoint colorSpacePoint = { 0.0f, 0.0f };
-            mapper->MapDepthPointToColorSpace( depthSpacePoint, depth, &colorSpacePoint );
-            int colorX = static_cast<int>( std::floor( colorSpacePoint.X + 0.5f ) );
-            int colorY = static_cast<int>( std::floor( colorSpacePoint.Y + 0.5f ) );
-            if( ( 0 <= colorX ) && ( colorX < colorWidth ) && ( 0 <= colorY ) && ( colorY < colorHeight ) ){
-                RGBQUAD color = colorBuffer[colorY * colorWidth + colorX];
-                point.b = color.rgbBlue;
-                point.g = color.rgbGreen;
-                point.r = color.rgbRed;
-            }
-
-            // Coordinate Mapping Depth to Camera Space, and Setting PointCloud XYZ
             CameraSpacePoint cameraSpacePoint = { 0.0f, 0.0f, 0.0f };
             mapper->MapDepthPointToCameraSpace( depthSpacePoint, depth, &cameraSpacePoint );
-            if( ( 0 <= colorX ) && ( colorX < colorWidth ) && ( 0 <= colorY ) && ( colorY < colorHeight ) ){
-       //      //A LIMIT IN THE DEPTH MUST BE SET WHEN WE KNOW THE OPERATING DISTANCE (Kinect to platform)
-                if (cameraSpacePoint.Z >= 0.2)
+
+            //if the point is valid
+            //      //A LIMIT IN THE DEPTH MUST BE SET WHEN WE KNOW THE OPERATING DISTANCE (Kinect to platform)
+            if (cameraSpacePoint.Z >= z_min && cameraSpacePoint.Z <= z_max && cameraSpacePoint.Y <= y_max && cameraSpacePoint.Y >= y_min && cameraSpacePoint.X <= x_max && cameraSpacePoint.X >= x_min)
+            {
+                ColorSpacePoint colorSpacePoint = { 0.0f, 0.0f };
+                mapper->MapDepthPointToColorSpace( depthSpacePoint, depth, &colorSpacePoint );
+                int colorX = static_cast<int>( std::floor( colorSpacePoint.X + 0.5f ) );
+                int colorY = static_cast<int>( std::floor( colorSpacePoint.Y + 0.5f ) );
+
+                if( ( 0 <= colorX ) && ( colorX < colorWidth ) && ( 0 <= colorY ) && ( colorY < colorHeight ) )
                 {
-                   if (cameraSpacePoint.Y <= 1.2 && cameraSpacePoint.Y >= -1.2)
-                   {
-                       if (cameraSpacePoint.X <= 0.6 && cameraSpacePoint.X >= -0.6 ){
-                       point.x = cameraSpacePoint.X;
-                       point.y = cameraSpacePoint.Y;
-                       point.z = cameraSpacePoint.Z;
-
-                       *pt = point;}
-                   }
+                    point.x = cameraSpacePoint.X;
+                    point.y = cameraSpacePoint.Y;
+                    point.z = cameraSpacePoint.Z;
                 }
+                // Coordinate Mapping Depth to Color Space, and Setting PointCloud RGB
 
+                if( ( 0 <= colorX ) && ( colorX < colorWidth ) && ( 0 <= colorY ) && ( colorY < colorHeight ) )
+                {
+                    RGBQUAD color = colorBuffer[colorY * colorWidth + colorX];
+                    point.b = color.rgbBlue;
+                    point.g = color.rgbGreen;
+                    point.r = color.rgbRed;
+                }
+                cloud->points.push_back(point);
             }
+
         }
     }
 

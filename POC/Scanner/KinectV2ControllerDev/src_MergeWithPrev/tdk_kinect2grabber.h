@@ -35,11 +35,12 @@ public:
     // Same for depth image
     // setDepthDisplay(...);
 
+    void mf_SetScanBoxLimits(int x_min,int x_max,int y_min,int y_max,int z_min,int z_max);
 
 private:
     //mutex
     boost::mutex mv_mutex;
-    boost::shared_ptr<pcl::Grabber> mv_grabber;
+    boost::shared_ptr<pcl::Kinect2Grabber> mv_grabber;
 
     //point cloud
     pcl::PointCloud<PointType>::Ptr mv_cloud;

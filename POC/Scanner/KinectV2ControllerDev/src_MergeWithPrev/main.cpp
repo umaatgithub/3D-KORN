@@ -19,6 +19,7 @@ int main()
 {
     TDK_Kinect2Grabber kinect;
 
+    kinect.mf_SetScanBoxLimits(-1.5, 1.5, -1.5, 1.5, 0.1, 3);
 
     // PCL Visualizer
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(
