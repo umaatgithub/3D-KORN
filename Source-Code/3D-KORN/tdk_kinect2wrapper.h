@@ -2,6 +2,7 @@
 #define TDK_KINECT2WRAPPER_H
 
 #include <QObject>
+#include <QDebug>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -21,12 +22,15 @@ public:
     boost::function<void( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& )> mv_pointCloudCallback =
             [this]( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr ){
 
+        qDebug("Callback fn : Inside callback fn");
         boost::mutex::scoped_lock lock(mutex);
+        qDebug("Callback fn : Acquired lock");
         setMv_cloud(ptr);
+        qDebug("Callback fn : Point cloud set -> "+ptr->size());
 
     };
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getMv_cloud() const;
+    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr getMv_cloud() const;
     void setMv_cloud(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &value);
 
 signals:

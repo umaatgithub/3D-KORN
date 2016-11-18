@@ -121,9 +121,11 @@ void TDK_ScanWindow::mf_SetupPointcloudListWidget()
 
 void TDK_ScanWindow::slotUpdateSensorOutputWidget(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &ptr)
 {
+    qDebug("Slot fn : Inside slot fn");
     if( !viewer->updatePointCloud( ptr, "cloud" ) ){
         viewer->addPointCloud( ptr, "cloud" );
-        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
     }
+    qDebug("SLot fn : Point cloud updated to visualizer -> "+ ptr->size());
     qvtkWidget->update();
+    qDebug("Slot fn : Point cloud updated to qvtkwidget");
 }
