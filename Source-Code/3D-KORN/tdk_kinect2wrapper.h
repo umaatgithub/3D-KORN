@@ -21,20 +21,17 @@ public:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr mv_cloud;
     boost::function<void( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& )> mv_pointCloudCallback =
             [this]( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr ){
-
-        qDebug("Callback fn : Inside callback fn");
+        qDebug("mv_pointCloudCallback --------------------------");
         boost::mutex::scoped_lock lock(mutex);
-        qDebug("Callback fn : Acquired lock");
         setMv_cloud(ptr);
-        qDebug("Callback fn : Point cloud set -> "+ptr->size());
 
     };
 
-    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr getMv_cloud() const;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getMv_cloud() const;
     void setMv_cloud(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &value);
 
 signals:
-    void signalCloudUpdated(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr);
+    void signalCloudUpdated();
 
 public slots:
 

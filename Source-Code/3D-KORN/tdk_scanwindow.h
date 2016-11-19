@@ -39,7 +39,7 @@ public:
 signals:
 
 public slots:
-    void slotUpdateSensorOutputWidget(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr);
+    void slotUpdateSensorOutputWidget();
 
 };
 

@@ -13,16 +13,15 @@ void TDK_Kinect2Wrapper::startKinect()
     mv_grabber->start();
 }
 
-pcl::PointCloud::ConstPtr TDK_Kinect2Wrapper::getMv_cloud() const
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_Kinect2Wrapper::getMv_cloud() const
 {
     return mv_cloud;
 }
 
 void TDK_Kinect2Wrapper::setMv_cloud(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &value)
 {
-    qDebug("Setter fn : Inside setter fn");
+    qDebug("setMv_cloud --------------------------");
     mv_cloud = value->makeShared();
-    qDebug("Setter fn : Point cloud set -> "+mv_cloud->size());
-    emit signalCloudUpdated(mv_cloud);
-    qDebug("Setter fn : Emitted signal");
+    qDebug() << mv_cloud->points.size();
+    emit signalCloudUpdated();
 }

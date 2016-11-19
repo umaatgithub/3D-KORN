@@ -6,7 +6,7 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     tdk_Kinect2Wrapper(new TDK_Kinect2Wrapper),
     qvtkWidget(new QVTKWidget)
 {
-    connect(tdk_Kinect2Wrapper, SIGNAL(signalCloudUpdated(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr)),this, SLOT(slotUpdateSensorOutputWidget(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr)));
+    connect(tdk_Kinect2Wrapper, SIGNAL(signalCloudUpdated()),this, SLOT(slotUpdateSensorOutputWidget()));
 
     tdk_Kinect2Wrapper->startKinect();
     vtkObject::GlobalWarningDisplayOff();
@@ -119,13 +119,13 @@ void TDK_ScanWindow::mf_SetupPointcloudListWidget()
     gridLayoutCentralWidget->addWidget(dockWidget, 1, 0);
 }
 
-void TDK_ScanWindow::slotUpdateSensorOutputWidget(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &ptr)
+void TDK_ScanWindow::slotUpdateSensorOutputWidget()
 {
-    qDebug("Slot fn : Inside slot fn");
-    if( !viewer->updatePointCloud( ptr, "cloud" ) ){
-        viewer->addPointCloud( ptr, "cloud" );
+    qDebug("slotUpdateSensorOutputWidget --------------------------");
+
+    if( !viewer->updatePointCloud( tdk_Kinect2Wrapper->getMv_cloud(), "cloud" ) ){
+        viewer->addPointCloud( tdk_Kinect2Wrapper->getMv_cloud(), "cloud" );
+        viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
     }
-    qDebug("SLot fn : Point cloud updated to visualizer -> "+ ptr->size());
     qvtkWidget->update();
-    qDebug("Slot fn : Point cloud updated to qvtkwidget");
 }
