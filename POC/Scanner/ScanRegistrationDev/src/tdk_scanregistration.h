@@ -1,8 +1,12 @@
 #ifndef TDK_SCANREGISTRATION_H
 #define TDK_SCANREGISTRATION_H
 
+#include <math.h>
 #include <vector>
+
 #include <Eigen/Core>
+#include <Eigen/Geometry>
+
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/common/transforms.h>
@@ -35,6 +39,7 @@ public:
     TDK_ScanRegistration();
 
     bool addNextPointCloud(const PointCloudT::Ptr &inputPointcloud);
+    bool addNextPointCloud(const PointCloudT::Ptr &inputPointcloud, float degreesRotatedY);
 
     PointCloudXYZ::Ptr getLastDownSampledPointcloud();
     vector<PointCloudT::Ptr>* mf_getOriginalPointClouds();
@@ -44,9 +49,13 @@ public:
     void setMv_ICP_MaxCorrespondenceDistance(float value);
     void setMv_ISS_resolution(double value);
 
+    void setMv_scannerCenterRotation(const pcl::PointXYZ &value);
+
 private:
     //General Approach
-    float mv_FeatureRadiusSearch;
+    bool mv_scannerCenterRotationSet;
+    pcl::PointXYZ mv_scannerCenterRotation;
+    float mv_accumulatedRotation;
 
     vector<PointCloudT::Ptr> mv_originalPointClouds;
     vector<PointCloudXYZ::Ptr> mv_downSampledPointClouds;
@@ -56,6 +65,7 @@ private:
 
 
     //Approach 1: Voxel + SAC + ICP
+    float mv_FeatureRadiusSearch;
     float mv_voxelSideLength;
     float mv_SAC_MinSampleDistance;
     float mv_SAC_MaxCorrespondenceDistance;
@@ -94,7 +104,6 @@ private:
     void mf_SVDInitialAlignment();
 
     bool mf_processCorrespondencesSVDICP();
-    bool mf_processCorrespondencesSACICP();
 };
 
 #endif // TDK_SCANREGISTRATION_H
