@@ -35,27 +35,14 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
 void TDK_ScanWindow::mf_SetupSensorOutputWidget()
 {
     QDockWidget *dockWidget = new QDockWidget(tr("Sensor Output"));
-
-
     dockWidget->setWidget(qvtkWidget);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-
     gridLayoutCentralWidget->addWidget(dockWidget, 0, 1, 2, 1);
-
-    //cloudSource1.reset(new pcl::PointCloud<pcl::PointXYZRGBA>);
-    //pcl::io::loadPLYFile ("D:\\MAIA\\SEM 1\\Software Engineering\\Project 3D-KORN\\eze_thresholded\\eze_3.ply", *cloudSource1);
 
     viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
     viewer->setBackgroundColor (0.1, 0.1, 0.1);
     qvtkWidget->SetRenderWindow (viewer->getRenderWindow ());
     viewer->setupInteractor ( qvtkWidget->GetInteractor (), qvtkWidget->GetRenderWindow ());
-    //viewer->addPointCloud (cloudSource1, "cloud");
-    //viewer->resetCamera ();
-    //qvtkWidget->update ();
-    //viewer->spinOnce();
-    //pcl::io::loadPLYFile ("D:\\MAIA\\SEM 1\\Software Engineering\\Project 3D-KORN\\eze_thresholded\\eze_1.ply", *cloudSource1);
-    //viewer->updatePointCloud(cloudSource1, "cloud");
-
 }
 
 void TDK_ScanWindow::mf_SetupSensorWidget()
@@ -69,7 +56,6 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-
     gridLayoutCentralWidget->addWidget(dockWidget, 0, 0);
 
 }
@@ -85,7 +71,6 @@ void TDK_ScanWindow::mf_SetupVideoStreamWidget()
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-
     gridLayoutCentralWidget->addWidget(dockWidget, 0, 2);
 }
 
@@ -100,7 +85,6 @@ void TDK_ScanWindow::mf_SetupDepthMapWidget()
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-
     gridLayoutCentralWidget->addWidget(dockWidget, 1, 2);
 }
 
@@ -115,14 +99,11 @@ void TDK_ScanWindow::mf_SetupPointcloudListWidget()
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-
     gridLayoutCentralWidget->addWidget(dockWidget, 1, 0);
 }
 
 void TDK_ScanWindow::slotUpdateSensorOutputWidget()
 {
-    qDebug("slotUpdateSensorOutputWidget --------------------------");
-
     if( !viewer->updatePointCloud( tdk_Kinect2Wrapper->getMv_cloud(), "cloud" ) ){
         viewer->addPointCloud( tdk_Kinect2Wrapper->getMv_cloud(), "cloud" );
         viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
