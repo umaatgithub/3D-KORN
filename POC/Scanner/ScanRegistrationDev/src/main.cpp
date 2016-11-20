@@ -71,7 +71,7 @@ main (int argc, char** argv)
         scanRegistrator.setMv_ISS_resolution(computeCloudResolution(cloud));
 
         //add to myRegistrator
-        scanRegistrator.addNextPointCloud(cloud, -35.0); //33
+        scanRegistrator.addNextPointCloud(cloud, -36.0); //33
 
         /*
         //Estimate center of rot

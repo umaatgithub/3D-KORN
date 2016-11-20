@@ -11,14 +11,14 @@ TDK_ScanRegistration::TDK_ScanRegistration()
     mv_scannerCenterRotationSet = false;
     mv_accumulatedRotation = 0.0;
 
-    mv_voxelSideLength = 0.02;
+    mv_voxelSideLength = 0.01;
     mv_FeatureRadiusSearch=0.05;
 
     mv_SAC_MinSampleDistance = 0.01;
     mv_SAC_MaxCorrespondenceDistance = 0.3;
     mv_SAC_MaximumIterations = 500;
 
-    mv_ICP_MaxCorrespondenceDistance = 0.06; //0.12
+    mv_ICP_MaxCorrespondenceDistance = 0.03; //0.12
 
     mv_ISS_resolution = 0.003;  //0.004 ,767 points
     mv_ISS_SalientRadius = 6*mv_ISS_resolution;
@@ -109,7 +109,7 @@ bool TDK_ScanRegistration::mf_processVoxelSacIcp()
 
     if(mv_originalPointClouds.size() > 1){
         mf_sampleConsensusInitialAlignment();
-        mf_iterativeClosestPointFinalAlignment();
+        mf_ClosestPointFinalAlignment();
 
         mv_downSampledNormals.back() = mf_computeNormals(mv_alignedDownSampledPointClouds.back(),mv_FeatureRadiusSearch);
         mv_downSampledFeatures.back() = mf_computeLocalFPFH33Features(mv_alignedDownSampledPointClouds.back(), mv_downSampledNormals.back(),mv_FeatureRadiusSearch);
@@ -331,11 +331,12 @@ bool TDK_ScanRegistration::mf_processVoxelIcp()
     mv_downSampledPointClouds.push_back(mf_voxelDownSamplePointCloud(mv_originalPointClouds.back(), mv_voxelSideLength));
 
     if(mv_originalPointClouds.size() > 1){
-        mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
+        mv_alignedDownSampledPointClouds.back()= mv_downSampledPointClouds.back();
         mv_transformationMatrixAlignment.push_back(Eigen::Matrix<float, 4, 4>::Identity());
         mf_iterativeClosestPointFinalAlignment();
-
+        *mv_alignedDownSampledPointClouds.front() += *mv_alignedDownSampledPointClouds.back();
     }else{
+        mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
         mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
         mv_alignedOriginalPointClouds.push_back(mv_originalPointClouds.back());
     }
