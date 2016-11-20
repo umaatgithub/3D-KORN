@@ -36,11 +36,9 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
     mv_originalPointClouds.push_back(inputPointcloud);
 
     //Approach 1 SAC ICP
-    //mf_processVoxelSacIcp();
-
-    //Approach 2 SVD ICP
-    mf_processCorrespondencesSVDICP();
-
+    //    mf_processVoxelSacIcp();
+    //mf_processCorrespondencesSVDICP();
+    mf_processVoxelIcp();
 
     return true;
 }
@@ -329,4 +327,25 @@ void PointCloudXYZRGBtoXYZ(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in, pcl
         out->points[i].y = in->points[i].y;
         out->points[i].z = in->points[i].z;
     }
+}
+
+
+bool TDK_ScanRegistration::mf_processVoxelIcp()
+{
+    //Downsample pointcloud and push to Downsampled vector
+    mv_downSampledPointClouds.push_back(mf_voxelDownSamplePointCloud(mv_originalPointClouds.back(), mv_voxelSideLength));
+
+    if(mv_originalPointClouds.size() > 1){
+        mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
+        mv_transformationMatrixAlignment.push_back(Eigen::Matrix<float, 4, 4>::Identity());
+        mf_iterativeClosestPointFinalAlignment();
+
+    }else{
+        mv_alignedDownSampledPointClouds.push_back(mv_downSampledPointClouds.back());
+        mv_alignedOriginalPointClouds.push_back(mv_originalPointClouds.back());
+    }
+    //qDebug() << "Donwsampled Point Cloud Dimension is " << (--mv_downSampledPointClouds.end())->get()->points.size()  <<endl;
+    //qDebug() << "features Dimension is " << mv_downSampledFeatures.back().get()->points.size()  <<endl;
+
+    return true;
 }

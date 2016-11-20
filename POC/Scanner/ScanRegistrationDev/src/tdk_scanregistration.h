@@ -104,6 +104,7 @@ private:
     void mf_SVDInitialAlignment();
 
     bool mf_processCorrespondencesSVDICP();
+    bool mf_processVoxelIcp();
 };
 
 #endif // TDK_SCANREGISTRATION_H
