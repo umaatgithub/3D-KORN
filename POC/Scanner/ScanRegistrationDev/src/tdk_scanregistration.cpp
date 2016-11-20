@@ -18,17 +18,17 @@ TDK_ScanRegistration::TDK_ScanRegistration()
     mv_SAC_MaxCorrespondenceDistance = 0.3;
     mv_SAC_MaximumIterations = 500;
 
-    mv_ICP_MaxCorrespondenceDistance = 0.1; //0.12
+    mv_ICP_MaxCorrespondenceDistance = 0.06; //0.12
 
-    mv_ISS_resolution = 0.002;  //0.004 ,767 points
+    mv_ISS_resolution = 0.003;  //0.004 ,767 points
     mv_ISS_SalientRadius = 6*mv_ISS_resolution;
     mv_ISS_NonMaxRadius = 4*mv_ISS_resolution;
     mv_ISS_Gamma21 =0.975;
     mv_ISS_Gamma32 =0.975;
-    mv_ISS_MinNeighbors = 6; //5
+    mv_ISS_MinNeighbors = 5; //5
     mv_ISS_Threads = 1;
 
-    mv_SVD_MaxDistance=0.4;
+    mv_SVD_MaxDistance=0.25;
 }
 
 bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud)
@@ -48,11 +48,6 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
     if(mv_scannerCenterRotationSet){
         //Transform pointcloud
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformedInputPointcloud(new  pcl::PointCloud<pcl::PointXYZRGB>());
-
-
-//        Eigen::Affine3f t = Eigen::Translation3d(Eigen::Vector3f(-mv_scannerCenterRotation.x, 0.0, -mv_scannerCenterRotation.z));
-//        Eigen::Affine3f r = Eigen::AngleAxisf(degreesRotatedY*(M_PI/180.0), Eigen::Vector3f::UnitY());
-//        Eigen::Matrix4d transform = (t * r).matrix(); // Option 1
 
         Eigen::Vector3f center_rot(mv_scannerCenterRotation.x, 0.0, mv_scannerCenterRotation.z);
         mv_accumulatedRotation += degreesRotatedY;
