@@ -11,6 +11,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/common/transforms.h>
 #include <pcl/filters/voxel_grid.h>
+#include <pcl/filters/passthrough.h>
 #include <pcl/registration/icp.h>
 #include <pcl/registration/ia_ransac.h>
 #include <pcl/features/fpfh.h>

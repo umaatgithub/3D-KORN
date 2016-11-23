@@ -52,13 +52,13 @@ computeCloudResolution (const pcl::PointCloud<PointType>::ConstPtr &cloud)
 int
 main (int argc, char** argv)
 {
-    int numPointclouds = 8;
+    int numPointclouds = 10;
 
-    //pcl::PointXYZ scannerCenter((float)atof(argv[1]), (float)atof(argv[2]), (float)atof(argv[3]));
     TDK_ScanRegistration scanRegistrator;
 
-    // x center = 0.087, z_center = 1.4
-    pcl::PointXYZ scannerCenter(0.08, 0.0, 1.43); //2.054 obtained from max_z in center slice
+    // x center = 0.087, z_center = 1.43
+    //pcl::PointXYZ scannerCenter(0.086, 0.0, 1.43);
+    pcl::PointXYZ scannerCenter((float)atof(argv[1]), (float)atof(argv[2]), (float)atof(argv[3]));
     scanRegistrator.setMv_scannerCenterRotation(scannerCenter);
 
     //Load pc
@@ -68,39 +68,10 @@ main (int argc, char** argv)
         cloud = boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>>(new pcl::PointCloud<pcl::PointXYZRGB>);
         pcl::io::loadPLYFile("../chair_eze" + to_string(i) +".ply", *cloud);
 
-        scanRegistrator.setMv_ISS_resolution(computeCloudResolution(cloud));
+        //scanRegistrator.setMv_ISS_resolution(computeCloudResolution(cloud));
 
         //add to myRegistrator
         scanRegistrator.addNextPointCloud(cloud, -36.0); //33
-
-        /*
-        //Estimate center of rot
-        float min_z = 10000;
-        float max_z = 0;
-        float mean_x = 0;
-        int num_x = 0;
-
-        for (int j = 0; j < cloud->points.size(); ++j) {
-           if( cloud->points[j].y < 0.2 && cloud->points[j].y > 0.1){
-               if(min_z > cloud->points[j].z){
-                   min_z = cloud->points[j].z;
-               }
-
-               if(max_z < cloud->points[j].z){
-                   max_z = cloud->points[j].z;
-               }
-
-               mean_x += cloud->points[j].x;
-               num_x++;
-           }
-        }
-
-        mean_x /= num_x;
-
-        qDebug() << "Min Z: " << min_z;
-        qDebug() << "Max Z: " << max_z;
-        qDebug() << "Mean X: " << mean_x;
-        */
 
         qDebug() << "Number of keypoints = " << scanRegistrator.getLastDownSampledPointcloud()->points.size();
     }
@@ -112,8 +83,8 @@ main (int argc, char** argv)
     viewer->setBackgroundColor (0, 0, 0);
 
     //add to viewer
-    //vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getOriginalPointClouds();
-    vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getAlignedPointClouds();
+    vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getOriginalPointClouds();
+    //vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getAlignedPointClouds();
 
     for (int i = 0; i < (*alignedPCs).size(); ++i) {
         viewer->addPointCloud( (*alignedPCs)[i], "pc"+to_string(i) );
@@ -121,7 +92,7 @@ main (int argc, char** argv)
     }
 
     // Starting visualizer
-    viewer->addCoordinateSystem (0.4, "global");
+    viewer->addCoordinateSystem (0.2, "global");
 
     // Wait until visualizer window is closed.
     while (!viewer->wasStopped ())
