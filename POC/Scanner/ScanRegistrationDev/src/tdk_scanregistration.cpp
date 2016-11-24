@@ -33,7 +33,13 @@ TDK_ScanRegistration::TDK_ScanRegistration()
 
 bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud)
 {
+
     mv_originalPointClouds.push_back(inputPointcloud);
+    qDebug() << "Original Point Cloud Dimension is " << (--mv_originalPointClouds.end())->get()->points.size() <<endl;
+
+    mf_denoiseLastPointCloud();
+    qDebug() << "Original Point Cloud Dimension is " << (--mv_originalPointClouds.end())->get()->points.size()  <<endl;
+
 
     //Approach 1 SAC ICP
     //    mf_processVoxelSacIcp();
@@ -349,4 +355,18 @@ bool TDK_ScanRegistration::mf_processVoxelIcp()
     //qDebug() << "features Dimension is " << mv_downSampledFeatures.back().get()->points.size()  <<endl;
 
     return true;
+}
+
+
+
+ pcl::PointCloud<pcl::PointXYZ>::Ptr PointTDK_ScanRegistration::mf_denoiseLastPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in) {
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sorfilter (true);
+    sorfilter.setInputCloud (cloud_in);
+    sorfilter.setMeanK (8);
+    sorfilter.setStddevMulThresh (2.5);
+    sorfilter.filter (cloud_out);
+
+    return cloud_out;
 }

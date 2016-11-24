@@ -24,6 +24,8 @@
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
 #include <pcl/registration/transformation_estimation_svd.h>
 #include <pcl/registration/correspondence_estimation_backprojection.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/PCLPointCloud2.h>
 
 using namespace std;
 
@@ -39,13 +41,16 @@ public:
 
     TDK_ScanRegistration();
 
+    //Input
     bool addNextPointCloud(const PointCloudT::Ptr &inputPointcloud);
     bool addNextPointCloud(const PointCloudT::Ptr &inputPointcloud, float degreesRotatedY);
 
+    //Ouput
     PointCloudXYZ::Ptr getLastDownSampledPointcloud();
     vector<PointCloudT::Ptr>* mf_getOriginalPointClouds();
     vector<PointCloudT::Ptr>* mf_getAlignedPointClouds();
 
+    //Configuration
     void setMv_SVD_MaxDistance(double value);
     void setMv_ICP_MaxCorrespondenceDistance(float value);
     void setMv_ISS_resolution(double value);
@@ -98,14 +103,17 @@ private:
     double mv_SVD_MaxDistance;
     vector<pcl::CorrespondencesPtr> mv_downsampledCorrespondences;
 
-
+    //Utility function
     pcl::PointCloud<pcl::PointXYZ>::Ptr mf_computeISS3DKeyPoints(const PointCloudT::Ptr &cloud_in,
         const double &SalientRadius, const double &NonMaxRadius, const double &Gamma21, const double &Gamma32 , const double &MinNeighbors, const int &Threads);
     pcl::CorrespondencesPtr mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance, pcl::PointCloud<pcl::Normal>::Ptr &normals1, pcl::PointCloud<pcl::Normal>::Ptr &normals2);
+
+    //Methods of class
     void mf_SVDInitialAlignment();
 
     bool mf_processCorrespondencesSVDICP();
     bool mf_processVoxelIcp();
+    pcl::PointCloud<pcl::PointXYZ>::Ptr PointTDK_ScanRegistration::mf_denoiseLastPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in);
 };
 
 #endif // TDK_SCANREGISTRATION_H

@@ -56,9 +56,8 @@ main (int argc, char** argv)
 
     TDK_ScanRegistration scanRegistrator;
 
-    // x center = 0.087, z_center = 1.43
-    //pcl::PointXYZ scannerCenter(0.086, 0.0, 1.43);
-    pcl::PointXYZ scannerCenter((float)atof(argv[1]), (float)atof(argv[2]), (float)atof(argv[3]));
+    // x center = 0.087, z_center = 1.4
+    pcl::PointXYZ scannerCenter(0.087, 0.0, 1.43); //2.054 obtained from max_z in center slice
     scanRegistrator.setMv_scannerCenterRotation(scannerCenter);
 
     //Load pc
@@ -73,7 +72,6 @@ main (int argc, char** argv)
         //add to myRegistrator
         scanRegistrator.addNextPointCloud(cloud, -36.0); //33
 
-        qDebug() << "Number of keypoints = " << scanRegistrator.getLastDownSampledPointcloud()->points.size();
     }
 
 
