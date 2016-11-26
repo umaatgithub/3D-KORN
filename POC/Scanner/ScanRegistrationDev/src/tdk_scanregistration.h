@@ -20,16 +20,24 @@
 #include <pcl/keypoints/iss_3d.h>
 #include <pcl/features/boundary.h>
 #include <pcl/point_types_conversion.h>
+#include <pcl/registration/transformation_estimation_svd.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+
 #include <pcl/registration/correspondence_estimation.h>
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
-#include <pcl/registration/transformation_estimation_svd.h>
+#include <pcl/registration/correspondence_estimation_normal_shooting.h>
 #include <pcl/registration/correspondence_estimation_backprojection.h>
-#include <pcl/filters/statistical_outlier_removal.h>
 #include <pcl/PCLPointCloud2.h>
 
 using namespace std;
 
-void PointCloudXYZRGBtoXYZ(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in, pcl::PointCloud<pcl::PointXYZ>::Ptr &out);
+void PointCloudXYZRGBtoXYZ(
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
+        pcl::PointCloud<pcl::PointXYZ>::Ptr &out
+        );
+double computeCloudResolution (
+        const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud
+        );
 
 class TDK_ScanRegistration
 {
@@ -47,6 +55,8 @@ public:
 
     //Ouput
     PointCloudXYZ::Ptr getLastDownSampledPointcloud();
+    PointCloudT::Ptr mf_getMergedAlignedPC();
+    PointCloudT::Ptr mf_getMergedPostRegisteredPC();
     vector<PointCloudT::Ptr>* mf_getOriginalPointClouds();
     vector<PointCloudT::Ptr>* mf_getAlignedPointClouds();
 
@@ -54,8 +64,8 @@ public:
     void setMv_SVD_MaxDistance(double value);
     void setMv_ICP_MaxCorrespondenceDistance(float value);
     void setMv_ISS_resolution(double value);
-
     void setMv_scannerCenterRotation(const pcl::PointXYZ &value);
+
 
 private:
     //General Approach
@@ -63,35 +73,8 @@ private:
     pcl::PointXYZ mv_scannerCenterRotation;
     float mv_accumulatedRotation;
 
-    vector<PointCloudT::Ptr> mv_originalPointClouds;
-    vector<PointCloudXYZ::Ptr> mv_downSampledPointClouds;
-    vector<PointCloudXYZ::Ptr> mv_alignedDownSampledPointClouds;
-    vector<Eigen::Matrix4f> mv_transformationMatrixAlignment;
-    vector<PointCloudT::Ptr> mv_alignedOriginalPointClouds;
+    float mv_normalRadiusSearch;
 
-
-    //Approach 1: Voxel + SAC + ICP
-    float mv_FeatureRadiusSearch;
-    float mv_voxelSideLength;
-    float mv_SAC_MinSampleDistance;
-    float mv_SAC_MaxCorrespondenceDistance;
-    int mv_SAC_MaximumIterations;
-
-    float mv_ICP_MaxCorrespondenceDistance;
-
-    vector<SurfaceNormalsT::Ptr> mv_downSampledNormals;
-    SurfaceNormalsT::Ptr mf_computeNormals(const PointCloudXYZ::Ptr &cloud_in, const float &searchRadius);
-
-    vector<LocalFeaturesT::Ptr> mv_downSampledFeatures;
-    pcl::PointCloud<pcl::FPFHSignature33>::Ptr mf_computeLocalFPFH33Features (const PointCloudXYZ::Ptr &cloud_in, const SurfaceNormalsT::Ptr &normal_in, const float &searchRadius);
-
-    PointCloudXYZ::Ptr mf_voxelDownSamplePointCloud(const PointCloudT::Ptr &cloud_in, const float &voxelSideLength);
-
-    void mf_sampleConsensusInitialAlignment();
-    void mf_iterativeClosestPointFinalAlignment();
-    bool mf_processVoxelSacIcp();
-
-    //Approach 2: Correspondent Keypoints + SAC + ICP
     double mv_ISS_resolution;
     double mv_ISS_SalientRadius;
     double mv_ISS_NonMaxRadius;
@@ -101,19 +84,74 @@ private:
     int mv_ISS_Threads;
 
     double mv_SVD_MaxDistance;
+
+    float mv_ICP_MaxCorrespondenceDistance;
+
+    vector<PointCloudT::Ptr> mv_originalPCs;
+    vector<PointCloudT::Ptr> mv_originalDenoisedPCs;
+    vector<PointCloudXYZ::Ptr> mv_downSampledPCs;
+    vector<SurfaceNormalsT::Ptr> mv_downSampledNormals;
     vector<pcl::CorrespondencesPtr> mv_downsampledCorrespondences;
+    vector<PointCloudXYZ::Ptr> mv_alignedDownSampledPCs;
+    vector<Eigen::Matrix4f> mv_transformationMatrices;
+    vector<PointCloudT::Ptr> mv_alignedOriginalPCs;
 
-    //Utility function
-    pcl::PointCloud<pcl::PointXYZ>::Ptr mf_computeISS3DKeyPoints(const PointCloudT::Ptr &cloud_in,
-        const double &SalientRadius, const double &NonMaxRadius, const double &Gamma21, const double &Gamma32 , const double &MinNeighbors, const int &Threads);
-    pcl::CorrespondencesPtr mf_estimateCorrespondencesRejection(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1, const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2, const double &max_distance, pcl::PointCloud<pcl::Normal>::Ptr &normals1, pcl::PointCloud<pcl::Normal>::Ptr &normals2);
+    //Utility functions
+    pcl::PointCloud<pcl::PointXYZ>::Ptr
+    mf_denoisePointCloud(
+            const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
+            const float std_dev=2.5
+            );
 
-    //Methods of class
-    void mf_SVDInitialAlignment();
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+    mf_denoisePointCloud(
+            const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_in,
+            const float std_dev=2.5
+            );
 
-    bool mf_processCorrespondencesSVDICP();
-    bool mf_processVoxelIcp();
-    pcl::PointCloud<pcl::PointXYZ>::Ptr PointTDK_ScanRegistration::mf_denoiseLastPointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in);
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr
+    mf_computeISS3DKeyPoints(
+            const PointCloudT::Ptr &cloud_in,
+            const double &SalientRadius, const double &NonMaxRadius,
+            const double &Gamma21,       const double &Gamma32 ,
+            const double &MinNeighbors,  const int &Threads
+            );
+
+    SurfaceNormalsT::Ptr
+    mf_computeNormals(
+            const PointCloudXYZ::Ptr &cloud_in,
+            const float &searchRadius
+            );
+
+    pcl::CorrespondencesPtr
+    mf_estimateCorrespondences(
+            const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1,
+            const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2,
+            const pcl::PointCloud<pcl::Normal>::Ptr &normals1,
+            const pcl::PointCloud<pcl::Normal>::Ptr &normals2,
+            const double &max_distance
+            );
+
+    template <typename PointT>
+    boost::shared_ptr<pcl::PointCloud<PointT>>
+    mf_iterativeClosestPointFinalAlignment(
+            const boost::shared_ptr<pcl::PointCloud<PointT>> &source,
+            const boost::shared_ptr<pcl::PointCloud<PointT>> &target,
+            const float &maxCorrespondenceDistance,
+            Eigen::Matrix4f &icpTransformation
+            );
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr
+    mf_SVDInitialAlignment(
+            const pcl::PointCloud<pcl::PointXYZ>::Ptr &source,
+            const pcl::PointCloud<pcl::PointXYZ>::Ptr &target,
+            pcl::CorrespondencesPtr correspondences,
+            Eigen::Matrix4f &transformation_matrix
+            );
+
+    bool
+    mf_processCorrespondencesSVDICP();
 };
 
 #endif // TDK_SCANREGISTRATION_H
