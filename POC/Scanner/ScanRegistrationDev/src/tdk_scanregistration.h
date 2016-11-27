@@ -23,6 +23,7 @@
 #include <pcl/registration/transformation_estimation_svd.h>
 #include <pcl/filters/statistical_outlier_removal.h>
 
+#include <pcl/registration/elch.h>
 #include <pcl/registration/correspondence_estimation.h>
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
 #include <pcl/registration/correspondence_estimation_normal_shooting.h>
@@ -63,9 +64,8 @@ public:
     //Configuration
     void setMv_SVD_MaxDistance(double value);
     void setMv_ICP_MaxCorrespondenceDistance(float value);
-    void setMv_ISS_resolution(double value);
     void setMv_scannerCenterRotation(const pcl::PointXYZ &value);
-
+    void setMv_ICPPost_MaxCorrespondanceDistance(float value);
 
 private:
     //General Approach
@@ -75,17 +75,13 @@ private:
 
     float mv_normalRadiusSearch;
 
-    double mv_ISS_resolution;
-    double mv_ISS_SalientRadius;
-    double mv_ISS_NonMaxRadius;
-    double mv_ISS_Gamma21;
-    double mv_ISS_Gamma32;
-    double mv_ISS_MinNeighbors;
-    int mv_ISS_Threads;
+    float mv_voxelSideLength;
 
     double mv_SVD_MaxDistance;
 
     float mv_ICP_MaxCorrespondenceDistance;
+
+    float mv_ICPPost_MaxCorrespondanceDistance;
 
     vector<PointCloudT::Ptr> mv_originalPCs;
     vector<PointCloudT::Ptr> mv_originalDenoisedPCs;
@@ -100,22 +96,21 @@ private:
     pcl::PointCloud<pcl::PointXYZ>::Ptr
     mf_denoisePointCloud(
             const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
+            const float meanK=8,
             const float std_dev=2.5
             );
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr
     mf_denoisePointCloud(
             const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_in,
+            const float meanK=8,
             const float std_dev=2.5
             );
 
-
     pcl::PointCloud<pcl::PointXYZ>::Ptr
-    mf_computeISS3DKeyPoints(
+    mf_voxelDownSamplePointCloud(
             const PointCloudT::Ptr &cloud_in,
-            const double &SalientRadius, const double &NonMaxRadius,
-            const double &Gamma21,       const double &Gamma32 ,
-            const double &MinNeighbors,  const int &Threads
+            const float &voxelSideLength
             );
 
     SurfaceNormalsT::Ptr

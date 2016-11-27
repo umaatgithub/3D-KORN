@@ -19,12 +19,12 @@
 int
 main (int argc, char** argv)
 {
-    int numPointclouds = 8;
+    int numPointclouds = 10;
 
     TDK_ScanRegistration scanRegistrator;
 
     // x center = 0.087, z_center = 1.4
-    pcl::PointXYZ scannerCenter(0.087, 0.0, 1.36); //2.054 obtained from max_z in center slice
+    pcl::PointXYZ scannerCenter(0.083, 0.0, 1.37); //2.054 obtained from max_z in center slice
     scanRegistrator.setMv_scannerCenterRotation(scannerCenter);
 
     //Load pc
@@ -32,9 +32,7 @@ main (int argc, char** argv)
 
     for (int i = 0; i < numPointclouds; ++i) {
         cloud = boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>>(new pcl::PointCloud<pcl::PointXYZRGB>);
-        pcl::io::loadPLYFile("../chair_eze" + to_string(i) +".ply", *cloud);
-
-        scanRegistrator.setMv_ISS_resolution(computeCloudResolution(cloud));
+        pcl::io::loadPLYFile("../chair_alb" + to_string(i) +".ply", *cloud);
 
         //add to myRegistrator
         scanRegistrator.addNextPointCloud(cloud, -36.0); //33
@@ -43,11 +41,14 @@ main (int argc, char** argv)
 
     // Initializing point cloud visualizer
 
-
     //add to viewer
     qDebug() << "Post processing pointcloud...";
 
-    TDK_ScanRegistration::PointCloudT::Ptr mergedPC = scanRegistrator.mf_getMergedAlignedPC();
+    TDK_ScanRegistration::PointCloudT::Ptr mergedPC = scanRegistrator.mf_getMergedPostRegisteredPC();
+
+
+    pcl::io::savePCDFileASCII("chef.pcd", *mergedPC);
+    qDebug() << "Post processing finished...";
 
     boost::shared_ptr<pcl::visualization::PCLVisualizer>
             viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
@@ -57,7 +58,7 @@ main (int argc, char** argv)
 
 
     //vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getOriginalPointClouds();
-//    vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getAlignedPointClouds();
+    //vector<TDK_ScanRegistration::PointCloudT::Ptr> * alignedPCs = scanRegistrator.mf_getAlignedPointClouds();
 
 //    for (int i = 0; i < (*alignedPCs).size(); ++i) {
 //        viewer->addPointCloud( (*alignedPCs)[i], "pc"+to_string(i) );
