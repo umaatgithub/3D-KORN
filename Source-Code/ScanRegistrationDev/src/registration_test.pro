@@ -49,6 +49,7 @@ LIBS += -lpcl_stereo_release
 LIBS += -lpcl_surface_release
 LIBS += -lpcl_tracking_release
 LIBS += -lpcl_visualization_release
+
 LIBS += -llibboost_atomic-vc140-mt-1_61
 LIBS += -llibboost_chrono-vc140-mt-1_61
 LIBS += -llibboost_container-vc140-mt-1_61
@@ -83,7 +84,11 @@ LIBS += -llibboost_type_erasure-vc140-mt-1_61
 LIBS += -llibboost_unit_test_framework-vc140-mt-1_61
 LIBS += -llibboost_wave-vc140-mt-1_61
 LIBS += -llibboost_wserialization-vc140-mt-1_61
+
+LIBS += -lflann
+LIBS += -lflann_s
 LIBS += -lflann_cpp_s
+
 LIBS += -lqhullstatic
 LIBS += -lvtkalglib-7.0
 LIBS += -lvtkChartsCore-7.0
