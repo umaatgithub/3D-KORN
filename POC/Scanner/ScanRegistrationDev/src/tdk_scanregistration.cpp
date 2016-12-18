@@ -11,22 +11,21 @@ TDK_ScanRegistration::TDK_ScanRegistration()
     mv_scannerCenterRotationSet = false;
     mv_accumulatedRotation = 0.0;
 
-    mv_voxelSideLength = 0.01;
+    mv_voxelSideLength = 0.015;
 
-    mv_normalRadiusSearch=0.04;
+    mv_normalRadiusSearch=0.05;
 
     mv_SVD_MaxDistance=0.15;
 
     mv_ICP_MaxCorrespondenceDistance = 0.05;
 
-    mv_ICPPost_MaxCorrespondanceDistance = 0.05;
+    mv_ICPPost_MaxCorrespondanceDistance = 0.03;
 }
 
 bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud)
 {
 
     mv_originalPCs.push_back(inputPointcloud);
-
     mv_originalDenoisedPCs.push_back(mf_denoisePointCloud(mv_originalPCs.back()));
 
     qDebug() << "DENOISE Original Points " << (--mv_originalPCs.end())->get()->points.size() <<
@@ -43,17 +42,15 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
         //Transform pointcloud
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformedInputPointcloud(new  pcl::PointCloud<pcl::PointXYZRGB>());
 
-        Eigen::Vector3f center_rot(mv_scannerCenterRotation.x, 0.0, mv_scannerCenterRotation.z);
-        mv_accumulatedRotation += degreesRotatedY;
-
         Eigen::Transform<float,3,Eigen::Affine> transform =
                 Eigen::AngleAxisf(mv_accumulatedRotation*(M_PI/180.0), Eigen::Vector3f::UnitY()) *
-                Eigen::Translation3f(-center_rot);
+                Eigen::Translation3f(-mv_scannerCenterRotation.x, 0.0, -mv_scannerCenterRotation.z);
 
         pcl::transformPointCloud(*inputPointcloud, *transformedInputPointcloud, transform.matrix());
 
         addNextPointCloud(transformedInputPointcloud);
 
+        mv_accumulatedRotation += degreesRotatedY;
         return true;
     }else{
         qWarning() << "Scanner Center Rotation NOT SET, To prerotate pcs you need to set it";
@@ -84,7 +81,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::mf_getMergedPostReg
     pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
                 new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
     icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
-    icp->setMaximumIterations (100);
+    icp->setMaximumIterations (300);
     icp->setTransformationEpsilon (1e-8);
 
     pcl::registration::ELCH<pcl::PointXYZRGB> elch;
@@ -97,9 +94,25 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::mf_getMergedPostReg
     elch.setLoopEnd (mv_alignedOriginalPCs.size()-1);
     elch.compute();
 
+    //Create and setup the Incremental registration object
+    pcl::registration::IncrementalRegistration<pcl::PointXYZRGB> incremental_icp;
+    incremental_icp.setRegistration(icp);
+
+    //Result pointcloud
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
-    for (it = mv_alignedOriginalPCs.begin(); it != mv_alignedOriginalPCs.end(); ++it)
-        *mergedAlignedOriginal += *(*it);
+    //Temporal pointcloud for transforming the incrementally registered
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
+
+    for (it = mv_alignedOriginalPCs.begin(); it != mv_alignedOriginalPCs.end(); ++it){
+        incremental_icp.registerCloud( *it );
+
+        //Align current pointcloud to previous ones
+        pcl::transformPointCloud ( *(*it) , *tmp, incremental_icp.getDeltaTransform());
+
+        *mergedAlignedOriginal += *tmp;
+    }
+
+    pcl::filters::GaussianKernelRGB<pcl::PointXYZRGB, pcl::PointXYZRGB> gk;
 
     return mf_denoisePointCloud(mergedAlignedOriginal, 8, 2);
 }
@@ -171,7 +184,7 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
 
         //Align original pointcloud with composed transform
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr alignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
-        pcl::transformPointCloud(*mv_originalPCs.back(), *alignedOriginal, mv_transformationMatrices.back());
+        pcl::transformPointCloud(*mv_originalDenoisedPCs.back(), *alignedOriginal, mv_transformationMatrices.back());
         mv_alignedOriginalPCs.push_back(alignedOriginal);
 
         //Recompute Normals once the Downsample pointcloud has been aligned
@@ -238,7 +251,8 @@ TDK_ScanRegistration::mf_iterativeClosestPointFinalAlignment(
     pcl::IterativeClosestPoint<PointT, PointT> icp;
 
     icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
-    icp.setMaximumIterations(50); //originally it was 10
+    icp.setMaximumIterations (300); //Originally 10
+    icp.setTransformationEpsilon (1e-8);
 
     icp.setInputCloud(source);
     icp.setInputTarget(target);
@@ -246,6 +260,7 @@ TDK_ScanRegistration::mf_iterativeClosestPointFinalAlignment(
     pcl::PointCloud<PointT>::Ptr alignedSource(new pcl::PointCloud<PointT>);
     icp.align(*alignedSource);
 
+    qDebug() << "Epsilon downsampled ICP: " << icp.getFitnessScore();
     icpTransformation = icp.getFinalTransformation();
     return alignedSource;
 }
@@ -381,33 +396,4 @@ PointCloudXYZRGBtoXYZ(
         out->points[i].y = in->points[i].y;
         out->points[i].z = in->points[i].z;
     }
-}
-
-double
-computeCloudResolution (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud)
-{
-    double res = 0.0;
-    int n_points = 0;
-    int nres;
-    std::vector<int> indices (2);
-    std::vector<float> sqr_distances (2);
-    pcl::search::KdTree<pcl::PointXYZRGB> tree;
-    tree.setInputCloud (cloud);
-
-    for (size_t i = 0; i < cloud->size (); ++i)
-    {
-        if (! pcl_isfinite ((*cloud)[i].x)) continue;
-
-        //Considering the second neighbor since the first is the point itself.
-        nres = tree.nearestKSearch (i, 2, indices, sqr_distances);
-        if (nres == 2)
-        {
-            res += sqrt (sqr_distances[1]);
-            ++n_points;
-        }
-    }
-
-    if (n_points != 0) res /= n_points;
-
-    return res;
 }

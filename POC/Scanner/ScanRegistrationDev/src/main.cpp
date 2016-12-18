@@ -30,14 +30,13 @@ main (int argc, char** argv)
     //Load pc
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
 
-    for (int i = 0; i < numPointclouds; ++i) {
+    for (int i = 0; i < numPointclouds; i++) {
         cloud = boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGB>>(new pcl::PointCloud<pcl::PointXYZRGB>);
-        pcl::io::loadPLYFile("../chair_alb" + to_string(i) +".ply", *cloud);
+        pcl::io::loadPLYFile("../chair_eze" + to_string(i) +".ply", *cloud);
 
         //add to myRegistrator
         scanRegistrator.addNextPointCloud(cloud, -36.0); //33
     }
-
 
     // Initializing point cloud visualizer
 
@@ -46,8 +45,7 @@ main (int argc, char** argv)
 
     TDK_ScanRegistration::PointCloudT::Ptr mergedPC = scanRegistrator.mf_getMergedPostRegisteredPC();
 
-
-    pcl::io::savePCDFileASCII("chef.pcd", *mergedPC);
+    //pcl::io::savePCDFileASCII("chef.pcd", *mergedPC);
     qDebug() << "Post processing finished...";
 
     boost::shared_ptr<pcl::visualization::PCLVisualizer>

@@ -11,13 +11,10 @@
 #include <pcl/point_cloud.h>
 #include <pcl/common/transforms.h>
 #include <pcl/filters/voxel_grid.h>
-#include <pcl/filters/passthrough.h>
 #include <pcl/registration/icp.h>
 #include <pcl/registration/ia_ransac.h>
-#include <pcl/features/fpfh.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree_flann.h>
-#include <pcl/keypoints/iss_3d.h>
 #include <pcl/features/boundary.h>
 #include <pcl/point_types_conversion.h>
 #include <pcl/registration/transformation_estimation_svd.h>
@@ -30,14 +27,15 @@
 #include <pcl/registration/correspondence_estimation_backprojection.h>
 #include <pcl/PCLPointCloud2.h>
 
+#include <pcl/registration/incremental_registration.h>
+
+#include <pcl/filters/convolution_3d.h>
+
 using namespace std;
 
 void PointCloudXYZRGBtoXYZ(
         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
         pcl::PointCloud<pcl::PointXYZ>::Ptr &out
-        );
-double computeCloudResolution (
-        const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &cloud
         );
 
 class TDK_ScanRegistration
@@ -74,13 +72,9 @@ private:
     float mv_accumulatedRotation;
 
     float mv_normalRadiusSearch;
-
     float mv_voxelSideLength;
-
     double mv_SVD_MaxDistance;
-
     float mv_ICP_MaxCorrespondenceDistance;
-
     float mv_ICPPost_MaxCorrespondanceDistance;
 
     vector<PointCloudT::Ptr> mv_originalPCs;
