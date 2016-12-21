@@ -8,7 +8,7 @@
 #include <QScrollArea>
 #include <QLabel>
 #include <QComboBox>
-#include <QSpinBox>
+#include <QDoubleSpinBox>
 #include <QPushButton>
 #include <QCheckBox>
 #include <map>
@@ -39,12 +39,12 @@ public:
 
     //Sensor widgets
     QComboBox *mv_SensorComboBox;
-    QSpinBox *mv_XMinimumSpinBox;
-    QSpinBox *mv_XMaximumSpinBox;
-    QSpinBox *mv_YMinimumSpinBox;
-    QSpinBox *mv_YMaximumSpinBox;
-    QSpinBox *mv_ZMinimumSpinBox;
-    QSpinBox *mv_ZMaximumSpinBox;
+    QDoubleSpinBox *mv_XMinimumSpinBox;
+    QDoubleSpinBox *mv_XMaximumSpinBox;
+    QDoubleSpinBox *mv_YMinimumSpinBox;
+    QDoubleSpinBox *mv_YMaximumSpinBox;
+    QDoubleSpinBox *mv_ZMinimumSpinBox;
+    QDoubleSpinBox *mv_ZMaximumSpinBox;
 
 
     void mf_setupUI();

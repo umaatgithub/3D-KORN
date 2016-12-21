@@ -6,20 +6,20 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     mv_SensorController(new TDK_SensorController),
     mv_SensorComboBox(new QComboBox),
     mv_PointCloudStreamQVTKWidget(new QVTKWidget),
-    mv_XMinimumSpinBox(new QSpinBox),
-    mv_XMaximumSpinBox(new QSpinBox),
-    mv_YMinimumSpinBox(new QSpinBox),
-    mv_YMaximumSpinBox(new QSpinBox),
-    mv_ZMinimumSpinBox(new QSpinBox),
-    mv_ZMaximumSpinBox(new QSpinBox)
+    mv_XMinimumSpinBox(new QDoubleSpinBox),
+    mv_XMaximumSpinBox(new QDoubleSpinBox),
+    mv_YMinimumSpinBox(new QDoubleSpinBox),
+    mv_YMaximumSpinBox(new QDoubleSpinBox),
+    mv_ZMinimumSpinBox(new QDoubleSpinBox),
+    mv_ZMaximumSpinBox(new QDoubleSpinBox)
 {
     connect(mv_SensorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(mf_SlotUpdateWindow(int)));
-    connect(mv_XMinimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(mf_SlotUpdateBoundingBox()));
-    connect(mv_XMaximumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(mf_SlotUpdateBoundingBox()));
-    connect(mv_YMinimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(mf_SlotUpdateBoundingBox()));
-    connect(mv_YMaximumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(mf_SlotUpdateBoundingBox()));
-    connect(mv_ZMinimumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(mf_SlotUpdateBoundingBox()));
-    connect(mv_ZMaximumSpinBox, SIGNAL(valueChanged(int)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_XMinimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_XMaximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_YMinimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_YMaximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_ZMinimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_ZMaximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
 }
 
 void TDK_ScanWindow::mf_setupUI()
@@ -57,11 +57,11 @@ void TDK_ScanWindow::mf_SetupPointCloudStreamWidget()
     mv_PointCloudStreamVisualizer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
     mv_PointCloudStreamVisualizer->setBackgroundColor (0.1, 0.1, 0.1);
 
-
-    mv_PointCloudStreamVisualizer->addCube(0, 1, 0, 1, 0, 1);
-    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.1, "cube");
-//    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 1.0, 0.0, "cube");
-    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, "cube");
+    mv_PointCloudStreamVisualizer->addCube(0, 1, 0, 1, 0, 1, 0, 0, 0,"cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
 
     mv_PointCloudStreamQVTKWidget->SetRenderWindow ( mv_PointCloudStreamVisualizer->getRenderWindow () );
     mv_PointCloudStreamVisualizer->setupInteractor ( mv_PointCloudStreamQVTKWidget->GetInteractor (), mv_PointCloudStreamQVTKWidget->GetRenderWindow ());
@@ -88,7 +88,7 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
 
 
     mv_XMinimumSpinBox->setRange(-10, 10);
-    mv_XMinimumSpinBox->setSingleStep(1);
+    mv_XMinimumSpinBox->setSingleStep(0.01);
     mv_XMinimumSpinBox->setValue(0);
     mv_XMinimumSpinBox->setFixedWidth(60);
     mv_XMinimumSpinBox->setFixedHeight(22);
@@ -96,32 +96,32 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
 
 
     mv_XMaximumSpinBox->setRange(-10, 10);
-    mv_XMaximumSpinBox->setSingleStep(1);
+    mv_XMaximumSpinBox->setSingleStep(0.01);
     mv_XMaximumSpinBox->setValue(1);
     mv_XMaximumSpinBox->setFixedWidth(60);
     mv_XMaximumSpinBox->setFixedHeight(22);
     mv_XMaximumSpinBox->setSuffix(QString("m"));
 
     mv_YMinimumSpinBox->setRange(-10, 10);
-    mv_YMinimumSpinBox->setSingleStep(1);
+    mv_YMinimumSpinBox->setSingleStep(0.01);
     mv_YMinimumSpinBox->setValue(0);
     mv_YMinimumSpinBox->setFixedHeight(22);
     mv_YMinimumSpinBox->setSuffix(QString("m"));
 
     mv_YMaximumSpinBox->setRange(-10, 10);
-    mv_YMaximumSpinBox->setSingleStep(1);
+    mv_YMaximumSpinBox->setSingleStep(0.01);
     mv_YMaximumSpinBox->setValue(1);
     mv_YMaximumSpinBox->setFixedHeight(22);
     mv_YMaximumSpinBox->setSuffix(QString("m"));
 
     mv_ZMinimumSpinBox->setRange(-10, 10);
-    mv_ZMinimumSpinBox->setSingleStep(1);
+    mv_ZMinimumSpinBox->setSingleStep(0.01);
     mv_ZMinimumSpinBox->setValue(0);
     mv_ZMinimumSpinBox->setFixedHeight(22);
     mv_ZMinimumSpinBox->setSuffix(QString("m"));
 
     mv_ZMaximumSpinBox->setRange(-10, 10);
-    mv_ZMaximumSpinBox->setSingleStep(1);
+    mv_ZMaximumSpinBox->setSingleStep(0.01);
     mv_ZMaximumSpinBox->setValue(1);
     mv_ZMaximumSpinBox->setFixedHeight(22);
     mv_ZMaximumSpinBox->setSuffix(QString("m"));
@@ -221,9 +221,10 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
 {
     mv_PointCloudStreamVisualizer->removeAllShapes();
     mv_PointCloudStreamVisualizer->addCube(mv_XMinimumSpinBox->value(), mv_XMaximumSpinBox->value(), mv_YMinimumSpinBox->value(), mv_YMaximumSpinBox->value(), mv_ZMinimumSpinBox->value(), mv_ZMaximumSpinBox->value());
-    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.1, "cube");
-//    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.0, 1.0, 0.0, "cube");
-    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 1, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
     mv_PointCloudStreamQVTKWidget->update();
 
 }
