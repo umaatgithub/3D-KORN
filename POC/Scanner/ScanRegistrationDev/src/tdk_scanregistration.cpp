@@ -55,6 +55,7 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
     mv_originalDenoisedPCs.push_back(mf_outlierRemovalPC(mv_originalPCs.back()));
 
     //Call process that will roughly align the last pointcloud to all previous ones
+
     mf_processCorrespondencesSVDICP();
 
     return true;
@@ -67,10 +68,12 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
 /// \return
 ///
 bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud, const float degreesRotatedY)
+
 {
     if(mv_scannerCenterRotationSet){
         //Transform pointcloud
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformedInputPointcloud(new  pcl::PointCloud<pcl::PointXYZRGB>());
+
 
         //Create transform matrix that compensates for turning table orientation and distance, and rotation
         Eigen::Transform<float,3,Eigen::Affine> transform =
@@ -78,6 +81,7 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
                 Eigen::AngleAxisf(mv_accumulatedRotation*(M_PI/180.0), Eigen::Vector3f::UnitY()) *
                 Eigen::AngleAxisf(mv_scannerCenter.vp_x*(M_PI/180.0), Eigen::Vector3f::UnitX())* //20 for pamir
                 Eigen::Translation3f(-mv_scannerCenter.x, 0.0, -mv_scannerCenter.z);
+
 
         pcl::transformPointCloud(*inputPointcloud, *transformedInputPointcloud, transform.matrix());
 
@@ -90,6 +94,7 @@ bool TDK_ScanRegistration::addNextPointCloud(const pcl::PointCloud<pcl::PointXYZ
         return false;
     }
 }
+
 
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::addAllPointClouds
@@ -125,6 +130,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr TDK_ScanRegistration::getLastDownSampledPoin
 /// \brief TDK_ScanRegistration::mf_getMergedAlignedPC
 /// \return
 ///
+
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::mf_getMergedAlignedPC()
 {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
@@ -140,16 +146,19 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::mf_getMergedAligned
 /// \brief TDK_ScanRegistration::mf_getMergedPostRegisteredPC
 /// \return
 ///
+
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::mf_getMergedPostRegisteredPC()
 {
     pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
                 new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
     icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
     icp->setMaximumIterations (300);
+
     icp->setTransformationEpsilon (1e-8);
 
     pcl::registration::ELCH<pcl::PointXYZRGB> elch;
     elch.setReg (icp);
+
 
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>::iterator it;
     for (it = mv_alignedOriginalPCs.begin(); it != mv_alignedOriginalPCs.end(); ++it)
@@ -188,6 +197,7 @@ vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* TDK_ScanRegistration::mf_getAlig
     return &mv_alignedOriginalPCs;
 }
 
+
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::mf_getOriginalPointClouds
 /// \return
@@ -218,7 +228,6 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
                     )
                 );
 
-
     //If pointcloud array has been initialized
     if(mv_originalPCs.size() > 1){
         //Compute correspondences between new pointcloud and last aligned pointcloud
@@ -229,6 +238,7 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
                         mv_SVD_MaxDistance
                         )
                     );
+
 
         //Align downsampled pointclouds using SVD and get transform to apply on original later
         Eigen::Matrix4f SVDtransform;
@@ -302,6 +312,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr TDK_ScanRegistration::mf_voxelDownSamplePoin
     return downSampledPointCloud;
 }
 
+
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::mf_computeNormals
 /// \param cloud_in
@@ -310,6 +321,7 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr TDK_ScanRegistration::mf_voxelDownSamplePoin
 ///
 pcl::PointCloud<pcl::Normal>::Ptr TDK_ScanRegistration::mf_computeNormals(
         const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
+
         const float &searchRadius
         )
 {
@@ -353,9 +365,11 @@ TDK_ScanRegistration::mf_iterativeClosestPointFinalAlignment(
     icp.align(*alignedSource);
 
     qDebug() << "Epsilon downsampled ICP: " << icp.getFitnessScore();
+    
     icpTransformation = icp.getFinalTransformation();
     return alignedSource;
 }
+
 
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::mf_estimateCorrespondences
@@ -366,6 +380,7 @@ TDK_ScanRegistration::mf_iterativeClosestPointFinalAlignment(
 /// \param max_distance
 /// \return
 ///
+
 pcl::CorrespondencesPtr
 TDK_ScanRegistration::mf_estimateCorrespondences(
         const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1,
@@ -401,6 +416,7 @@ TDK_ScanRegistration::mf_estimateCorrespondences(
     return remaining_correspondences;
 }
 
+
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::mf_SVDInitialAlignment
 /// \param source
@@ -409,6 +425,7 @@ TDK_ScanRegistration::mf_estimateCorrespondences(
 /// \param transformation_matrix
 /// \return
 ///
+
 pcl::PointCloud<pcl::PointXYZ>::Ptr
 TDK_ScanRegistration::mf_SVDInitialAlignment
 (
@@ -429,6 +446,7 @@ TDK_ScanRegistration::mf_SVDInitialAlignment
 
     return alignedSource;
 }
+
 
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::mf_outlierRemovalPC
@@ -544,7 +562,6 @@ float TDK_ScanRegistration::get_ICP_MaxCorrespondenceDistance() const
 {
     return mv_ICP_MaxCorrespondenceDistance;
 }
-
 void TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
 {
     mv_ICP_MaxCorrespondenceDistance = value;
@@ -560,15 +577,25 @@ void TDK_ScanRegistration::set_ICPPost_MaxCorrespondanceDistance(float value)
     mv_ICPPost_MaxCorrespondanceDistance = value;
 }
 
+void
+TDK_ScanRegistration::setMv_scannerCenterRotation(const pcl::PointXYZ &value)
+{
+    mv_scannerCenterRotationSet = true;
+    mv_scannerCenterRotation = value;
+}
+
+
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::setMv_SVD_MaxDistance
 /// \param value
 ///
 void
 TDK_ScanRegistration::set_SVD_MaxDistance(double value)
+
 {
     mv_SVD_MaxDistance = value;
 }
+
 
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::setMv_ICP_MaxCorrespondenceDistance

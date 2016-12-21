@@ -25,13 +25,13 @@
 #include <pcl/registration/incremental_registration.h>
 #include <pcl/PCLPointCloud2.h>
 
-
 using namespace std;
 
 void PointCloudXYZRGBtoXYZ(
         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
         pcl::PointCloud<pcl::PointXYZ>::Ptr &out
         );
+
 
 class TDK_ScanRegistration
 {
