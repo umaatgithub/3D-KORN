@@ -19,8 +19,10 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <vtkRenderWindow.h>
 
-typedef pcl::PointXYZRGBA PointT;
-typedef pcl::PointCloud<PointT> PointCloudT;
+#include "tdk_database.h"
+
+//typedef pcl::PointXYZRGBA PointT;
+//typedef pcl::PointCloud<PointT> PointCloudT;
 
 class TDK_CentralWidget : public QWidget
 {
@@ -30,8 +32,8 @@ public:
     ~TDK_CentralWidget();
 
 private:
-//    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-//    PointCloudT::Ptr cloudSource1;
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
 //    PointCloudT::Ptr cloudSource2;
 //    PointCloudT::Ptr cloudRegistered;
     /** @brief 0 = x | 1 = y | 2 = z */
@@ -40,7 +42,7 @@ private:
     /** @brief Holds the color mode for @ref colorCloudDistances */
     int color_mode;
     QGridLayout *layout;
-
+    QVTKWidget *qvtkWidget;
 
 
 signals:

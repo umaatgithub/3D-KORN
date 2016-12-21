@@ -6,6 +6,13 @@
 #include <QGridLayout>
 #include <QDockWidget>
 #include <QScrollArea>
+#include <QLabel>
+#include <QComboBox>
+#include <QSpinBox>
+#include <QPushButton>
+#include <QCheckBox>
+#include <map>
+#include <QDebug>
 
 //Include PCL headers
 #include <pcl/point_cloud.h>
@@ -16,29 +23,45 @@
 #include <vtkRenderWindow.h>
 #include <QVTKWidget.h>
 
-#include "tdk_kinect2wrapper.h"
+#include "tdk_sensorcontroller.h"
 
 class TDK_ScanWindow : public QMainWindow
 {
     Q_OBJECT
 public:
     explicit TDK_ScanWindow(QWidget *parent = 0);
-    QWidget *centralWidget;
-    QGridLayout *gridLayoutCentralWidget;
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-    TDK_Kinect2Wrapper *tdk_Kinect2Wrapper;
-    QVTKWidget *qvtkWidget;
+    QWidget *mv_CentralWidget;
+    QGridLayout *mv_CentralGridLayout;
+    TDK_SensorController *mv_SensorController;
+    TDK_Sensor *mv_Sensor;
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudStreamVisualizer;
+    QVTKWidget *mv_PointCloudStreamQVTKWidget;
 
-    void mf_SetupSensorOutputWidget();
+    //Sensor widgets
+    QComboBox *mv_SensorComboBox;
+    QSpinBox *mv_XMinimumSpinBox;
+    QSpinBox *mv_XMaximumSpinBox;
+    QSpinBox *mv_YMinimumSpinBox;
+    QSpinBox *mv_YMaximumSpinBox;
+    QSpinBox *mv_ZMinimumSpinBox;
+    QSpinBox *mv_ZMaximumSpinBox;
+
+
+    void mf_setupUI();
+    void mf_SetupPointCloudStreamWidget();
     void mf_SetupSensorWidget();
     void mf_SetupVideoStreamWidget();
     void mf_SetupDepthMapWidget();
     void mf_SetupPointcloudListWidget();
 
+    //enum SensorType{ KINECTV1=0, KINECTV2, INTELR200};
+
 signals:
 
 public slots:
-    void slotUpdateSensorOutputWidget();
+    void mf_SlotUpdateWindow(int sensorIndex);
+    void mf_SlotUpdatePointCloudStreamWidget();
+    void mf_SlotUpdateBoundingBox();
 
 };
 

@@ -39,8 +39,10 @@ namespace pcl
             virtual void start();
             virtual void stop();
             virtual bool isRunning() const;
+            bool isAvailable() const;
             virtual std::string getName() const;
             virtual float getFramesPerSecond() const;
+
 
             typedef void ( signal_Kinect2_PointXYZ )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZ>>& );
             typedef void ( signal_Kinect2_PointXYZI )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZI>>& );
@@ -65,6 +67,7 @@ namespace pcl
 
             bool quit;
             bool running;
+            bool available;
 
             HRESULT result;
             IKinectSensor* sensor;

@@ -23,6 +23,7 @@ Kinect2Grabber::Kinect2Grabber()
     , infraredBuffer()
     , running( false )
     , quit( false )
+    , available( true )
     , signal_PointXYZ( nullptr )
     , signal_PointXYZI( nullptr )
     , signal_PointXYZRGB( nullptr )
@@ -62,6 +63,9 @@ Kinect2Grabber::Kinect2Grabber()
     result = sensor->get_InfraredFrameSource( &infraredSource );
     if( FAILED( result ) ){
         throw std::exception( "Exception : IKinectSensor::get_InfraredFrameSource()" );
+    }
+    if( infraredSource == nullptr){
+        available = false;
     }
 
     // Retrieved Color Frame Size
@@ -201,6 +205,15 @@ bool Kinect2Grabber::isRunning() const
     boost::unique_lock<boost::mutex> lock( mutex );
 
     return running;
+
+    lock.unlock();
+}
+
+bool Kinect2Grabber::isAvailable() const
+{
+    boost::unique_lock<boost::mutex> lock( mutex );
+
+    return available;
 
     lock.unlock();
 }

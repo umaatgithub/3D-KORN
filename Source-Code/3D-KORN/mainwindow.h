@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMessageBox>
+
 #include "tdk_scanwindow.h"
 
 namespace Ui {

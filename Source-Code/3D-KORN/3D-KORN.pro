@@ -214,7 +214,11 @@ SOURCES += main.cpp\
     tdk_database.cpp \
     tdk_edit.cpp \
     kinect2_grabber.cpp \
-    tdk_kinect2wrapper.cpp
+#    tdk_kinect2wrapper.cpp \
+    tdk_sensor.cpp \
+    tdk_intelr200sensor.cpp \
+    tdk_sensorcontroller.cpp \
+    tdk_kinectv2sensor.cpp
 
 HEADERS  += mainwindow.h \
     tdk_centralwidget.h \
@@ -222,6 +226,10 @@ HEADERS  += mainwindow.h \
     tdk_database.h \
     tdk_edit.h \
     kinect2_grabber.h \
-    tdk_kinect2wrapper.h
+#    tdk_kinect2wrapper.h \
+    tdk_sensor.h \
+    tdk_intelr200sensor.h \
+    tdk_sensorcontroller.h \
+    tdk_kinectv2sensor.h
 
 FORMS    += mainwindow.ui
