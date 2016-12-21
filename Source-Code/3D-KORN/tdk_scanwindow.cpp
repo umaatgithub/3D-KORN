@@ -6,12 +6,17 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     mv_SensorController(new TDK_SensorController),
     mv_SensorComboBox(new QComboBox),
     mv_PointCloudStreamQVTKWidget(new QVTKWidget),
+    mv_FlagRegisterDuringScan(false),
+    mv_FlagScanning(false),
     mv_XMinimumSpinBox(new QDoubleSpinBox),
     mv_XMaximumSpinBox(new QDoubleSpinBox),
     mv_YMinimumSpinBox(new QDoubleSpinBox),
     mv_YMaximumSpinBox(new QDoubleSpinBox),
     mv_ZMinimumSpinBox(new QDoubleSpinBox),
-    mv_ZMaximumSpinBox(new QDoubleSpinBox)
+    mv_ZMaximumSpinBox(new QDoubleSpinBox),
+    mv_RegisterationCheckBox(new QCheckBox),
+    mv_StartScanPushButton(new QPushButton(QString("START SCAN"))),
+    mv_StopScanPushButton(new QPushButton(QString("STOP SCAN")))
 {
     connect(mv_SensorComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(mf_SlotUpdateWindow(int)));
     connect(mv_XMinimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
@@ -20,6 +25,10 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     connect(mv_YMaximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
     connect(mv_ZMinimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
     connect(mv_ZMaximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_RegisterationCheckBox, SIGNAL(clicked(bool)), this, SLOT(mf_SlotPointCloudRegistration(bool)));
+    connect(mv_StartScanPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotStartScan()));
+    connect(mv_StopScanPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotStopScan()));
+
 }
 
 void TDK_ScanWindow::mf_setupUI()
@@ -86,19 +95,15 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
         it++;
     }
 
-
     mv_XMinimumSpinBox->setRange(-10, 10);
     mv_XMinimumSpinBox->setSingleStep(0.01);
     mv_XMinimumSpinBox->setValue(0);
-    mv_XMinimumSpinBox->setFixedWidth(60);
     mv_XMinimumSpinBox->setFixedHeight(22);
     mv_XMinimumSpinBox->setSuffix(QString("m"));
-
 
     mv_XMaximumSpinBox->setRange(-10, 10);
     mv_XMaximumSpinBox->setSingleStep(0.01);
     mv_XMaximumSpinBox->setValue(1);
-    mv_XMaximumSpinBox->setFixedWidth(60);
     mv_XMaximumSpinBox->setFixedHeight(22);
     mv_XMaximumSpinBox->setSuffix(QString("m"));
 
@@ -126,13 +131,10 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     mv_ZMaximumSpinBox->setFixedHeight(22);
     mv_ZMaximumSpinBox->setSuffix(QString("m"));
 
-    QPushButton *startScanPushButton = new QPushButton(QString("START SCAN"));
-    startScanPushButton->setFixedHeight(22);
-    QPushButton *stopScanPushButton = new QPushButton(QString("STOP SCAN"));
-    stopScanPushButton->setFixedHeight(22);
+    mv_StartScanPushButton->setFixedHeight(22);
+    mv_StopScanPushButton->setFixedHeight(22);
 
-    QCheckBox *registerationCheckBox = new QCheckBox;
-    registerationCheckBox->setText(QString("Register points clouds during scan"));
+    mv_RegisterationCheckBox->setText(QString("Register point clouds during scan"));
 
     gridLayout->addWidget(sensorLabel, 0, 0, 1, 2);
     gridLayout->addWidget(mv_SensorComboBox, 0, 2, 1, 2);
@@ -148,9 +150,9 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     gridLayout->addWidget(mv_ZMinimumSpinBox, 3, 1);
     gridLayout->addWidget(new QLabel(QString("z-maximum : ")), 3, 2);
     gridLayout->addWidget(mv_ZMaximumSpinBox, 3, 3);
-    gridLayout->addWidget(registerationCheckBox, 4, 0, 1, 4);
-    gridLayout->addWidget(startScanPushButton, 5, 0, 1, 2);
-    gridLayout->addWidget(stopScanPushButton, 5, 2, 1, 2);
+    gridLayout->addWidget(mv_RegisterationCheckBox, 4, 0, 1, 4);
+    gridLayout->addWidget(mv_StartScanPushButton, 5, 0, 1, 2);
+    gridLayout->addWidget(mv_StopScanPushButton, 5, 2, 1, 2);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
@@ -208,13 +210,21 @@ void TDK_ScanWindow::mf_SetupPointcloudListWidget()
     mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
 }
 
-void TDK_ScanWindow::mf_SlotUpdatePointCloudStreamWidget()
+void TDK_ScanWindow::mf_SlotUpdatePointCloudStream()
 {
     if( !mv_PointCloudStreamVisualizer->updatePointCloud( mv_Sensor->mf_GetMvPointCloud(), "cloud" ) ){
         mv_PointCloudStreamVisualizer->addPointCloud( mv_Sensor->mf_GetMvPointCloud(), "cloud" );
         mv_PointCloudStreamVisualizer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
     }
     mv_PointCloudStreamQVTKWidget->update();
+
+    if(mv_FlagScanning){
+        TDK_Database::mv_PointCloudsVector.push_back(mv_Sensor->mf_GetMvPointCloud()->makeShared());
+        if(mv_FlagRegisterDuringScan){
+            //Call registration and pass the point cloud
+            qDebug() << "Register";
+        }
+    }
 }
 
 void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
@@ -229,11 +239,54 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
 
 }
 
+void TDK_ScanWindow::mf_SlotPointCloudRegistration(bool flagRegisterDuringScan)
+{
+    if(!mv_FlagScanning){
+        mv_FlagRegisterDuringScan = flagRegisterDuringScan;
+    }
+}
+
+void TDK_ScanWindow::mf_SlotStartScan()
+{
+    if(!mv_FlagScanning){
+        mv_FlagScanning = true;
+        mv_SensorComboBox->setEnabled(false);
+        mv_XMinimumSpinBox->setEnabled(false);
+        mv_XMaximumSpinBox->setEnabled(false);
+        mv_YMinimumSpinBox->setEnabled(false);
+        mv_YMaximumSpinBox->setEnabled(false);
+        mv_ZMinimumSpinBox->setEnabled(false);
+        mv_ZMaximumSpinBox->setEnabled(false);
+        mv_RegisterationCheckBox->setEnabled(false);
+        mv_StartScanPushButton->setEnabled(false);
+    }
+}
+
+void TDK_ScanWindow::mf_SlotStopScan()
+{
+    if(mv_FlagScanning){
+        mv_FlagScanning = false;
+        mv_SensorComboBox->setEnabled(true);
+        mv_XMinimumSpinBox->setEnabled(true);
+        mv_XMaximumSpinBox->setEnabled(true);
+        mv_YMinimumSpinBox->setEnabled(true);
+        mv_YMaximumSpinBox->setEnabled(true);
+        mv_ZMinimumSpinBox->setEnabled(true);
+        mv_ZMaximumSpinBox->setEnabled(true);
+        mv_RegisterationCheckBox->setEnabled(true);
+        mv_StartScanPushButton->setEnabled(true);
+    }
+    if(!mv_FlagRegisterDuringScan){
+        //Call registration and pass the pointcloud vector
+        qDebug() << "Register after stopping scan";
+    }
+}
+
 void TDK_ScanWindow::mf_SlotUpdateWindow(int sensorIndex)
 {
     QString sensorName = mv_SensorComboBox->itemText(sensorIndex);
     mv_Sensor = mv_SensorController->mf_GetSensor(sensorName);
     qDebug() << mv_Sensor->mf_GetMvName();
-    connect(mv_Sensor, SIGNAL(mf_SignalPointCloudUpdated()), this, SLOT(mf_SlotUpdatePointCloudStreamWidget()));
+    connect(mv_Sensor, SIGNAL(mf_SignalPointCloudUpdated()), this, SLOT(mf_SlotUpdatePointCloudStream()));
     mv_Sensor->mf_StartSensor();
 }

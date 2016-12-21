@@ -24,6 +24,7 @@
 #include <QVTKWidget.h>
 
 #include "tdk_sensorcontroller.h"
+#include "tdk_database.h"
 
 class TDK_ScanWindow : public QMainWindow
 {
@@ -37,6 +38,11 @@ public:
     boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudStreamVisualizer;
     QVTKWidget *mv_PointCloudStreamQVTKWidget;
 
+
+    //Flag variables
+    bool mv_FlagRegisterDuringScan;
+    bool mv_FlagScanning;
+
     //Sensor widgets
     QComboBox *mv_SensorComboBox;
     QDoubleSpinBox *mv_XMinimumSpinBox;
@@ -45,6 +51,9 @@ public:
     QDoubleSpinBox *mv_YMaximumSpinBox;
     QDoubleSpinBox *mv_ZMinimumSpinBox;
     QDoubleSpinBox *mv_ZMaximumSpinBox;
+    QPushButton *mv_StartScanPushButton;
+    QPushButton *mv_StopScanPushButton;
+    QCheckBox *mv_RegisterationCheckBox;
 
 
     void mf_setupUI();
@@ -60,8 +69,12 @@ signals:
 
 public slots:
     void mf_SlotUpdateWindow(int sensorIndex);
-    void mf_SlotUpdatePointCloudStreamWidget();
     void mf_SlotUpdateBoundingBox();
+    void mf_SlotPointCloudRegistration(bool flagRegisterDuringScan);
+    void mf_SlotStartScan();
+    void mf_SlotStopScan();
+
+    void mf_SlotUpdatePointCloudStream();
 
 };
 
