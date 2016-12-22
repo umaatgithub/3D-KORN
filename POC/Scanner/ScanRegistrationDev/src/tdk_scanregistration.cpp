@@ -308,7 +308,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr TDK_ScanRegistration::mf_voxelDownSamplePoin
     vg.setInputCloud (cloud_in_xyz);
     vg.filter (*downSampledPointCloud);
 
-    qDebug() << "DownsampledPoints " << downSampledPointCloud->points.size();
     return downSampledPointCloud;
 }
 
@@ -363,8 +362,6 @@ TDK_ScanRegistration::mf_iterativeClosestPointFinalAlignment(
 
     pcl::PointCloud<PointT>::Ptr alignedSource(new pcl::PointCloud<PointT>);
     icp.align(*alignedSource);
-
-    qDebug() << "Epsilon downsampled ICP: " << icp.getFitnessScore();
     
     icpTransformation = icp.getFinalTransformation();
     return alignedSource;
@@ -410,8 +407,6 @@ TDK_ScanRegistration::mf_estimateCorrespondences(
     //Add source and target pointcloud data to rejector?
     pcl::CorrespondencesPtr remaining_correspondences(new pcl::Correspondences());
     rejector.getCorrespondences(*remaining_correspondences);
-
-    qDebug() << "Original corresp size: " << all_correspondences->size() << " -> " << remaining_correspondences->size() ;
 
     return remaining_correspondences;
 }
@@ -529,11 +524,6 @@ float TDK_ScanRegistration::get_voxelSideLength() const
     return mv_voxelSideLength;
 }
 
-void TDK_ScanRegistration::set_voxelSideLength(float value)
-{
-    mv_voxelSideLength = value;
-}
-
 /////////////////////////////////////////////////////
 /// \brief TDK_ScanRegistration::setMv_ICPPost_MaxCorrespondanceDistance
 /// \param value
@@ -553,35 +543,15 @@ double TDK_ScanRegistration::get_SVD_MaxDistance() const
     return mv_SVD_MaxDistance;
 }
 
-void TDK_ScanRegistration::set_SVD_MaxDistance(double value)
-{
-    mv_SVD_MaxDistance = value;
-}
 
 float TDK_ScanRegistration::get_ICP_MaxCorrespondenceDistance() const
 {
     return mv_ICP_MaxCorrespondenceDistance;
 }
-void TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
-{
-    mv_ICP_MaxCorrespondenceDistance = value;
-}
 
 float TDK_ScanRegistration::get_ICPPost_MaxCorrespondanceDistance() const
 {
     return mv_ICPPost_MaxCorrespondanceDistance;
-}
-
-void TDK_ScanRegistration::set_ICPPost_MaxCorrespondanceDistance(float value)
-{
-    mv_ICPPost_MaxCorrespondanceDistance = value;
-}
-
-void
-TDK_ScanRegistration::setMv_scannerCenterRotation(const pcl::PointXYZ &value)
-{
-    mv_scannerCenterRotationSet = true;
-    mv_scannerCenterRotation = value;
 }
 
 

@@ -67,7 +67,7 @@ public:
     void set_voxelSideLength(float value);
     void set_SVD_MaxDistance(double value);
     void set_ICP_MaxCorrespondenceDistance(float value);
-    void set_ICPPost_MaxCorrespondanceDistance(float value);
+    void set_PostICP_MaxCorrespondanceDistance(float value);
 
 private:
     //Configuration parameters

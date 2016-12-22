@@ -9,11 +9,13 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/registration/ndt.h>
-#include <pcl/filters/approximate_voxel_grid.h>
+#include <pcl/filters/voxel_grid.h>
 #include <boost/thread/thread.hpp>
 #include <QDebug>
 #include <limits>
 #include "tdk_scanregistration.h"
+
+#include <pcl/filters/radius_outlier_removal.h>
 
 int
 main (int argc, char** argv)
@@ -46,6 +48,19 @@ main (int argc, char** argv)
     qDebug() << "Post processing pointcloud...";
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedPC = scanRegistrator.mf_getMergedPostRegisteredPC();
+
+    unsigned int pointsBefore = mergedPC->points.size();
+
+    pcl::VoxelGrid<pcl::PointXYZRGB> avg;
+
+    avg.setInputCloud(mergedPC);
+    float leafSize = 0.03;
+    avg.setLeafSize(leafSize,leafSize,leafSize);
+    avg.filter(*mergedPC);
+
+    unsigned int pointsRemoved = pointsBefore - mergedPC->points.size();
+
+    qDebug() << "Removed " << pointsRemoved << " points";
 
     //pcl::io::savePLYFileBinary("pamir.ply", *mergedPC);
     //    qDebug() << "Post processing finished...";
