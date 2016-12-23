@@ -18,6 +18,8 @@ INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Boost\include\boost-1_61"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Qhull\include"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\FLANN\include"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Eigen\eigen3"
+INCLUDEPATH += "C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc"
+INCLUDEPATH += "C:\Program Files\OpenNI2\Include"
 
 
 LIBS += opengl32.lib advapi32.lib Ws2_32.lib user32.lib shell32.lib gdi32.lib kernel32.lib
@@ -26,6 +28,9 @@ LIBS += "-LC:\Program Files\PCL 1.8.0\3rdParty\VTK\lib"
 LIBS += "-LC:\Program Files\PCL 1.8.0\3rdParty\Qhull\lib"
 LIBS += "-LC:\Program Files\PCL 1.8.0\3rdParty\FLANN\lib"
 LIBS += "-LC:\Program Files\PCL 1.8.0\3rdParty\Boost\lib"
+LIBS += "-LC:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64"
+LIBS += "-LC:\Program Files\OpenNI2\Lib"
+
 
 
 LIBS += -lpcl_common_release
@@ -97,6 +102,7 @@ LIBS += -lvtkCommonSystem-7.0
 LIBS += -lvtkCommonTransforms-7.0
 LIBS += -lvtkDICOMParser-7.0
 LIBS += -lvtkDomainsChemistry-7.0
+LIBS += -lvtkDomainsChemistryOpenGL2-7.0
 LIBS += -lvtkexoIIc-7.0
 LIBS += -lvtkexpat-7.0
 LIBS += -lvtkFiltersAMR-7.0
@@ -123,7 +129,8 @@ LIBS += -lvtkfreetype-7.0
 LIBS += -lvtkGUISupportQtSQL-7.0
 LIBS += -lvtkGUISupportQt-7.0
 LIBS += -lvtkGeovisCore-7.0
-LIBS += -lvtkgl2ps-7.0
+LIBS += -lvtkglew-7.0
+#LIBS += -lvtkgl2ps-7.0
 LIBS += -lvtkhdf5-7.0
 LIBS += -lvtkhdf5_hl-7.0
 LIBS += -lvtkImagingColor-7.0
@@ -174,36 +181,55 @@ LIBS += -lvtkpng-7.0
 LIBS += -lvtkproj4-7.0
 LIBS += -lvtkRenderingAnnotation-7.0
 LIBS += -lvtkRenderingContext2D-7.0
-LIBS += -lvtkRenderingContextOpenGL-7.0
+LIBS += -lvtkRenderingContextOpenGL2-7.0
 LIBS += -lvtkRenderingCore-7.0
 LIBS += -lvtkRenderingFreeType-7.0
-LIBS += -lvtkRenderingGL2PS-7.0
+#LIBS += -lvtkRenderingGL2PS-7.0
 LIBS += -lvtkRenderingImage-7.0
 LIBS += -lvtkRenderingLabel-7.0
-LIBS += -lvtkRenderingLIC-7.0
+#LIBS += -lvtkRenderingLIC-7.0
 LIBS += -lvtkRenderingLOD-7.0
-LIBS += -lvtkRenderingOpenGL-7.0
+LIBS += -lvtkRenderingOpenGL2-7.0
 LIBS += -lvtkRenderingQt-7.0
 LIBS += -lvtkRenderingVolume-7.0
-LIBS += -lvtkRenderingVolumeOpenGL-7.0
+LIBS += -lvtkRenderingVolumeOpenGL2-7.0
 LIBS += -lvtksqlite-7.0
 LIBS += -lvtksys-7.0
 LIBS += -lvtktiff-7.0
 LIBS += -lvtkverdict-7.0
 LIBS += -lvtkViewsContext2D-7.0
 LIBS += -lvtkViewsCore-7.0
+LIBS += -lvtkViewsGeovis-7.0
 LIBS += -lvtkViewsInfovis-7.0
 LIBS += -lvtkViewsQt-7.0
 LIBS += -lvtkzlib-7.0
-#LIBS += -lOpenNI2
-#LIBS += -lkinect20
+LIBS += -lOpenNI2
+LIBS += -lkinect20
 
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    tdk_centralwidget.cpp
+    tdk_centralwidget.cpp \
+    tdk_scanwindow.cpp \
+    tdk_database.cpp \
+    tdk_edit.cpp \
+    kinect2_grabber.cpp \
+#    tdk_kinect2wrapper.cpp \
+    tdk_sensor.cpp \
+    tdk_intelr200sensor.cpp \
+    tdk_sensorcontroller.cpp \
+    tdk_kinectv2sensor.cpp
 
 HEADERS  += mainwindow.h \
-    tdk_centralwidget.h
+    tdk_centralwidget.h \
+    tdk_scanwindow.h \
+    tdk_database.h \
+    tdk_edit.h \
+    kinect2_grabber.h \
+#    tdk_kinect2wrapper.h \
+    tdk_sensor.h \
+    tdk_intelr200sensor.h \
+    tdk_sensorcontroller.h \
+    tdk_kinectv2sensor.h
 
 FORMS    += mainwindow.ui
