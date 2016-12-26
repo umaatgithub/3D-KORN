@@ -1,31 +1,54 @@
 #include "pclviewer.h"
 #include "ui_pclviewer.h"
 #include <iostream>
-#include <pcl/common/common.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/io/ply_io.h>
+//#include <pcl/common/common.h>
+//#include <pcl/io/pcd_io.h>
+//#include <pcl/io/ply_io.h>
 #include <pcl/search/kdtree.h>
-#include <pcl/features/normal_3d_omp.h>
-#include <pcl/point_types.h>
-#include <pcl/surface/mls.h>
+//#include <pcl/features/normal_3d_omp.h>
+//#include <pcl/point_types.h>
+//#include <pcl/surface/mls.h>
 #include <pcl/surface/poisson.h>
 #include <pcl/filters/passthrough.h>
-#include <pcl/io/vtk_io.h>
+//#include <pcl/io/vtk_io.h>
 #include <vtkDataReader.h>
 #include <vtkGenericDataObjectReader.h>
-#include <vtkStructuredGrid.h>
-#include <vtkSmartPointer.h>
-#include <vtkPolyData.h>
+//#include <vtkStructuredGrid.h>
+//#include <vtkSmartPointer.h>
+//#include <vtkPolyData.h>
 #include <string>
-#include <pcl/console/parse.h>
-#include <pcl/io/vtk_lib_io.h>
+//#include <pcl/console/parse.h>
+//#include <pcl/io/vtk_lib_io.h>
 #include <pcl/visualization/pcl_visualizer.h>
 
+#include <iostream>
+
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/surface/convex_hull.h>
+#include <pcl/filters/crop_hull.h>
+
+
+
+//#include <pcl/crop_hull.h>
+#include <pcl/surface/concave_hull.h>
 #include <vector>
-#include <vtkSTLWriter.h>
-#include <vtkSTLReader.h>
+//#include <vtkSTLWriter.h>
+//#include <vtkSTLReader.h>
 
 
+#include <pcl/ModelCoefficients.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
+#include <pcl/sample_consensus/method_types.h>
+#include <pcl/sample_consensus/model_types.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/project_inliers.h>
+#include <pcl/segmentation/sac_segmentation.h>
+#include <pcl/surface/concave_hull.h>
+
+
+#include <pcl/filters/crop_hull.h>
 
 using namespace pcl::visualization;
 PCLVisualizer::Ptr viewer;
@@ -42,12 +65,25 @@ PCLViewer::PCLViewer (QWidget *parent) :
 
     // Setup the cloud pointer
     cloud.reset ((new PointCloud<PointXYZ>));
-    clouda.reset ((new PointCloud<PointXYZ>));
+    cloud_cropped.reset ((new PointCloud<PointXYZ>));
+
+    cloud_hullx.reset ((new PointCloud<PointXYZ>));
+
+    cloud_hully.reset ((new PointCloud<PointXYZ>));
+
+    cloud_hullz.reset ((new PointCloud<PointXYZ>));
+
+    cloud_randomplane.reset ((new PointCloud<PointXYZ>));
+
+
+    objects.reset ((new PointCloud<PointXYZ>));
+    potatoecloud.reset ((new PointCloud<PointXYZRGBA>));
     // The number of points in the cloud
 
     //load a file
     pcl::io::loadPCDFile<pcl::PointXYZ> ("/home/sav/Desktop/chef.pcd" , *cloud);
 
+    // pcl::io::loadPCDFile<pcl::PointXYZ> ("/home/sav/Desktop/canny.pcd" , *cloud);
 
     /*  pcl::PointIndices::Ptr fInliers (new pcl::PointIndices);
     fInliers = indices of part_of_full_cloud;
@@ -118,7 +154,7 @@ PCLViewer::PCLViewer (QWidget *parent) :
 
 
     viewer->addPointCloud (cloud, "cloud");
-    pSliderValueChanged (2);
+    //pSliderValueChanged (2);
 
     viewer->resetCamera ();
     ui->qvtkWidget->update ();
@@ -138,13 +174,13 @@ PCLViewer::randomButtonPressed () //mow callpoisson and stuff
     }*/
 
     ///////////////////////////////////////////////////////////////// http://justpaste.it/code1
-    cout<<"start size : " << clouda->points.size ()<<endl;
+    cout<<"start size : " << cloud_cropped->points.size ()<<endl;
 
     cout << "begin passthrough filter" << endl ;
     PointCloud<PointXYZ>::Ptr filtered(new PointCloud<PointXYZ>());
     PassThrough<PointXYZ> filter;
 
-    filter.setInputCloud(clouda);
+    filter.setInputCloud(cloud_cropped);
     filter.filter(*filtered);
 
     cout << "passthrough filter complete" << endl;
@@ -231,15 +267,58 @@ PCLViewer::RGBsliderReleased ()
 void
 PCLViewer::pSliderValueChanged (int value)
 {
-    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, value, "cloud");
+    objects->clear();
+
+
+    pcl::ConvexHull<pcl::PointXYZ> hull;
+    hull.setInputCloud(cloud_hullx);
+    hull.setDimension(3);
+    std::vector<pcl::Vertices> polygons;
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr surface_hull (new pcl::PointCloud<pcl::PointXYZ>);
+    hull.reconstruct(*surface_hull, polygons);
+
+    for(int i = 0; i < polygons.size(); i++)
+        std::cout << polygons[i] << std::endl;
+
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr objects (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::CropHull<pcl::PointXYZ> bb_filter;
+
+    bb_filter.setDim(2);
+    bb_filter.setInputCloud(cloud_randomplane);
+    bb_filter.setHullIndices(polygons);
+    bb_filter.setHullCloud(cloud_hullx);
+    bb_filter.setCropOutside(true);
+    bb_filter.filter(*objects);
+    std::cout << objects->size() << std::endl;
+
+    // boundingbox_ptr->clear();
+    //objects->clear();
+    // std::cerr << "PointCloud hull after projection has: "
+    //         << cloud_h->points.size () << " data points." << std::endl;
+    int size=cloud_cropped->points.size ();
+    for (size_t i = 0; i < objects->points.size(); ++i)
+    {
+        cloud_cropped->push_back(objects->points[i]);
+
+    }
+
+    viewer->updatePointCloud (objects, "cloud");
     ui->qvtkWidget->update ();
+
+
+    // viewer->addPolygonMesh(output, "polygon");
+
+    /* viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, value, "cloud");
+    ui->qvtkWidget->update ();*/
 }
 void
 PCLViewer::redSliderValueChanged (int value)
 {
     red = value;
     // printf ("redSliderValueChanged: [%d|%d|%d]\n", red, green, blue);
-    CropBoxPointsRemoval(red, green,blue,1);
+    CropPlanesPointsRemoval(red, green,blue,1);
+
 }
 
 void
@@ -249,7 +328,8 @@ PCLViewer::greenSliderValueChanged (int value)
     //  printf ("greenSliderValueChanged: [%d|%d|%d]\n", red, green, blue);
     //CropBox(red, green,blue);
 
-    CropBoxPointsRemoval(red, green,blue,2);
+    CropPlanesPointsRemoval(red, green,blue,2);
+
 }
 
 void
@@ -257,7 +337,8 @@ PCLViewer::blueSliderValueChanged (int value)
 {
     blue=value;
     //  printf("blueSliderValueChanged: [%d|%d|%d]\n", red, green, blue);
-    CropBoxPointsRemoval(red, green,blue,3);
+    CropPlanesPointsRemoval(red, green,blue,3);
+
 }
 PCLViewer::~PCLViewer ()
 {
@@ -268,9 +349,9 @@ void PCLViewer::load() //now call meshes and stuff
 {
     printf ("Load button was pressed\n");
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr clouda (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_cropped (new pcl::PointCloud<pcl::PointXYZ>);
 
-    if (pcl::io::loadPCDFile<pcl::PointXYZ> ("/home/sav/Desktop/bunny.pcd" , *clouda) == -1) //* load the file
+    if (pcl::io::loadPCDFile<pcl::PointXYZ> ("/home/sav/Desktop/bunny.pcd" , *cloud_cropped) == -1) //* load the file
     {
         PCL_ERROR ("Couldn't read file test_pcd.pcd \n");
 
@@ -307,12 +388,50 @@ void PCLViewer::load() //now call meshes and stuff
     ui->qvtkWidget->update ();
 }
 
-void PCLViewer::CropBox(uint xi, uint yi, uint zi,uint axe){
+void PCLViewer::RandomPlane(int numberofpoints,int randprecision,uint xvalue, uint yvalue,uint zvalue,uint axe){
 
 
-    clouda->empty();
+    cloud_randomplane->clear();
 
 
+    cloud_randomplane->points.resize(numberofpoints);
+
+    if (axe==0){
+
+
+        for (int i = 0; i < numberofpoints; i++)
+        {
+
+            cloud_randomplane->points[i].z=(rand() % (randprecision+1))*(maxz-minz)/randprecision+minz;
+            cloud_randomplane->points[i].y=(rand() % (randprecision+1))*(maxy-miny)/randprecision+miny;
+            cloud_randomplane->points[i].x=(xvalue)*(maxx-minx)/255+minx;
+
+        }
+    }
+
+    else if (axe==1){
+
+        for (int i = 0; i < numberofpoints; i++)
+        {
+
+            cloud_randomplane->points[i].z=(rand() % (randprecision+1))*(maxz-minz)/randprecision+minz;
+            cloud_randomplane->points[i].y=(yvalue)*(maxy-miny)/255+miny;
+            cloud_randomplane->points[i].x=(rand() % (randprecision+1))*(maxx-minx)/randprecision+minx;
+
+        }
+    }
+
+    else {
+
+        for (int i = 0; i < numberofpoints; i++)
+        {
+
+            cloud_randomplane->points[i].z=(zvalue)*(maxz-minz)/255+minz;
+            cloud_randomplane->points[i].y=(rand() % (randprecision+1))*(maxy-miny)/randprecision+miny;
+            cloud_randomplane->points[i].x=(rand() % (randprecision+1))*(maxx-minx)/randprecision+minx;
+
+        }
+    }
     /////////////////////////////mesh to cloud
 
 
@@ -323,165 +442,120 @@ void PCLViewer::CropBox(uint xi, uint yi, uint zi,uint axe){
 
     ////////////////////////////////////////////
 
-    //http://www.pcl-users.org/Access-pcl-PolygonMesh-triangles-data-td4025718.html
 
-    //cout<<"         balab   "<<mesh->polygons[5].vertices[2] <<endl;
-
-
-    //  cout<<clouda->width<< '  and  ' <<  cloud->width;
-    // clouda->points.resize (clouda->width * clouda->height);
-    double a=0;
-
-
-    for (size_t i = 0; i < cloud->points.size (); ++i)
-    {
-
-
-        clouda->points.resize(a+1);
-        clouda->points[a]=cloud->points[i];
-        if (clouda->points[a].z < (zi*(maxz-minz)/255)+minz ){//clouda->resize(cloud->points.size()+1);
-
-            clouda->points[a].z=(zi*(maxz-minz)/255)+minz;
-            //  clouda->points[i].y=(yri*(maxy-miny)/255)+miny;
-            //clouda->points[i].x=(xri*(maxx-minx)/255)+minx;
-        }
-
-        if (clouda->points[a].y < (yi*(maxy-miny)/255)+miny){//clouda->resize(cloud->points.size()+1);
-
-            //   clouda->points[i].z=(zri*(maxz-minz)/255)+minz;
-            clouda->points[a].y=(yi*(maxy-miny)/255)+miny;}
-        //  clouda->points[i].x=(xri*(maxx-minx)/255)+minx;}
-
-        if (clouda->points[a].x < (xi*(maxx-minx)/255)+minx){//clouda->resize(cloud->points.size()+1);
-
-
-            clouda->points[a].x=(xi*(maxx-minx)/255)+minx;}
-
-        a=a+1;
-        //  clouda->points[i].z=(zri*(maxz-minz)/255)+minz;
-        // clouda->points[i].y=(yri*(maxy-miny)/255)+miny;
-        //clouda->points[i].x=(xi*(maxx-minx)/255)+minx;}
-    }
 
 
     // cout<< "minz " << minz << "maxZ : "<< maxz ;
-    viewer->updatePointCloud (clouda, "cloud");
-    viewer->resetCamera ();
-    ui->qvtkWidget->update ();
 
 }
 
 
-void PCLViewer::CropBoxPointsRemoval(uint xi, uint yi, uint zi,uint axe){
+void PCLViewer::CropPlanesPointsRemoval(uint xi, uint yi, uint zi,uint axe){
 
 
-    clouda->empty();
+    cloud_cropped->clear();
+    cloud_hullx->clear();
 
+    cloud_hully->clear();
 
-    PointCloud<PointXY>::Ptr  outliercoordinates(new pcl::PointCloud<pcl::PointXY>);
-    //  pcl::PointCloud<pcl::PointXY>::Ptr temp (new pcl::PointCloud<pcl::PointXY>);
+    cloud_hullz->clear();
 
-    /////////////////////////////mesh to cloud
-
-
-    /*   PointCloud<PointXYZRGBA>::Ptr cloud (new PointCloud<PointXYZRGBA> ());
-    pcl::PolygonMesh triangles;
-    pcl::io::loadPolygonFilePLY(argv[1], triangles);
-    pcl::fromROSMsg(triangles.cloud, *cloud);*/
-
-    ////////////////////////////////////////////
-
-    //http://www.pcl-users.org/Access-pcl-PolygonMesh-triangles-data-td4025718.html
-
-    //cout<<"         balab   "<<mesh->polygons[5].vertices[2] <<endl;
-
-
-    //  cout<<clouda->width<< '  and  ' <<  cloud->width;
-    // clouda->points.resize (clouda->width * clouda->height);
-    double a=0;
     double u=0;
+    croppedcloudsize=0;
+    double a=0;
+    double b=0;
+    double c=0;
+    cloud_hullx->resize(cloud->size());
+
+    cloud_hully->resize(cloud->size());
+
+    cloud_hullz->resize(cloud->size());
 
     for (size_t i = 0; i < cloud->points.size (); ++i)
     {
-        clouda->resize(a+1);
+        cloud_cropped->resize(croppedcloudsize+1);
 
         if (cloud->points[i].z >= (zi*(maxz-minz)/255)+minz && cloud->points[i].y >= (yi*(maxy-miny)/255)+miny && cloud->points[i].x >= (xi*(maxx-minx)/255)+minx ) { // && cloud->points[i].y <=! y && cloud->points[i].z <=! z){
 
-            clouda->points[a]=cloud->points[i];
-            a=a+1;
-            if ( (cloud->points[i].x <= ((xi+1)*(maxx-minx)/255)+minx) && (cloud->points[i].x >= ((xi)*(maxx-minx)/255)+minx) ){
-                // for ( (cloud->points[i].x = (xi*(maxx-minx)/255)+minx))
-                outliercoordinates->points.resize (u+1);
-                outliercoordinates->points[u].x=cloud->points[a].y;
+            cloud_cropped->points[croppedcloudsize]=cloud->points[i];
+            croppedcloudsize++;
 
-                outliercoordinates->points[u].y=cloud->points[a].z;
-                //     cout<<temp->points[u].x;//<<"     "<<temp.y<< endl;
+            if ( (cloud->points[i].x <= ((xi+2)*(maxx-minx)/255)+minx) && (cloud->points[i].x >= ((xi)*(maxx-minx)/255)+minx) ){
 
-                u+=1;
-                //              for (int p=0; p<outliercoordinates.size(); p+=2) {
+                cloud_hullx->points[a]=cloud->points[i];
+                cloud_hullx->points[a].x=xi*(maxx-minx)/255+minx;
+                a++;
+
             }
-            //     }
+
+            if ( (cloud->points[i].y <= ((yi+2)*(maxy-miny)/255)+miny) && (cloud->points[i].y >= ((yi)*(maxy-miny)/255)+miny) ){
+
+                cloud_hully->points[b]=cloud->points[i];
+                cloud_hully->points[b].y=yi*(maxy-miny)/255+miny;
+                b++;
+
+            }
+
+            if ( (cloud->points[i].z <= ((zi+2)*(maxz-minz)/255)+minz) && (cloud->points[i].z >= ((zi)*(maxz-minz)/255)+minz) ){
+
+                cloud_hullz->points[c]=cloud->points[i];
+                cloud_hullz->points[c].z=zi*(maxz-minz)/255+minz;
+                c++;
+
+            }
+
         }
 
-        else {
 
-            clouda->points[a].x=(xi*(maxx-minx)/255)+minx;
-            clouda->points[a].z=(zi*(maxz-minz)/255)+minz;
-            clouda->points[a].y=(yi*(maxy-miny)/255)+miny;
-
-            a=a+1;
-        }
     }
 
-    Sorting(outliercoordinates);
 
-    /////////////////////Buble sorting
+    //http://stackoverflow.com/questions/279854/how-do-i-sort-a-vector-of-pairs-based-on-the-second-element-of-the-pair#279878
 
 
-    //http://alienryderflex.com/polygon_fill/
+    cout<<cloud_cropped->points.size ()<<endl;
 
-    // cout<< "minz " << minz << "maxZ : "<< maxz ;
-    viewer->updatePointCloud (clouda, "cloud");
-    viewer->resetCamera ();
+    RandomPlane(10000,1000,red,green,blue,1);
+    FillingCropPlane();
+
+    viewer->updatePointCloud (cloud_cropped, "cloud");
     ui->qvtkWidget->update ();
 
 
 }
-void  PCLViewer::FillingCrop ( vector<  PointCloud<PointXY> >  &vec ){
-    int  i=0;
-    PointCloud<PointXY> temp;
-    // while (i<vec.size()-1) {
-    // PointCloud<PointXY> temp0= vec.at(i) ;
-    //  PointCloud<PointXY> temp1= vec.at(i+1) ;
-    /*     if ( temp0->points.x>temp1->points.x) {
-        swap=vec.points[i];
-        vec.at(i)=vec.at(i+1);
-        vec.at(i+1)=swap;
-        i--; }
-    else {
-        i++; }}*/
-    // }
-}
 
-void  PCLViewer::Sorting(   PointCloud<PointXY>::Ptr    &vec ){//Bubble sorting
-    int  i=0;
-    pcl::PointXY swap ;// (new pcl::PointXY);
-    int a=vec->points.size();
-    // cout<<vec->points.size()<<endl;
-    while (i<(a-1)) {
-        if ( vec->points[i].x > vec->points[i+1].x ) {
-            swap=vec->points[i];
+void  PCLViewer::FillingCropPlane (){
 
-            vec->points[i]=vec->points[i+1];
-            vec->points[i+1]=swap;
+    // from https://github.com/PointCloudLibrary/pcl/issues/234
 
-            if (i>0){i--;}
-        }
-        else {
-            i++; }
+    objects->clear();
+
+    pcl::ConvexHull<pcl::PointXYZ> hull;
+    hull.setInputCloud(cloud_hully);
+    hull.setDimension(3);
+    std::vector<pcl::Vertices> polygons;
+    pcl::PointCloud<pcl::PointXYZ>::Ptr surface_hull (new pcl::PointCloud<pcl::PointXYZ>);
+    hull.reconstruct(*surface_hull, polygons);
+
+    pcl::CropHull<pcl::PointXYZ> bb_filter;
+
+    bb_filter.setDim(2);
+    bb_filter.setInputCloud(cloud_randomplane);
+    bb_filter.setHullIndices(polygons);
+    bb_filter.setHullCloud(cloud_hully);
+    bb_filter.setCropOutside(true);
+    bb_filter.filter(*objects);
+
+    for (size_t i = 0; i < objects->points.size(); ++i)
+    {
+        cloud_cropped->push_back(objects->points[i]);
     }
 
 }
+
+
+
+
 
 void PCLViewer::on_load_clicked()
 {

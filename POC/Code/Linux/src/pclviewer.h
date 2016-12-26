@@ -16,10 +16,8 @@
 #include <iostream>
 #include <pcl/common/common.h>
 #include <pcl/io/pcd_io.h>
-#include <pcl/io/ply_io.h>
 #include <pcl/search/kdtree.h>
 #include <pcl/features/normal_3d_omp.h>
-#include <pcl/point_types.h>
 #include <pcl/surface/mls.h>
 #include <pcl/surface/poisson.h>
 #include <pcl/filters/passthrough.h>
@@ -47,8 +45,8 @@ public:
   explicit PCLViewer (QWidget *parent = 0);
   ~PCLViewer ();
 
-    void CropBox(uint xi,uint yi,uint zi, uint axe);
-    void CropBoxPointsRemoval(uint xi, uint yi, uint zi,uint axe);
+    void RandomPlane(int numberofpoints,int randprecision,uint xvalue, uint yvalue,uint zvalue,uint axe);
+    void CropPlanesPointsRemoval(uint xi, uint yi, uint zi,uint axe);
 
 
     double minx,maxx,miny,maxy,minz,maxz,kx,ky,kz;
@@ -79,14 +77,31 @@ protected:
  // PointCloudT::Ptr cloud;
   PointCloud<PointXYZ>::Ptr cloud ;
 
+  PointCloud<PointXYZ>::Ptr cloud_hullx ;
+
+  PointCloud<PointXYZ>::Ptr cloud_hully ;
+
+
+  PointCloud<PointXYZ>::Ptr cloud_hullz ;
+
+
+  PointCloud<PointXYZ>::Ptr cloud_randomplane ;
+
+
+  PointCloud<PointXYZ>::Ptr objects ;
+
+
+  PointCloud<PointXYZRGBA>::Ptr potatoecloud ;
+
+
   PolygonMesh mesh;
+std::vector<std::pair<float, float> > outliercoordinates;
+
+  void  FillingCropPlane( );
+  PointCloud<PointXYZ>::Ptr cloud_cropped ;
 
 
-  void  FillingCrop( vector<PointCloud<PointXY> > &);
- void Sorting( PointCloud<PointXY>::Ptr &);
-  PointCloud<PointXYZ>::Ptr clouda ;
-
-
+double croppedcloudsize;
   unsigned int red;
   unsigned int green;
   unsigned int blue;
