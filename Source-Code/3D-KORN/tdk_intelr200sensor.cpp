@@ -40,47 +40,64 @@ bool TDK_IntelR200Sensor::mf_StopSensor()
 //generates a pcl pointcloud from sensor streams
 void TDK_IntelR200Sensor::mf_GeneratePointCloud()
 {
-    // Initialize and Stream Samples
-    //mv_myManager->Init();
-
     //Aligned capture: returns aligned color and depth streams: block/stop return until both streams are ready
     //return NULL pointer if error in acquiring frame
     if (mv_myManager->AcquireFrame(true)<PXC_STATUS_NO_ERROR) {
-        qDebug() <<"gutfydy";
+        qDebug() <<"Error acquiring aligned frames!";
         return;
     }
 
-    //mv_myManager->AcquireFrame(true);
-
     // retrieve the color and depth samples aligned
     mv_alignedImage = mv_myManager->QuerySample();
-//qDebug() << mv_alignedImage->IsEmpty();
+    //qDebug() << mv_alignedImage->IsEmpty();
+
     // work on color and depth streams of
     mv_colorImage = mv_alignedImage->color;
     mv_depthImage = mv_alignedImage->depth;
-    qDebug() << "----------------------";
+    qDebug() << "color and depth streams extracted from alignedImage";
+
+    //map the color image to depth image (Note: kinect grabber class maps depth to color)
+    PXCImage* colorMappedToDepth;
+    colorMappedToDepth = mv_projection->CreateColorImageMappedToDepth(mv_depthImage, mv_colorImage);
+
     // go fetching the next aligned-sample, if required : (this does not 'release' the manager interface)
     mv_myManager->ReleaseFrame();
-    qDebug() << ".............................";
+    qDebug() << "mv_myManager released frame, can fetch next aligned frames";
+
     //-----For creating point cloud from depth image (by <projecting> depth image to world coordinates)-------
 
     //create an ImageData object to store info (in an ImageInfo object) about PXCImage depthImage
     PXCImage::ImageData depthImageData;
+    PXCImage::ImageData colorMappedToDepthData;
+
     PXCImage::ImageInfo depthImageInfo = mv_depthImage->QueryInfo();
-    depthImageData.format = depthImageInfo.format;
+    PXCImage::ImageInfo colorMappedToDepthInfo = colorMappedToDepth->QueryInfo();
+
+    //For checking storage formats of depth and color data buffers
+    //depthImageData.format = depthImageInfo.format;
+    //colorMappedToDepthData.format = colorMappedToDepthInfo.format;
 
     //Initialize planes and pitches arrays, depthImage buffer data starts at ..data.planes[0]
     depthImageData.planes[0] = {0};
     depthImageData.pitches[0] = {0};
 
+    colorMappedToDepthData.planes[0] = {0};
+    colorMappedToDepthData.pitches[0] = {0};
+
     //Acquire read access to depthImage buffer: this is equivalent to getting buffer positions in memory
     //in depthImageData (so that we know where to read)
     mv_depthImage -> AcquireAccess(PXCImage::ACCESS_READ, PXCImage::PIXEL_FORMAT_DEPTH, &depthImageData);
+    colorMappedToDepth->AcquireAccess(PXCImage::ACCESS_READ, PXCImage::PIXEL_FORMAT_RGB32, &colorMappedToDepthData);
 
     //short = 2 bytes: each depthImage pixel value is 16 bits long, so we want to traverse the
-    //depth buffer in steps of 2 bytes
-    short *buffer = (short*)depthImageData.planes[0];
-    qDebug() << "Buffered---------------------------";
+    //depth buffer in steps of 2 bytes; similarly, color buffer is in RGB32 format (8x4 -> R,G,B,A),
+    //sizeof(uint8_t) = 1
+
+    short *depthbuffer = (short*) depthImageData.planes[0];
+    uint8_t *mappedColorbuffer = (uint8_t*) colorMappedToDepthData.planes[0];
+
+    qDebug() << "Acquired buffer locations of depth and color streams";
+
     //point cloud container for the current request (session)
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud ( new pcl::PointCloud <pcl::PointXYZRGB> () );
 
@@ -92,25 +109,26 @@ void TDK_IntelR200Sensor::mf_GeneratePointCloud()
 
             depthImagePoint.x = col;
             depthImagePoint.y = row;
-            depthImagePoint.z = buffer[0];
+            depthImagePoint.z = depthbuffer[0];
 
             mv_projection->ProjectDepthToCamera(1, &depthImagePoint, &worldPoint);
 
             pclworldpoint.x = (float) worldPoint.x/1000.0;
             pclworldpoint.y = (float) worldPoint.y/1000.0;
-            pclworldpoint.z = (float) worldPoint.z/1000.0;
+            pclworldpoint.z = (float) -worldPoint.z/1000.0;
 
-            pclworldpoint.r = (float) 255;
-            pclworldpoint.g = (float) 255;
-            pclworldpoint.b = (float) 255;
+            pclworldpoint.r = (float) mappedColorbuffer[0];
+            pclworldpoint.g = (float) mappedColorbuffer[1];
+            pclworldpoint.b = (float) mappedColorbuffer[2];
 
             cloud->points.push_back(pclworldpoint);
 
-            buffer++;
+            depthbuffer++;
+            mappedColorbuffer += 4;
         }
     }
 
-   // mv_myManager->Release();
+    // mv_myManager->Release();
     qDebug() << "About to set point cloud";
     mf_SetMvPointCloud(cloud);
 
@@ -128,11 +146,11 @@ void TDK_IntelR200Sensor::mf_threadAcquireCloud()
         boost::unique_lock<boost::mutex> lock(mutex);
         qDebug() << "Intel R200 inside thread while";
 
-       mf_GeneratePointCloud();
+        mf_GeneratePointCloud();
 
         //qDebug() << "Intel R200 exiting thread function";
         lock.unlock();
- }
+    }
 }
 
 
@@ -159,7 +177,7 @@ bool TDK_IntelR200Sensor::mf_SetupSensor ()
     mv_myManager->EnableStream(PXCCapture::STREAM_TYPE_DEPTH, mv_depthWidth, mv_depthHeight, mv_fps);
 
 
-     mv_myManager->Init();
+    mv_myManager->Init();
     //initialize a pcl pointcloud PointXYZRGB
     //mv_cloud = new pcl::PointCloud <pcl::PointXYZRGB>;
 
@@ -176,7 +194,7 @@ bool TDK_IntelR200Sensor::mf_SetupSensor ()
 
     mv_device = mv_capture->CreateDevice(0);
 
-    //initialize the projection interface
+    //initialize the projection interface (for mapping between depth, color and world (camera) coordinates)
     mv_projection = mv_device->CreateProjection();
 
     qDebug() << "IntelR200 Setup done";
