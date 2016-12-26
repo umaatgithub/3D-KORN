@@ -20,6 +20,9 @@ INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\FLANN\include"
 INCLUDEPATH += "C:\Program Files\PCL 1.8.0\3rdParty\Eigen\eigen3"
 INCLUDEPATH += "C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc"
 INCLUDEPATH += "C:\Program Files\OpenNI2\Include"
+INCLUDEPATH += "C:\Program Files (x86)\Intel\RSSDK\include"
+INCLUDEPATH += "C:\Program Files (x86)\Intel\RSSDK\src\libpxc"
+
 
 
 LIBS += opengl32.lib advapi32.lib Ws2_32.lib user32.lib shell32.lib gdi32.lib kernel32.lib
@@ -30,6 +33,8 @@ LIBS += "-LC:\Program Files\PCL 1.8.0\3rdParty\FLANN\lib"
 LIBS += "-LC:\Program Files\PCL 1.8.0\3rdParty\Boost\lib"
 LIBS += "-LC:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64"
 LIBS += "-LC:\Program Files\OpenNI2\Lib"
+LIBS += "C:/Program Files (x86)/Intel/RSSDK/lib/x64/*.lib"
+LIBS += "C:/Program Files (x86)/Intel/RSSDK/sample/common/lib/x64/v140/*.lib"
 
 
 
@@ -214,11 +219,12 @@ SOURCES += main.cpp\
     tdk_database.cpp \
     tdk_edit.cpp \
     kinect2_grabber.cpp \
-#    tdk_kinect2wrapper.cpp \
+    tdk_scanregistration.cpp \
     tdk_sensor.cpp \
     tdk_intelr200sensor.cpp \
     tdk_sensorcontroller.cpp \
-    tdk_kinectv2sensor.cpp
+    tdk_kinectv2sensor.cpp \
+    tdk_turntable.cpp
 
 HEADERS  += mainwindow.h \
     tdk_centralwidget.h \
@@ -226,10 +232,11 @@ HEADERS  += mainwindow.h \
     tdk_database.h \
     tdk_edit.h \
     kinect2_grabber.h \
-#    tdk_kinect2wrapper.h \
+    tdk_scanregistration.h \
     tdk_sensor.h \
     tdk_intelr200sensor.h \
     tdk_sensorcontroller.h \
-    tdk_kinectv2sensor.h
+    tdk_kinectv2sensor.h \
+    tdk_turntable.h
 
 FORMS    += mainwindow.ui
