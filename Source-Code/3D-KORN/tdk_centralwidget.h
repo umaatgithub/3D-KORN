@@ -15,7 +15,6 @@
 #include <pcl/io/ply_io.h>
 
 #include <pcl/registration/icp.h>
-
 #include <pcl/visualization/pcl_visualizer.h>
 #include <vtkRenderWindow.h>
 
@@ -32,18 +31,17 @@ public:
     ~TDK_CentralWidget();
 
 private:
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
-//    PointCloudT::Ptr cloudSource2;
-//    PointCloudT::Ptr cloudRegistered;
-    /** @brief 0 = x | 1 = y | 2 = z */
-    int filtering_axis;
 
-    /** @brief Holds the color mode for @ref colorCloudDistances */
-    int color_mode;
-    QGridLayout *layout;
-    QVTKWidget *qvtkWidget;
+    QGridLayout *mv_CentralGridLayout;
+    QVTKWidget *mv_PointCloudQVTKWidget;
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudVisualizer;
 
+    void mf_setupUI();
+    void mf_SetupPointCloudDisplayWidget();
+    void mf_SetupCropWidget();
+    void mf_SetupInformationWidget();
+    void mf_SetupPointCloudListWidget();
+    void mf_SetupPointCloudOperationsWidget();
 
 signals:
 

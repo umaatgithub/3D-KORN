@@ -3,13 +3,114 @@
 #include <pcl/registration/incremental_registration.h>
 
 TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
-    layout(new QGridLayout), filtering_axis (1),  // = y
-    color_mode(4) , // = Rainbow
-    qvtkWidget(new QVTKWidget)
+    mv_CentralGridLayout(new QGridLayout),
+    mv_PointCloudQVTKWidget(new QVTKWidget)
+{
+    mf_setupUI();
+
+}
+
+TDK_CentralWidget::~TDK_CentralWidget()
+{
+
+}
+
+
+void TDK_CentralWidget::mf_setupUI()
 {
     vtkObject::GlobalWarningDisplayOff();
 
-    QDockWidget *dock = new QDockWidget(tr("Dummy"));
+    mf_SetupPointCloudDisplayWidget();
+    mf_SetupCropWidget();
+    mf_SetupInformationWidget();
+    mf_SetupPointCloudListWidget();
+    mf_SetupPointCloudOperationsWidget();
+
+    mv_CentralGridLayout->setColumnMinimumWidth(0, 300);
+    mv_CentralGridLayout->setColumnMinimumWidth(1, 300);
+    mv_CentralGridLayout->setColumnMinimumWidth(2, 300);
+
+    mv_CentralGridLayout->setRowMinimumHeight(0, 300);
+    mv_CentralGridLayout->setRowMinimumHeight(1, 300);
+
+    mv_CentralGridLayout->setColumnStretch(1, 1);
+
+    this->setLayout(mv_CentralGridLayout);
+}
+
+void TDK_CentralWidget::mf_SetupPointCloudDisplayWidget()
+{
+    QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Visualizer"));
+    dockWidget->setWidget(mv_PointCloudQVTKWidget);
+    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    mv_CentralGridLayout->addWidget(dockWidget, 0, 1, 2, 1);
+
+    mv_PointCloudVisualizer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
+    mv_PointCloudVisualizer->setBackgroundColor (0.1, 0.1, 0.1);
+    //mv_PointCloudStreamVisualizer->setCameraPosition( 0.0, 0.0, 2.5, 0.0, 0.0, 0.0 );
+
+    mv_PointCloudVisualizer->addCoordinateSystem(1.0);
+//    mv_PointCloudVisualizer->addCube(0, 1, 0, 1, 0, 1, 0, 0, 0,"cube");
+//    mv_PointCloudVisualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "cube");
+//    mv_PointCloudVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
+//    mv_PointCloudVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
+//    mv_PointCloudVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
+
+    mv_PointCloudQVTKWidget->SetRenderWindow ( mv_PointCloudVisualizer->getRenderWindow () );
+    mv_PointCloudVisualizer->setupInteractor ( mv_PointCloudQVTKWidget->GetInteractor (), mv_PointCloudQVTKWidget->GetRenderWindow ());
+
+}
+
+void TDK_CentralWidget::mf_SetupCropWidget()
+{
+    QDockWidget *dockWidget = new QDockWidget(tr("Crop Widget"));
+    QGridLayout *gridLayout = new QGridLayout;
+    QScrollArea *scrollArea = new QScrollArea;
+    QWidget *widget = new QWidget;
+
+
+
+    widget->setLayout(gridLayout);
+    scrollArea->setWidget(widget);
+    dockWidget->setWidget(scrollArea);
+    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    mv_CentralGridLayout->addWidget(dockWidget, 0, 0);
+
+}
+
+void TDK_CentralWidget::mf_SetupInformationWidget()
+{
+    QDockWidget *dockWidget = new QDockWidget(tr("Information"));
+    QGridLayout *gridLayout = new QGridLayout;
+    QScrollArea *scrollArea = new QScrollArea;
+    QWidget *widget = new QWidget;
+
+    widget->setLayout(gridLayout);
+    scrollArea->setWidget(widget);
+    dockWidget->setWidget(scrollArea);
+    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    mv_CentralGridLayout->addWidget(dockWidget, 1, 2);
+}
+
+void TDK_CentralWidget::mf_SetupPointCloudListWidget()
+{
+    QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud List"));
+    QGridLayout *gridLayout = new QGridLayout;
+    QScrollArea *scrollArea = new QScrollArea;
+    QWidget *widget = new QWidget;
+
+
+
+    widget->setLayout(gridLayout);
+    scrollArea->setWidget(widget);
+    dockWidget->setWidget(scrollArea);
+    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    mv_CentralGridLayout->addWidget(dockWidget, 0, 2);
+}
+
+void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
+{
+    QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Operations"));
     QGridLayout *gridLayout = new QGridLayout;
     QScrollArea *scrollArea = new QScrollArea;
     QWidget *widget = new QWidget;
@@ -17,101 +118,7 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
 
     widget->setLayout(gridLayout);
     scrollArea->setWidget(widget);
-    dock->setWidget(scrollArea);
-    dock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-
-    layout->addWidget(dock, 0, 0);
-    layout->addWidget(new QScrollArea(), 1, 0);
-    layout->addWidget(new QScrollArea(), 2, 0);
-
-    QDockWidget *dockWidget = new QDockWidget(tr("Sensor Output"));
-    dockWidget->setWidget(qvtkWidget);
+    dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    layout->addWidget(dockWidget, 0, 1,3, 1);
-
-    viewer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
-    viewer->setBackgroundColor (0.1, 0.1, 0.1);
-    qvtkWidget->SetRenderWindow (viewer->getRenderWindow ());
-    viewer->setupInteractor ( qvtkWidget->GetInteractor (), qvtkWidget->GetRenderWindow ());
-    viewer->resetCamera ();
-
-
-    layout->addWidget(new QScrollArea(), 0, 2);
-    layout->addWidget(new QScrollArea(), 1, 2);
-    layout->addWidget(new QScrollArea(), 2, 2);
-
-    layout->setColumnMinimumWidth(0, 300);
-    layout->setColumnMinimumWidth(1, 300);
-    layout->setColumnMinimumWidth(2, 300);
-
-    layout->setRowMinimumHeight(0, 150);
-    layout->setRowMinimumHeight(1, 150);
-    layout->setRowMinimumHeight(2, 150);
-
-    layout->setColumnStretch(1, 1);
-
-    setLayout(layout);
-
-
-
-
-    cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
-    //pcl::io::loadPLYFile ("C:\\Users\\Umamaheswaran\\Desktop\\testdata\\chair_alb0.ply", *cloud);
-//    pcl::io::loadPLYFile ("D:\\MAIA\\SEM 1\\Software Engineering\\Project 3D-KORN\\eze_thresholded\\eze_0.ply", *cloud);
-//    TDK_Database::mv_PointCloudsVector.push_back(cloud->makeShared());
-////    viewer->addPointCloud( cloud, "cloud1" );
-////    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud1");
-
-//    pcl::io::loadPLYFile ("D:\\MAIA\\SEM 1\\Software Engineering\\Project 3D-KORN\\eze_thresholded\\eze_1.ply", *cloud);
-//    TDK_Database::mv_PointCloudsVector.push_back(cloud->makeShared());
-////    viewer->addPointCloud( cloud, "cloud2" );
-////    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud2");
-
-//    pcl::io::loadPLYFile ("D:\\MAIA\\SEM 1\\Software Engineering\\Project 3D-KORN\\eze_thresholded\\eze_2.ply", *cloud);
-//    TDK_Database::mv_PointCloudsVector.push_back(cloud->makeShared());
-////    viewer->addPointCloud( cloud, "cloud3" );
-////    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud3");
-
-
-//    pcl::io::loadPLYFile ("D:\\MAIA\\SEM 1\\Software Engineering\\Project 3D-KORN\\eze_thresholded\\eze_3.ply", *cloud);
-//    TDK_Database::mv_PointCloudsVector.push_back(cloud->makeShared());
-////    viewer->addPointCloud( cloud, "cloud4" );
-////    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud4");
-
-
-//    pcl::IterativeClosestPoint<pcl::PointXYZRGB,pcl::PointXYZRGB>::Ptr icp (new pcl::IterativeClosestPoint<pcl::PointXYZRGB,pcl::PointXYZRGB>);
-//    //icp->setMaxCorrespondenceDistance (0.05);
-//    icp->setMaximumIterations (50);
-//    pcl::registration::IncrementalRegistration<pcl::PointXYZRGB> iicp;
-//    iicp.setRegistration (icp);
-//    int i = 0;
-//    while (i < 4){
-
-//      iicp.registerCloud (TDK_Database::mv_PointCloudsVector[i]);
-//      transformPointCloud (*(TDK_Database::mv_PointCloudsVector[i]), *cloud, iicp.getAbsoluteTransform ());
-//      viewer->addPointCloud( cloud, "cloud"+i );
-//      viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud"+i);
-
-
-//      i++;
-//    }
-
-    //viewer->addPointCloud( (TDK_Database::mv_PointCloudsVector)[1], "cloud" );
-//    viewer->addPointCloud( cloud, "cloud" );
-//    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
-    qvtkWidget->update();
-
-    //pcl::io::loadPLYFile ("D:\\MAIA\\SEM 1\\Software Engineering\\Project 3D-KORN\\testdata\\chair_alb0.ply", *cloud);
-    //viewer->addCoordinateSystem();
-    //if( !viewer->updatePointCloud( TDK_Database::mv_PointCloudsVector[2], "cloud" ) ){
-         // viewer->addPointCloud( (TDK_Database::mv_PointCloudsVector)[1], "cloud" );
-//          viewer->addPointCloud( cloud, "cloud" );
-//          viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 2, "cloud");
-//      // }
-    qvtkWidget->update();
-}
-
-TDK_CentralWidget::~TDK_CentralWidget()
-{
-
+    mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
 }

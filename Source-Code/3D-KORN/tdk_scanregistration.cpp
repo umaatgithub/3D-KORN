@@ -520,35 +520,35 @@ void TDK_ScanRegistration::set_voxelSideLength(float value)
 /// \brief TDK_ScanRegistration::setMv_ICPPost_MaxCorrespondanceDistance
 /// \param value
 ///
-void TDK_ScanRegistration::set_PostICP_MaxCorrespondanceDistance(float value)
-{
-    mv_ICPPost_MaxCorrespondanceDistance = value;
-}
+//void TDK_ScanRegistration::set_PostICP_MaxCorrespondanceDistance(float value)
+//{
+//    mv_ICPPost_MaxCorrespondanceDistance = value;
+//}
 
-void TDK_ScanRegistration::set_voxelSideLength(float value)
-{
-    mv_voxelSideLength = value;
-}
+//void TDK_ScanRegistration::set_voxelSideLength(float value)
+//{
+//    mv_voxelSideLength = value;
+//}
 
 double TDK_ScanRegistration::get_SVD_MaxDistance() const
 {
     return mv_SVD_MaxDistance;
 }
 
-void TDK_ScanRegistration::set_SVD_MaxDistance(double value)
-{
-    mv_SVD_MaxDistance = value;
-}
+//void TDK_ScanRegistration::set_SVD_MaxDistance(double value)
+//{
+//    mv_SVD_MaxDistance = value;
+//}
 
 float TDK_ScanRegistration::get_ICP_MaxCorrespondenceDistance() const
 {
     return mv_ICP_MaxCorrespondenceDistance;
 }
 
-void TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
-{
-    mv_ICP_MaxCorrespondenceDistance = value;
-}
+//void TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
+//{
+//    mv_ICP_MaxCorrespondenceDistance = value;
+//}
 
 float TDK_ScanRegistration::get_ICPPost_MaxCorrespondanceDistance() const
 {

@@ -3,6 +3,7 @@
 
 // Include Qt headers
 #include <QMainWindow>
+#include <QStatusBar>
 #include <QGridLayout>
 #include <QDockWidget>
 #include <QScrollArea>
@@ -13,6 +14,8 @@
 #include <QCheckBox>
 #include <map>
 #include <QDebug>
+#include <QRadioButton>
+#include <QKeyEvent>
 
 //Include PCL headers
 #include <pcl/point_cloud.h>
@@ -25,13 +28,16 @@
 
 #include "tdk_sensorcontroller.h"
 #include "tdk_database.h"
+#include "tdk_scanregistration.h"
 
 class TDK_ScanWindow : public QMainWindow
 {
     Q_OBJECT
 public:
     explicit TDK_ScanWindow(QWidget *parent = 0);
+    ~TDK_ScanWindow();
     QWidget *mv_CentralWidget;
+    QStatusBar *mv_StatusBar;
     QGridLayout *mv_CentralGridLayout;
     TDK_SensorController *mv_SensorController;
     TDK_Sensor *mv_Sensor;
@@ -42,6 +48,8 @@ public:
     //Flag variables
     bool mv_FlagRegisterDuringScan;
     bool mv_FlagScanning;
+    bool mv_FlagTurnTableParametersEnabled;
+    bool mv_FlagPointCloudExists;
 
     //Sensor widgets
     QComboBox *mv_SensorComboBox;
@@ -51,21 +59,26 @@ public:
     QDoubleSpinBox *mv_YMaximumSpinBox;
     QDoubleSpinBox *mv_ZMinimumSpinBox;
     QDoubleSpinBox *mv_ZMaximumSpinBox;
+    QCheckBox *mv_RegisterationCheckBox;
+    QPushButton *mv_CapturePointCloudPushButton;
     QPushButton *mv_StartScanPushButton;
     QPushButton *mv_StopScanPushButton;
-    QCheckBox *mv_RegisterationCheckBox;
 
+    //Platform parameters widgets
+    QRadioButton *mv_PlatformParametersYesRadioButton;
+    QRadioButton *mv_PlatformParametersNoRadioButton;
+    QDoubleSpinBox *mv_IncrementalRotationAngleSpinBox;
+    QDoubleSpinBox *mv_NumberOfRotationsSpinBox;
 
     void mf_setupUI();
     void mf_SetupPointCloudStreamWidget();
     void mf_SetupSensorWidget();
     void mf_SetupVideoStreamWidget();
     void mf_SetupDepthMapWidget();
-    void mf_SetupPointcloudListWidget();
-
-    //enum SensorType{ KINECTV1=0, KINECTV2, INTELR200};
+    void mf_SetupPlatformParametersWidget();
 
 signals:
+    void mf_SignalStatusChanged(QString, QColor);
 
 public slots:
     void mf_SlotUpdateWindow(int sensorIndex);
@@ -74,7 +87,13 @@ public slots:
     void mf_SlotStartScan();
     void mf_SlotStopScan();
 
+    void mf_SlotHandlePlatformParameters(bool flagEnablePlatformParameters);
+
     void mf_SlotUpdatePointCloudStream();
+    void mf_SlotCapturePointCloud(float degreesRotated);
+    void mf_SlotCapturePointCloudButtonClick();
+
+    void mf_SlotUpdateStatusBar(QString status, QColor statusColor);
 
 };
 

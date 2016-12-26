@@ -18,6 +18,7 @@ public:
 
     static std::vector<TDK_Edit*> mv_EditHistoryVector;
     static std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_PointCloudsVector;
+    static std::vector<float> mv_PointCloudsRotation;
 
 signals:
 
