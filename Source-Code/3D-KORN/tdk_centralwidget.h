@@ -7,6 +7,7 @@
 #include <QScrollArea>
 #include <QLabel>
 #include <QPushButton>
+#include <QComboBox>
 #include <QVTKWidget.h>
 
 #include <pcl/point_cloud.h>
@@ -36,6 +37,13 @@ private:
     QVTKWidget *mv_PointCloudQVTKWidget;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudVisualizer;
 
+    //Point cloud operations
+    QComboBox *mv_MeshAlgorithmComboBox;
+    QPushButton *mv_GenerateMeshPushButton;
+    QComboBox *mv_RegistrationComboBox;
+    QPushButton *mv_RegistrationPushButton;
+
+
     void mf_setupUI();
     void mf_SetupPointCloudDisplayWidget();
     void mf_SetupCropWidget();
@@ -46,6 +54,8 @@ private:
 signals:
 
 public slots:
+    void mf_SlotRegisterPointCloud();
+    void mf_SlotGenerateMesh();
 };
 
 #endif // TDK_CENTRALWIDGET_H

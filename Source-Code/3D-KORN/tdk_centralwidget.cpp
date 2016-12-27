@@ -4,9 +4,16 @@
 
 TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     mv_CentralGridLayout(new QGridLayout),
-    mv_PointCloudQVTKWidget(new QVTKWidget)
+    mv_PointCloudQVTKWidget(new QVTKWidget),
+    mv_MeshAlgorithmComboBox(new QComboBox),
+    mv_GenerateMeshPushButton(new QPushButton(QString("GENERATE MESH"))),
+    mv_RegistrationComboBox(new QComboBox),
+    mv_RegistrationPushButton(new QPushButton(QString("REGISTER POINT CLOUDS")))
 {
     mf_setupUI();
+
+    connect(mv_RegistrationPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotRegisterPointCloud()));
+    connect(mv_GenerateMeshPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotGenerateMesh()));
 
 }
 
@@ -115,10 +122,48 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     QScrollArea *scrollArea = new QScrollArea;
     QWidget *widget = new QWidget;
 
+    mv_RegistrationComboBox->setFixedHeight(22);
+    mv_RegistrationComboBox->addItem("SVD + ICP", "SVD");
+
+    mv_RegistrationPushButton->setFixedHeight(22);
+    mv_RegistrationPushButton->setMinimumWidth(300);
+
+    QFrame* myFrame = new QFrame();
+    myFrame->setFrameShape(QFrame::HLine);
+
+    mv_MeshAlgorithmComboBox->setFixedHeight(22);
+    mv_MeshAlgorithmComboBox->addItem("Poisson", "Poisson");
+
+    mv_GenerateMeshPushButton->setFixedHeight(22);
+    mv_GenerateMeshPushButton->setMinimumWidth(300);
+
+    gridLayout->addWidget(new QLabel("Select registration algorithm : "), 0, 0, 1, 2);
+    gridLayout->addWidget(mv_RegistrationComboBox, 0, 2, 1, 2);
+    gridLayout->addWidget(mv_RegistrationPushButton, 1, 0, 1, 4);
+    gridLayout->addWidget(myFrame, 2, 0, 1, 4);
+    gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 3, 0, 1, 2);
+    gridLayout->addWidget(mv_MeshAlgorithmComboBox, 3, 2, 1, 2);
+    gridLayout->addWidget(mv_GenerateMeshPushButton, 4, 0, 1, 4);
+
+
+    gridLayout->setRowMinimumHeight(0, 30);
+    gridLayout->setHorizontalSpacing(10);
+    gridLayout->setVerticalSpacing(20);
+    gridLayout->setMargin(12);
 
     widget->setLayout(gridLayout);
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
     mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
+}
+
+void TDK_CentralWidget::mf_SlotRegisterPointCloud()
+{
+    qDebug() << "Check if atleast one point cloud selected and run registration";
+}
+
+void TDK_CentralWidget::mf_SlotGenerateMesh()
+{
+    qDebug() << "Check if only one point cloud is selected and run mesh";
 }

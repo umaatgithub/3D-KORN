@@ -13,7 +13,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_actionImport_from_scan_triggered()
+
+void MainWindow::on_mf_NewScanToolBar_triggered()
 {
     TDK_ScanWindow *tdk_scanWindow = new TDK_ScanWindow(this);
     if(tdk_scanWindow->mv_SensorController->mf_IsSensorAvailable()){
@@ -49,6 +50,40 @@ void MainWindow::on_actionImport_from_scan_triggered()
                 break;
             }
         }
-
     }
+}
+
+void MainWindow::on_mf_ActionNewScanMenuBar_triggered()
+{
+    on_mf_NewScanToolBar_triggered();
+}
+
+void MainWindow::on_mf_ActionExitMenuBar_triggered()
+{
+    this->close();
+}
+
+void MainWindow::on_mf_ActionAboutMenuBar_triggered()
+{
+
+}
+
+void MainWindow::on_mf_ActionImportPointCloudMenuBar_triggered()
+{
+
+}
+
+void MainWindow::on_mf_ActionImportMeshMenuBar_triggered()
+{
+
+}
+
+void MainWindow::on_mf_ActionExportPointCloudMenuBar_triggered()
+{
+
+}
+
+void MainWindow::on_mf_ActionExportMeshMenuBar_triggered()
+{
+
 }
