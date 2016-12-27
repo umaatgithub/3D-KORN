@@ -20,6 +20,7 @@
 #include <vtkRenderWindow.h>
 
 #include "tdk_database.h"
+#include <QPushButton>
 
 //typedef pcl::PointXYZRGBA PointT;
 //typedef pcl::PointCloud<PointT> PointCloudT;
@@ -30,6 +31,14 @@ class TDK_CentralWidget : public QWidget
 public:
     explicit TDK_CentralWidget(QWidget *parent = 0);
     ~TDK_CentralWidget();
+
+
+
+    void Setup_CroppingWidget();
+    void Setup_RegistrationWidget();
+    void Setup_ProgressionBarWidget();
+    void Setup_PCListWidget();
+    void Setup_InformationPCWidget();
 
 private:
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
@@ -43,6 +52,7 @@ private:
     int color_mode;
     QGridLayout *layout;
     QVTKWidget *qvtkWidget;
+    QPushButton *pb;
 
 
 signals:
