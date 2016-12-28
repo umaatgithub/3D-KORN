@@ -8,12 +8,19 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     mv_MeshAlgorithmComboBox(new QComboBox),
     mv_GenerateMeshPushButton(new QPushButton(QString("GENERATE MESH"))),
     mv_RegistrationComboBox(new QComboBox),
-    mv_RegistrationPushButton(new QPushButton(QString("REGISTER POINT CLOUDS")))
+    mv_RegistrationPushButton(new QPushButton(QString("REGISTER POINT CLOUDS"))),
+    mv_SelectionTabWidget(new QTabWidget),
+    mv_PointCloudListTab(new QListWidget),
+    mv_RegisteredPointCloudListTab(new QListWidget),
+    mv_MeshListTab(new QListWidget)
 {
     mf_setupUI();
 
     connect(mv_RegistrationPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotRegisterPointCloud()));
     connect(mv_GenerateMeshPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotGenerateMesh()));
+
+    connect(this, SIGNAL(mf_SignalRegisteredPointCloudListUpdated()), this, SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
+    connect(this, SIGNAL(mf_SignalMeshListUpdated()), this, SLOT(mf_SlotUpdateMeshListTab()));
 
 }
 
@@ -30,7 +37,7 @@ void TDK_CentralWidget::mf_setupUI()
     mf_SetupPointCloudDisplayWidget();
     mf_SetupCropWidget();
     mf_SetupInformationWidget();
-    mf_SetupPointCloudListWidget();
+    mf_SetupSelectionWidget();
     mf_SetupPointCloudOperationsWidget();
 
     mv_CentralGridLayout->setColumnMinimumWidth(0, 300);
@@ -99,18 +106,14 @@ void TDK_CentralWidget::mf_SetupInformationWidget()
     mv_CentralGridLayout->addWidget(dockWidget, 1, 2);
 }
 
-void TDK_CentralWidget::mf_SetupPointCloudListWidget()
+void TDK_CentralWidget::mf_SetupSelectionWidget()
 {
-    QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud List"));
-    QGridLayout *gridLayout = new QGridLayout;
-    QScrollArea *scrollArea = new QScrollArea;
-    QWidget *widget = new QWidget;
+    QDockWidget *dockWidget = new QDockWidget(tr("Selection Widget"));
+    mv_SelectionTabWidget->addTab(mv_PointCloudListTab, QString("PC"));
+    mv_SelectionTabWidget->addTab(mv_RegisteredPointCloudListTab, QString("REGISTERED PC"));
+    mv_SelectionTabWidget->addTab(mv_MeshListTab, QString("MESH"));
 
-
-
-    widget->setLayout(gridLayout);
-    scrollArea->setWidget(widget);
-    dockWidget->setWidget(scrollArea);
+    dockWidget->setWidget(mv_SelectionTabWidget);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
     mv_CentralGridLayout->addWidget(dockWidget, 0, 2);
 }
@@ -161,9 +164,41 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
 void TDK_CentralWidget::mf_SlotRegisterPointCloud()
 {
     qDebug() << "Check if atleast one point cloud selected and run registration";
+    TDK_Database::mv_RegisteredPointCloudsName.push_back(QString("TDK_Registered_PointCloud"));
+    emit mf_SignalRegisteredPointCloudListUpdated();
 }
 
 void TDK_CentralWidget::mf_SlotGenerateMesh()
 {
     qDebug() << "Check if only one point cloud is selected and run mesh";
+    TDK_Database::mv_MeshesName.push_back(QString("TDK_Mesh"));
+    emit mf_SignalMeshListUpdated();
+
+}
+
+void TDK_CentralWidget::mf_SlotUpdatePointCloudListTab()
+{
+    QListWidgetItem* item = new QListWidgetItem;
+    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+    item->setCheckState(Qt::Unchecked);
+    item->setText(TDK_Database::mv_PointCloudsName[TDK_Database::mv_PointCloudsName.size()-1]);
+    mv_PointCloudListTab->addItem(item);
+}
+
+void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudListTab()
+{
+    QListWidgetItem* item = new QListWidgetItem;
+    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+    item->setCheckState(Qt::Unchecked);
+    item->setText(TDK_Database::mv_RegisteredPointCloudsName[TDK_Database::mv_RegisteredPointCloudsName.size()-1]);
+    mv_RegisteredPointCloudListTab->addItem(item);
+}
+
+void TDK_CentralWidget::mf_SlotUpdateMeshListTab()
+{
+    QListWidgetItem* item = new QListWidgetItem;
+    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+    item->setCheckState(Qt::Unchecked);
+    item->setText(TDK_Database::mv_MeshesName[TDK_Database::mv_MeshesName.size()-1]);
+    mv_MeshListTab->addItem(item);
 }

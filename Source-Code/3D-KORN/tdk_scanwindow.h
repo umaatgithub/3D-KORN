@@ -43,6 +43,7 @@ public:
     TDK_Sensor *mv_Sensor;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudStreamVisualizer;
     QVTKWidget *mv_PointCloudStreamQVTKWidget;
+    unsigned int mv_NumberOfPointCloudsCaptured;
 
 
     //Flag variables
@@ -60,9 +61,10 @@ public:
     QDoubleSpinBox *mv_ZMinimumSpinBox;
     QDoubleSpinBox *mv_ZMaximumSpinBox;
     QCheckBox *mv_RegisterationCheckBox;
-    QPushButton *mv_CapturePointCloudPushButton;
     QPushButton *mv_StartScanPushButton;
     QPushButton *mv_StopScanPushButton;
+    QLabel *mv_NumberOfPointCloudsCapturedLabel;
+    QPushButton *mv_CapturePointCloudPushButton;
 
     //Platform parameters widgets
     QRadioButton *mv_PlatformParametersYesRadioButton;

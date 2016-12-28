@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QVTKWidget.h>
+#include <QListWidget>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -20,9 +21,6 @@
 #include <vtkRenderWindow.h>
 
 #include "tdk_database.h"
-
-//typedef pcl::PointXYZRGBA PointT;
-//typedef pcl::PointCloud<PointT> PointCloudT;
 
 class TDK_CentralWidget : public QWidget
 {
@@ -43,19 +41,32 @@ private:
     QComboBox *mv_RegistrationComboBox;
     QPushButton *mv_RegistrationPushButton;
 
+    //Selection widget
+    QTabWidget *mv_SelectionTabWidget;
+    QListWidget *mv_PointCloudListTab;
+    QListWidget *mv_RegisteredPointCloudListTab;
+    QListWidget *mv_MeshListTab;
+
 
     void mf_setupUI();
     void mf_SetupPointCloudDisplayWidget();
     void mf_SetupCropWidget();
     void mf_SetupInformationWidget();
-    void mf_SetupPointCloudListWidget();
+    void mf_SetupSelectionWidget();
     void mf_SetupPointCloudOperationsWidget();
 
 signals:
+    void mf_SignalPointCloudListUpdated();
+    void mf_SignalRegisteredPointCloudListUpdated();
+    void mf_SignalMeshListUpdated();
 
 public slots:
     void mf_SlotRegisterPointCloud();
     void mf_SlotGenerateMesh();
+
+    void mf_SlotUpdatePointCloudListTab();
+    void mf_SlotUpdateRegisteredPointCloudListTab();
+    void mf_SlotUpdateMeshListTab();
 };
 
 #endif // TDK_CENTRALWIDGET_H

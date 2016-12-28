@@ -24,7 +24,9 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     mv_IncrementalRotationAngleSpinBox(new QDoubleSpinBox),
     mv_NumberOfRotationsSpinBox(new QDoubleSpinBox),
     mv_FlagTurnTableParametersEnabled(false),
-    mv_FlagPointCloudExists(false)
+    mv_FlagPointCloudExists(false),
+    mv_NumberOfPointCloudsCaptured(0),
+    mv_NumberOfPointCloudsCapturedLabel(new QLabel("0"))
 {
     this->setStatusBar(mv_StatusBar);
 
@@ -174,9 +176,11 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     gridLayout->addWidget(new QLabel(QString("z-maximum : ")), 3, 2);
     gridLayout->addWidget(mv_ZMaximumSpinBox, 3, 3);
     gridLayout->addWidget(mv_RegisterationCheckBox, 4, 0, 1, 4);
-    gridLayout->addWidget(mv_CapturePointCloudPushButton, 5, 0, 1, 4);
-    gridLayout->addWidget(mv_StartScanPushButton, 6, 0, 1, 2);
-    gridLayout->addWidget(mv_StopScanPushButton, 6, 2, 1, 2);
+    gridLayout->addWidget(mv_StartScanPushButton, 5, 0, 1, 2);
+    gridLayout->addWidget(mv_StopScanPushButton, 5, 2, 1, 2);
+    gridLayout->addWidget(new QLabel(QString("Number of point clouds captured : ")), 6, 0, 1, 2);
+    gridLayout->addWidget(mv_NumberOfPointCloudsCapturedLabel, 6, 2, 1, 2);
+    gridLayout->addWidget(mv_CapturePointCloudPushButton, 7, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
