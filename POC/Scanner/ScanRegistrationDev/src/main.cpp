@@ -22,14 +22,12 @@ main (int argc, char** argv)
 {
     int numPointclouds = 16;
 
-
-    TDK_ScanRegistration scanRegistrator;
+    TDK_ScanRegistration scanRegistrator(false);
 
     // x center = 0.087, z_center = 1.4
     //Pamir is 0.2, 0, 2.25 + 0.3 (with rotation compensaiton
     pcl::PointWithViewpoint scannerCenter(0.18, 0.0, 2.12, 21, 0, 0); //2.054 obtained from max_z in center slice
-    scanRegistrator.setScannerCenter(scannerCenter);
-
+    scanRegistrator.setScannerRotationAxis(scannerCenter);
 
     //Load pc
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud;
@@ -47,20 +45,7 @@ main (int argc, char** argv)
     //add to viewer
     qDebug() << "Post processing pointcloud...";
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedPC = scanRegistrator.mf_getMergedPostRegisteredPC();
-
-    unsigned int pointsBefore = mergedPC->points.size();
-
-    pcl::VoxelGrid<pcl::PointXYZRGB> avg;
-
-    avg.setInputCloud(mergedPC);
-    float leafSize = 0.03;
-    avg.setLeafSize(leafSize,leafSize,leafSize);
-    avg.filter(*mergedPC);
-
-    unsigned int pointsRemoved = pointsBefore - mergedPC->points.size();
-
-    qDebug() << "Removed " << pointsRemoved << " points";
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedPC = scanRegistrator.postProcess_and_getAlignedPC();
 
     //pcl::io::savePLYFileBinary("pamir.ply", *mergedPC);
     //    qDebug() << "Post processing finished...";

@@ -2901,8 +2901,6 @@ release\main.obj: ..\src\main.cpp "C:\Program Files\PCL 1.8.0\include\pcl-1.8\pc
 		"C:\Program Files\PCL 1.8.0\3rdParty\Eigen\eigen3\unsupported\Eigen\src\NonLinearOptimization\HybridNonLinearSolver.h" \
 		"C:\Program Files\PCL 1.8.0\3rdParty\Eigen\eigen3\unsupported\Eigen\src\NonLinearOptimization\LevenbergMarquardt.h" \
 		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\impl\ndt.hpp" \
-		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\filters\approximate_voxel_grid.h" \
-		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\filters\impl\approximate_voxel_grid.hpp" \
 		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\QDebug \
 		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qdebug.h \
 		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qalgorithms.h \
@@ -3032,7 +3030,9 @@ release\main.obj: ..\src\main.cpp "C:\Program Files\PCL 1.8.0\include\pcl-1.8\pc
 		"C:\Program Files\PCL 1.8.0\3rdParty\Boost\include\boost-1_61\boost\graph\adjacency_iterator.hpp" \
 		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\impl\elch.hpp" \
 		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\incremental_registration.h" \
-		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\impl\incremental_registration.hpp"
+		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\impl\incremental_registration.hpp" \
+		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\filters\radius_outlier_removal.h" \
+		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\filters\impl\radius_outlier_removal.hpp"
 
 release\tdk_scanregistration.obj: ..\src\tdk_scanregistration.cpp ../src/tdk_scanregistration.h \
 		"C:\Program Files\PCL 1.8.0\3rdParty\Eigen\eigen3\Eigen\Core" \
@@ -5270,69 +5270,7 @@ release\tdk_scanregistration.obj: ..\src\tdk_scanregistration.cpp ../src/tdk_sca
 		"C:\Program Files\PCL 1.8.0\3rdParty\Boost\include\boost-1_61\boost\graph\adjacency_iterator.hpp" \
 		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\impl\elch.hpp" \
 		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\incremental_registration.h" \
-		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\impl\incremental_registration.hpp" \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\QDebug \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qdebug.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qalgorithms.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qglobal.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qconfig.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qfeatures.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qsystemdetection.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qprocessordetection.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qcompilerdetection.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qtypeinfo.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qtypetraits.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qisenum.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qsysinfo.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qlogging.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qflags.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qatomic.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qbasicatomic.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qatomic_bootstrap.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qgenericatomic.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qatomic_cxx11.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qatomic_msvc.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qglobalstatic.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qmutex.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qnumeric.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qversiontagging.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qhash.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qchar.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qiterator.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qlist.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qrefcount.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qarraydata.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qhashfunctions.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qpair.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qbytearraylist.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qbytearray.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qnamespace.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qstring.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qstringbuilder.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qstringlist.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qregexp.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qstringmatcher.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qmap.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qtextstream.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qiodevice.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qobject.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qobjectdefs.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qobjectdefs_impl.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qcoreevent.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qscopedpointer.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qmetatype.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qvarlengtharray.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qcontainerfwd.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qobject_impl.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qlocale.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qvariant.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qshareddata.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qvector.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qpoint.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qset.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qcontiguouscache.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qsharedpointer.h \
-		C:\Qt\Qt5.7.0\5.7\msvc2015_64\include\QtCore\qsharedpointer_impl.h
+		"C:\Program Files\PCL 1.8.0\include\pcl-1.8\pcl\registration\impl\incremental_registration.hpp"
 
 ####### Install
 
