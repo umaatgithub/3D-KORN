@@ -25,7 +25,6 @@
 #include <pcl/registration/incremental_registration.h>
 #include <pcl/PCLPointCloud2.h>
 
-
 using namespace std;
 
 void PointCloudXYZRGBtoXYZ(
@@ -33,43 +32,50 @@ void PointCloudXYZRGBtoXYZ(
         pcl::PointCloud<pcl::PointXYZ>::Ptr &out
         );
 
+
 class TDK_ScanRegistration
 {
 public:
-    TDK_ScanRegistration();
-    TDK_ScanRegistration(const pcl::PointWithViewpoint scannerCenter);
+    TDK_ScanRegistration(const bool registerInRealTime);
+    TDK_ScanRegistration(const pcl::PointWithViewpoint scannerCenter,
+                         const bool registerInRealTime);
     ~TDK_ScanRegistration();
 
     //Input
-    bool addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud);
     bool addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud,
                            const float degreesRotatedY);
-    bool addAllPointClouds(const vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &inputPCs,
-                           const vector<float> degreesRotatedY);
 
     //Ouput
     pcl::PointCloud<pcl::PointXYZ>::Ptr getLastDownSampledPointcloud();
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mf_getMergedAlignedPC();
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mf_getMergedPostRegisteredPC();
-    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* mf_getOriginalPointClouds();
-    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* mf_getAlignedPointClouds();
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr getRoughlyAlignedPC();
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr postProcess_and_getAlignedPC();
+    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRotationCompensatedPCs();
+    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRoughlyAlignedPCs();
 
     //Configuration parameters getters and setters
-    pcl::PointWithViewpoint getMv_scannerCenter() const;
+    bool getRegisterInRealTime() const;
+    void setRegisterInRealTime(bool value);
+
+    pcl::PointWithViewpoint getScannerRotationAxis() const;
+    void setScannerRotationAxis(const pcl::PointWithViewpoint &value);
+
     float get_normalRadiusSearch() const;
     float get_ICPPost_MaxCorrespondanceDistance() const;
     float get_voxelSideLength() const;
     double get_SVD_MaxDistance() const;
     float get_ICP_MaxCorrespondenceDistance() const;
 
-    void setScannerCenter(const pcl::PointWithViewpoint &value);
     void set_normalRadiusSearch(float value);
     void set_voxelSideLength(float value);
     void set_SVD_MaxDistance(double value);
     void set_ICP_MaxCorrespondenceDistance(float value);
-    void set_ICPPost_MaxCorrespondanceDistance(float value);
+    void set_PostICP_MaxCorrespondanceDistance(float value);
+
 
 private:
+    //Class operation configuration
+    bool mv_registerInRealTime;
+
     //Configuration parameters
     float mv_normalRadiusSearch;
     float mv_voxelSideLength;
@@ -84,6 +90,8 @@ private:
 
     //Internal data storage
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_originalPCs;
+    vector<float> mv_originalPointcloudsYRotation;
+    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_originalRotatedPCs;
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_originalDenoisedPCs;
     vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> mv_downSampledPCs;
     vector<pcl::PointCloud<pcl::Normal>::Ptr> mv_downSampledNormals;
@@ -95,6 +103,13 @@ private:
     //Private class functions
     bool
     mf_processCorrespondencesSVDICP();
+
+    bool
+    addAllPointClouds(const vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &inputPCs,
+                      const vector<float> degreesRotatedY);
+
+    void
+    setDefaultParameters();
 
     //Utility functions
     pcl::PointCloud<pcl::PointXYZ>::Ptr
