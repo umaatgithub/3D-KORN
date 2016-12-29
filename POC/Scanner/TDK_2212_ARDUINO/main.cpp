@@ -1,4 +1,4 @@
-#include "tdk_serialportreader.h"
+#include "tdk_turntable.h"
 
 #include <QtSerialPort/QSerialPort>
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    TDK_serialPortReader serialPortReader(&serialPort);
+    TDK_turntable serialPortReader(&serialPort);
 
 
     ////////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
-#ifndef TDK_SERIALPORTREADER_H
-#define TDK_SERIALPORTREADER_H
+#ifndef TDK_TURNTABLE_H
+#define TDK_TURNTABLE_H
 
 #include <QtSerialPort/QSerialPort>
 #include <QTextStream>
@@ -15,13 +15,13 @@ QT_END_NAMESPACE
 */
 
 
-class TDK_serialPortReader : public QObject
+class TDK_turntable : public QObject
 {
     Q_OBJECT
 
 public:
-    TDK_serialPortReader(QSerialPort *serialPort, QObject *parent = 0);
-    ~TDK_serialPortReader();
+    TDK_turntable(QSerialPort *serialPort, QObject *parent = 0);
+    ~TDK_turntable();
     void mf_startPlatform();
     void mf_stopPlatform();
     void mf_setNumberOfRotations(int& num_rot);
@@ -48,4 +48,4 @@ private:
 };
 
 
-#endif // TDK_SERIALPORTREADER_H
+#endif // TDK_TURNTABLE_H

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.0.2, 2016-12-22T18:30:06. -->
+<!-- Written by QtCreator 4.0.2, 2016-12-29T14:48:28. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -284,12 +284,12 @@
     </valuelist>
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">TDK_2212_ARDUINO</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">TDK_TURNTABLE</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/Dani/Documents/TDK_2212_arduino/TDK_2212_ARDUINO/TDK_2212_ARDUINO.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/Dani/Documents/Github/3D-KORN/POC/Scanner/TDK_2212_ARDUINO/TDK_TURNTABLE.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">COM3 4800</value>
-    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">TDK_2212_ARDUINO.pro</value>
+    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">TDK_TURNTABLE.pro</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix">false</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory.default">C:/Users/Dani/Documents/TDK_2212_arduino/build-TDK_2212_ARDUINO-Desktop_Qt_5_7_0_MSVC2015_64bit-Release</value>

@@ -4,14 +4,14 @@ QT += serialport
 
 CONFIG += c++11
 
-TARGET = TDK_2212_ARDUINO
+TARGET = TDK_TURNTABLE
 CONFIG += console
 CONFIG -= app_bundle
 
 TEMPLATE = app
 
 SOURCES += main.cpp \
-    tdk_serialportreader.cpp
+    tdk_turntable.cpp
 
 HEADERS += \
-    tdk_serialportreader.h
+    tdk_turntable.h

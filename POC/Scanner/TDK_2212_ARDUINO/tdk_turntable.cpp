@@ -1,17 +1,17 @@
-#include "tdk_serialportreader.h"
+#include "tdk_turntable.h"
 #include <QCoreApplication>
 
 QT_USE_NAMESPACE
 
 
-TDK_serialPortReader::TDK_serialPortReader(QSerialPort *serialPort, QObject *parent)
+TDK_turntable::TDK_turntable(QSerialPort *serialPort, QObject *parent)
     : QObject(parent)
     , m_serialPort(serialPort)
     , m_standardOutput(stdout)
 {
     mv_totalAngle=0;
     mv_totalLaps=0;
-    connect(m_serialPort, &QSerialPort::readyRead, this, &TDK_serialPortReader::handleReadyRead);
+    connect(m_serialPort, &QSerialPort::readyRead, this, &TDK_turntable::handleReadyRead);
     //connect(m_serialPort, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
     //        this, &TDK_serialPortReader::handleError);
     //connect(&m_timer, &QTimer::timeout, this, &SerialPortReader::handleTimeout);
@@ -20,28 +20,28 @@ TDK_serialPortReader::TDK_serialPortReader(QSerialPort *serialPort, QObject *par
 }
 
 
-TDK_serialPortReader::~TDK_serialPortReader()
+TDK_turntable::~TDK_turntable()
 {
     if (m_serialPort->isOpen())
         m_serialPort->close();
 }
 
 //function that sends via serial the command for stopping the turntable
-void TDK_serialPortReader::mf_stopPlatform()
+void TDK_turntable::mf_stopPlatform()
 {
     int com=0;
     this->mf_sendCommandViaSerial(com);
 }
 
 //function that sends via serial the command for setting the number of rotations desired to ddo
-void TDK_serialPortReader::mf_setNumberOfRotations(int& num_rot)
+void TDK_turntable::mf_setNumberOfRotations(int& num_rot)
 {
     int com=num_rot;
     this->mf_sendCommandViaSerial(com);
 }
 
 //function that sends via serial the command for starting the turntable
-void TDK_serialPortReader::mf_startPlatform()
+void TDK_turntable::mf_startPlatform()
 {
     int com=9;
     this->mf_sendCommandViaSerial(com);
@@ -49,7 +49,7 @@ void TDK_serialPortReader::mf_startPlatform()
 
 
 //private function that sends a command via serial in an array
-void TDK_serialPortReader::mf_sendCommandViaSerial(int& com)
+void TDK_turntable::mf_sendCommandViaSerial(int& com)
 {
     if (m_serialPort->isOpen() && m_serialPort->isWritable())
     {
@@ -68,7 +68,7 @@ void TDK_serialPortReader::mf_sendCommandViaSerial(int& com)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //Slot function for when the turntable has rotated 5 degrees
-void TDK_serialPortReader::handleReadyRead()
+void TDK_turntable::handleReadyRead()
 {
     static int i=0;
     m_readData.append(m_serialPort->readAll());
