@@ -1,13 +1,13 @@
 #include "tdk_scanwindow.h"
 
-TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
+TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
     mv_CentralWidget(new QWidget(this)),
     mv_StatusBar(new QStatusBar),
     mv_CentralGridLayout(new QGridLayout),
     mv_SensorController(new TDK_SensorController),
     mv_SensorComboBox(new QComboBox),
     mv_PointCloudStreamQVTKWidget(new QVTKWidget),
-    mv_FlagRegisterDuringScan(false),
+    mv_FlagRealTimeScan(false),
     mv_FlagScanning(false),
     mv_XMinimumSpinBox(new QDoubleSpinBox),
     mv_XMaximumSpinBox(new QDoubleSpinBox),
@@ -26,7 +26,10 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     mv_FlagTurnTableParametersEnabled(false),
     mv_FlagPointCloudExists(false),
     mv_NumberOfPointCloudsCaptured(0),
-    mv_NumberOfPointCloudsCapturedLabel(new QLabel("0"))
+    mv_NumberOfPointCloudsCapturedLabel(new QLabel("0")),
+    mv_ScanRegistration(new TDK_ScanRegistration),
+    mv_SerialPortNameLineEdit(new QLineEdit),
+    mv_SerialPortBaudRateComboBox(new QComboBox)
 {
     this->setStatusBar(mv_StatusBar);
 
@@ -45,6 +48,9 @@ TDK_ScanWindow::TDK_ScanWindow(QWidget *parent) : QMainWindow(parent),
     connect(mv_PlatformParametersYesRadioButton, SIGNAL(toggled(bool)), this, SLOT(mf_SlotHandlePlatformParameters(bool)));
 
     connect(this, SIGNAL(mf_SignalStatusChanged(QString,QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString,QColor)));
+
+    pcl::PointWithViewpoint center;
+    mv_ScanRegistration->setScannerRotationAxis(center);
 
 }
 
@@ -178,8 +184,8 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     gridLayout->addWidget(mv_RegisterationCheckBox, 4, 0, 1, 4);
     gridLayout->addWidget(mv_StartScanPushButton, 5, 0, 1, 2);
     gridLayout->addWidget(mv_StopScanPushButton, 5, 2, 1, 2);
-    gridLayout->addWidget(new QLabel(QString("Number of point clouds captured : ")), 6, 0, 1, 2);
-    gridLayout->addWidget(mv_NumberOfPointCloudsCapturedLabel, 6, 2, 1, 2);
+    gridLayout->addWidget(new QLabel(QString("Number of point clouds captured : ")), 6, 0, 1, 3);
+    gridLayout->addWidget(mv_NumberOfPointCloudsCapturedLabel, 6, 3, 1, 1);
     gridLayout->addWidget(mv_CapturePointCloudPushButton, 7, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
@@ -250,6 +256,13 @@ void TDK_ScanWindow::mf_SetupPlatformParametersWidget()
     mv_NumberOfRotationsSpinBox->setFixedHeight(22);
     mv_NumberOfRotationsSpinBox->setEnabled(false);
 
+    mv_SerialPortBaudRateComboBox->addItem(QString("4800"));
+    mv_SerialPortBaudRateComboBox->addItem(QString("19200"));
+    mv_SerialPortBaudRateComboBox->setEnabled(false);
+
+    mv_SerialPortNameLineEdit->setText("COM3");
+    mv_SerialPortNameLineEdit->setEnabled(false);
+
     gridLayout->addWidget(new QLabel("Enable platform parameters : "), 0, 0, 1, 2);
     gridLayout->addWidget(mv_PlatformParametersYesRadioButton, 0, 2, 1, 1);
     gridLayout->addWidget(mv_PlatformParametersNoRadioButton, 0, 3, 1, 1);
@@ -257,6 +270,10 @@ void TDK_ScanWindow::mf_SetupPlatformParametersWidget()
     gridLayout->addWidget(mv_IncrementalRotationAngleSpinBox, 1, 2, 1, 2);
     gridLayout->addWidget(new QLabel("Number of rotations : "), 2, 0, 1, 2);
     gridLayout->addWidget(mv_NumberOfRotationsSpinBox, 2, 2, 1, 2);
+    gridLayout->addWidget(new QLabel("Serial port name : "), 3, 0, 1, 2);
+    gridLayout->addWidget(mv_SerialPortNameLineEdit, 3, 2, 1, 2);
+    gridLayout->addWidget(new QLabel("Serial port baud rate : "), 4, 0, 1, 2);
+    gridLayout->addWidget(mv_SerialPortBaudRateComboBox, 4, 2, 1, 2);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
@@ -282,26 +299,32 @@ void TDK_ScanWindow::mf_SlotUpdatePointCloudStream()
 
 void TDK_ScanWindow::mf_SlotCapturePointCloud(float degreesRotated)
 {
-    if(mv_FlagScanning){
-        TDK_Database::mv_PointCloudsVector.push_back(mv_Sensor->mf_GetMvPointCloud()->makeShared());
-        TDK_Database::mv_PointCloudsRotation.push_back(degreesRotated);
-        if(mv_FlagRegisterDuringScan){
+    if(mv_FlagScanning && mv_FlagPointCloudExists){
+        TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
+        emit mf_SignalDatabasePointCloudUpdated();
+//        TDK_Database::mv_PointCloudsVector.push_back(mv_Sensor->mf_GetMvPointCloud()->makeShared());
+//        TDK_Database::mv_PointCloudsRotation.push_back(degreesRotated);
+        //if(mv_FlagRealTimeScan){
             //Call registration and pass the point cloud
             qDebug() << "Register";
-        }
+            mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], degreesRotated);
+        //}
     }
 }
 
 void TDK_ScanWindow::mf_SlotCapturePointCloudButtonClick()
 {
-    qDebug() << "Clicked";
+    qDebug() << "Clicked" << mv_FlagScanning << mv_FlagPointCloudExists << !mv_FlagTurnTableParametersEnabled;
     if(mv_FlagScanning && mv_FlagPointCloudExists && !mv_FlagTurnTableParametersEnabled){
-        TDK_Database::mv_PointCloudsVector.push_back(mv_Sensor->mf_GetMvPointCloud()->makeShared());
-        TDK_Database::mv_PointCloudsRotation.push_back(0);
-        if(mv_FlagRegisterDuringScan){
+        TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
+        emit mf_SignalDatabasePointCloudUpdated();
+//        TDK_Database::mv_PointCloudsVector.push_back(mv_Sensor->mf_GetMvPointCloud()->makeShared());
+//        TDK_Database::mv_PointCloudsRotation.push_back(0);
+        //if(mv_FlagRealTimeScan){
             //Call registration and pass the point cloud
             qDebug() << "Register";
-        }
+            mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], 0);
+        //}
     }
 }
 
@@ -330,10 +353,11 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
 
 }
 
-void TDK_ScanWindow::mf_SlotPointCloudRegistration(bool flagRegisterDuringScan)
+void TDK_ScanWindow::mf_SlotPointCloudRegistration(bool flagRealTimeScan)
 {
     if(!mv_FlagScanning){
-        mv_FlagRegisterDuringScan = flagRegisterDuringScan;
+        mv_FlagRealTimeScan = flagRealTimeScan;
+        mv_ScanRegistration->setRegisterInRealTime(flagRealTimeScan);
     }
 }
 
@@ -372,12 +396,19 @@ void TDK_ScanWindow::mf_SlotStopScan()
         mv_RegisterationCheckBox->setEnabled(true);
         mv_StartScanPushButton->setEnabled(true);
 
-        if(!mv_FlagRegisterDuringScan){
-            emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
-            //Call registration and pass the pointcloud vector
-            qDebug() << "Register after stopping scan";
-            emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
+        if(mv_FlagPointCloudExists){
+            //if(!mv_FlagRealTimeScan){
+                emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
+                //Call registration and pass the pointcloud vector
+                //qDebug() << "Register after stopping scan";
+                //mv_ScanRegistration->postProcess_and_getAlignedPC();
+                //mv_ScanRegistration->addAllPointClouds(TDK_Database::mv_PointCloudsVector, TDK_Database::mv_PointCloudsRotation);
+                //emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
+            //}
+            //TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
+            //emit mf_SignalDatabaseRegisteredPointCloudUpdated();
         }
+
     }
 }
 
@@ -386,10 +417,14 @@ void TDK_ScanWindow::mf_SlotHandlePlatformParameters(bool flagEnablePlatformPara
     if(flagEnablePlatformParameters){
         mv_IncrementalRotationAngleSpinBox->setEnabled(true);
         mv_NumberOfRotationsSpinBox->setEnabled(true);
+        mv_SerialPortNameLineEdit->setEnabled(true);
+        mv_SerialPortBaudRateComboBox->setEnabled(true);
     }
     else{
         mv_IncrementalRotationAngleSpinBox->setEnabled(false);
         mv_NumberOfRotationsSpinBox->setEnabled(false);
+        mv_SerialPortNameLineEdit->setEnabled(false);
+        mv_SerialPortBaudRateComboBox->setEnabled(false);
     }
 }
 

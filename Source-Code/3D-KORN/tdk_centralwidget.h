@@ -67,6 +67,10 @@ public slots:
     void mf_SlotUpdatePointCloudListTab();
     void mf_SlotUpdateRegisteredPointCloudListTab();
     void mf_SlotUpdateMeshListTab();
+
+    void mf_SlotUpdatePointCloudDisplay(QListWidgetItem* item);
+    void mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem* item);
+    void mf_SlotUpdateMeshDisplay(QListWidgetItem* item);
 };
 
 #endif // TDK_CENTRALWIDGET_H

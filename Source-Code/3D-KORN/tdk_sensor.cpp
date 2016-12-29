@@ -27,9 +27,11 @@ pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr TDK_Sensor::mf_GetMvPointCloud() con
 
 void TDK_Sensor::mf_SetMvPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pointCloudPtr)
 {
-    //qDebug() << "Setting point cloud";
-    mv_PointCloud = pointCloudPtr->makeShared();
-    emit mf_SignalPointCloudUpdated();
+    if(pointCloudPtr != nullptr && pointCloudPtr->points.size() > 0){
+        //qDebug() << "Setting point cloud" << pointCloudPtr->points.size();
+        mv_PointCloud = pointCloudPtr->makeShared();
+        emit mf_SignalPointCloudUpdated();
+    }
 }
 
 QString TDK_Sensor::mf_GetMvName() const

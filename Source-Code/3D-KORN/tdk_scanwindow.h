@@ -16,6 +16,7 @@
 #include <QDebug>
 #include <QRadioButton>
 #include <QKeyEvent>
+#include <QLineEdit>
 
 //Include PCL headers
 #include <pcl/point_cloud.h>
@@ -34,7 +35,7 @@ class TDK_ScanWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit TDK_ScanWindow(QWidget *parent = 0);
+    explicit TDK_ScanWindow(QMainWindow *parent = 0);
     ~TDK_ScanWindow();
     QWidget *mv_CentralWidget;
     QStatusBar *mv_StatusBar;
@@ -44,10 +45,11 @@ public:
     boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudStreamVisualizer;
     QVTKWidget *mv_PointCloudStreamQVTKWidget;
     unsigned int mv_NumberOfPointCloudsCaptured;
+    TDK_ScanRegistration *mv_ScanRegistration;
 
 
     //Flag variables
-    bool mv_FlagRegisterDuringScan;
+    bool mv_FlagRealTimeScan;
     bool mv_FlagScanning;
     bool mv_FlagTurnTableParametersEnabled;
     bool mv_FlagPointCloudExists;
@@ -71,6 +73,8 @@ public:
     QRadioButton *mv_PlatformParametersNoRadioButton;
     QDoubleSpinBox *mv_IncrementalRotationAngleSpinBox;
     QDoubleSpinBox *mv_NumberOfRotationsSpinBox;
+    QLineEdit *mv_SerialPortNameLineEdit;
+    QComboBox *mv_SerialPortBaudRateComboBox;
 
     void mf_setupUI();
     void mf_SetupPointCloudStreamWidget();
@@ -81,11 +85,14 @@ public:
 
 signals:
     void mf_SignalStatusChanged(QString, QColor);
+    void mf_SignalDatabasePointCloudUpdated();
+    void mf_SignalDatabaseRegisteredPointCloudUpdated();
+
 
 public slots:
     void mf_SlotUpdateWindow(int sensorIndex);
     void mf_SlotUpdateBoundingBox();
-    void mf_SlotPointCloudRegistration(bool flagRegisterDuringScan);
+    void mf_SlotPointCloudRegistration(bool flagRealTimeScan);
     void mf_SlotStartScan();
     void mf_SlotStopScan();
 

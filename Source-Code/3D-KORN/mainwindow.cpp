@@ -3,9 +3,13 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    tdk_scanWindow(new TDK_ScanWindow(this))
 {
     ui->setupUi(this);
+
+    connect(tdk_scanWindow, SIGNAL(mf_SignalDatabasePointCloudUpdated()), ui->centralWidget, SLOT(mf_SlotUpdatePointCloudListTab()));
+
 }
 
 MainWindow::~MainWindow()
@@ -16,7 +20,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_mf_NewScanToolBar_triggered()
 {
-    TDK_ScanWindow *tdk_scanWindow = new TDK_ScanWindow(this);
+
     if(tdk_scanWindow->mv_SensorController->mf_IsSensorAvailable()){
         tdk_scanWindow->mf_setupUI();
         tdk_scanWindow->setWindowTitle("3D KORN SCANNER - SCAN WINDOW");

@@ -33,6 +33,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    TDK_ScanWindow *tdk_scanWindow;
 };
 
 #endif // MAINWINDOW_H

@@ -22,13 +22,16 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     connect(this, SIGNAL(mf_SignalRegisteredPointCloudListUpdated()), this, SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
     connect(this, SIGNAL(mf_SignalMeshListUpdated()), this, SLOT(mf_SlotUpdateMeshListTab()));
 
+    connect(mv_PointCloudListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdatePointCloudDisplay(QListWidgetItem*)));
+    connect(mv_RegisteredPointCloudListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
+    connect(mv_MeshListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
+
 }
 
 TDK_CentralWidget::~TDK_CentralWidget()
 {
 
 }
-
 
 void TDK_CentralWidget::mf_setupUI()
 {
@@ -88,7 +91,7 @@ void TDK_CentralWidget::mf_SetupCropWidget()
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 0, 0);
+    mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
 
 }
 
@@ -115,7 +118,7 @@ void TDK_CentralWidget::mf_SetupSelectionWidget()
 
     dockWidget->setWidget(mv_SelectionTabWidget);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 0, 2);
+    mv_CentralGridLayout->addWidget(dockWidget, 0, 0);
 }
 
 void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
@@ -158,7 +161,7 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
+    mv_CentralGridLayout->addWidget(dockWidget, 0, 2);
 }
 
 void TDK_CentralWidget::mf_SlotRegisterPointCloud()
@@ -201,4 +204,65 @@ void TDK_CentralWidget::mf_SlotUpdateMeshListTab()
     item->setCheckState(Qt::Unchecked);
     item->setText(TDK_Database::mv_MeshesName[TDK_Database::mv_MeshesName.size()-1]);
     mv_MeshListTab->addItem(item);
+}
+
+void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
+{
+    if(item->checkState() == Qt::Checked){
+        qDebug() << item->text() << "Item checked";
+        for(int i = 0, len = item->listWidget()->count(); i < len; i++)
+        {
+            if(item->listWidget()->item(i)->text() == item->text())
+            {
+                mv_PointCloudVisualizer->addPointCloud(TDK_Database::mv_PointCloudsVector[i] , item->text().toStdString());
+                break;
+            }
+        }
+    }
+    else{
+        qDebug() << item->text() << "Item unchecked";
+        mv_PointCloudVisualizer->removePointCloud(item->text().toStdString());
+    }
+    mv_PointCloudQVTKWidget->update();
+
+}
+
+void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem *item)
+{
+    if(item->checkState() == Qt::Checked){
+        qDebug() << item->text() << "Registered Item checked";
+        for(int i = 0, len = item->listWidget()->count(); i < len; i++)
+        {
+            if(item->listWidget()->item(i)->text() == item->text())
+            {
+                mv_PointCloudVisualizer->addPointCloud(TDK_Database::mv_RegisteredPointCloudsVector[i] , item->text().toStdString());
+                break;
+            }
+        }
+    }
+    else{
+        qDebug() << item->text() << "Registered Item unchecked";
+        mv_PointCloudVisualizer->removePointCloud(item->text().toStdString());
+    }
+    mv_PointCloudQVTKWidget->update();
+}
+
+void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
+{
+    if(item->checkState() == Qt::Checked){
+        qDebug() << item->text() << "Mesh Item checked";
+        for(int i = 0, len = item->listWidget()->count(); i < len; i++)
+        {
+            if(item->listWidget()->item(i)->text() == item->text())
+            {
+                mv_PointCloudVisualizer->addPolygonMesh(*(TDK_Database::mv_MeshesVector[i]) , item->text().toStdString());
+                break;
+            }
+        }
+    }
+    else{
+        qDebug() << item->text() << "Mesh Item unchecked";
+        mv_PointCloudVisualizer->removePolygonMesh(item->text().toStdString());
+    }
+    mv_PointCloudQVTKWidget->update();
 }
