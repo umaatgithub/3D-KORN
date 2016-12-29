@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.0.2, 2016-12-29T18:47:32. -->
+<!-- Written by QtCreator 4.0.2, 2016-12-29T15:22:39. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -285,8 +285,8 @@
     <value type="int" key="PE.EnvironmentAspect.Base">2</value>
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">TDK_TURNTABLE</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">TDK_TURNTABLE2</value>
-    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/Dani/Documents/Github/3D-KORN/POC/Scanner/TDK_turntable/TDK_TURNTABLE.pro</value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/Dani/Documents/Github/3D-KORN/POC/Scanner/TDK_2212_ARDUINO/TDK_TURNTABLE.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">COM3 4800</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">TDK_TURNTABLE.pro</value>
