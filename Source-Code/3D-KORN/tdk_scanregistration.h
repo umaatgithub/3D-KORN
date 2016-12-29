@@ -36,7 +36,8 @@ void PointCloudXYZRGBtoXYZ(
 class TDK_ScanRegistration
 {
 public:
-    TDK_ScanRegistration(const bool registerInRealTime = false);
+    TDK_ScanRegistration();
+    TDK_ScanRegistration(const bool registerInRealTime);
     TDK_ScanRegistration(const pcl::PointWithViewpoint scannerCenter,
                          const bool registerInRealTime);
     ~TDK_ScanRegistration();
