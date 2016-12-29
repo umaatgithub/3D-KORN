@@ -97,11 +97,11 @@ void TDK_ScanWindow::mf_SetupPointCloudStreamWidget()
     mv_PointCloudStreamVisualizer->setBackgroundColor (0.1, 0.1, 0.1);
     mv_PointCloudStreamVisualizer->setCameraPosition( 0.0, 0.0, -5, 0.0, 0.0, 0.0 );
 
-    mv_PointCloudStreamVisualizer->addCoordinateSystem(0.5, mv_XMinimumSpinBox->value(), mv_YMinimumSpinBox->value(), mv_ZMinimumSpinBox->value(), 0);
+    mv_PointCloudStreamVisualizer->addCoordinateSystem(0.5);
 
     mv_PointCloudStreamVisualizer->addCube(mv_XMinimumSpinBox->value(), mv_XMaximumSpinBox->value(), mv_YMinimumSpinBox->value(), mv_YMaximumSpinBox->value(), mv_ZMinimumSpinBox->value(), mv_ZMaximumSpinBox->value());
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "cube");
-    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.33, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
 
@@ -110,7 +110,7 @@ void TDK_ScanWindow::mf_SetupPointCloudStreamWidget()
     float z_coord = mv_ZMinimumSpinBox->value() + (mv_ZMaximumSpinBox->value() - mv_ZMinimumSpinBox->value())/2;
 
     float inclinationDegrees = mv_InclinationSpinBox->value();
-    float top_z_coord = z_coord - (mv_YMaximumSpinBox->value() - mv_YMinimumSpinBox->value())*tan(inclinationDegrees*M_PI/180.0);
+    float top_z_coord = z_coord - (0 - mv_YMinimumSpinBox->value())*tan(inclinationDegrees*M_PI/180.0);
     float bottom_z_coord = z_coord;
 
     pcl::PointXYZ top(x_coord, mv_YMaximumSpinBox->value(), top_z_coord);
@@ -118,6 +118,7 @@ void TDK_ScanWindow::mf_SetupPointCloudStreamWidget()
 
     mv_PointCloudStreamVisualizer->addLine<pcl::PointXYZ>(bottom, top, 0.0, 0.9, 0.0, "rot_axis");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, "rot_axis");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "rot_axis");
 
     mv_PointCloudStreamQVTKWidget->SetRenderWindow ( mv_PointCloudStreamVisualizer->getRenderWindow () );
     mv_PointCloudStreamVisualizer->setupInteractor ( mv_PointCloudStreamQVTKWidget->GetInteractor (), mv_PointCloudStreamQVTKWidget->GetRenderWindow ());
@@ -373,7 +374,7 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
 
     mv_PointCloudStreamVisualizer->addCube(mv_XMinimumSpinBox->value(), mv_XMaximumSpinBox->value(), mv_YMinimumSpinBox->value(), mv_YMaximumSpinBox->value(), mv_ZMinimumSpinBox->value(), mv_ZMaximumSpinBox->value());
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "cube");
-    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.33, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
 
@@ -390,8 +391,13 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
 
     mv_PointCloudStreamVisualizer->addLine<pcl::PointXYZ>(bottom, top, 0.0, 0.9, 0.0, "rot_axis");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, "rot_axis");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "rot_axis");
 
 
+    //Compute scanregistrator axis of rotation parameters
+    pcl::PointWithViewpoint turntableRotationAxis(x_coord, 0.0, z_coord, inclinationDegrees, 0.0, 0.0);
+
+    //TODO: CONNECT WITH REGISTRATION CLASS OR PARAMETERS?
 
     mv_PointCloudStreamQVTKWidget->update();
 }
