@@ -3,6 +3,15 @@
 
 using namespace std;
 
+TDK_ScanRegistration::TDK_ScanRegistration()
+{
+    //Empty constructor
+    mv_registerInRealTime = false;
+    this->setDefaultParameters();
+}
+
+/////////////////////////////////////////////////////
+
 TDK_ScanRegistration::TDK_ScanRegistration(const bool registerInRealTime)
 {
     //Empty constructor
@@ -11,6 +20,7 @@ TDK_ScanRegistration::TDK_ScanRegistration(const bool registerInRealTime)
 }
 
 /////////////////////////////////////////////////////
+
 TDK_ScanRegistration::TDK_ScanRegistration(
         const pcl::PointWithViewpoint scannerCenter,
         const bool registerInRealTime)
