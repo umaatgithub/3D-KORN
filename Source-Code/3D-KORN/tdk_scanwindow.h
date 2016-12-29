@@ -62,6 +62,7 @@ public:
     QDoubleSpinBox *mv_YMaximumSpinBox;
     QDoubleSpinBox *mv_ZMinimumSpinBox;
     QDoubleSpinBox *mv_ZMaximumSpinBox;
+    QDoubleSpinBox *mv_InclinationSpinBox;
     QCheckBox *mv_RegisterationCheckBox;
     QPushButton *mv_StartScanPushButton;
     QPushButton *mv_StopScanPushButton;
