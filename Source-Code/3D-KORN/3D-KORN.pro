@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui opengl
+QT       += core gui opengl serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -224,7 +224,8 @@ SOURCES += main.cpp\
     tdk_intelr200sensor.cpp \
     tdk_sensorcontroller.cpp \
     tdk_kinectv2sensor.cpp \
-    tdk_turntable.cpp
+    tdk_turntable.cpp \
+    TDK_PointOperations.cpp
 
 HEADERS  += mainwindow.h \
     tdk_centralwidget.h \
@@ -237,6 +238,7 @@ HEADERS  += mainwindow.h \
     tdk_intelr200sensor.h \
     tdk_sensorcontroller.h \
     tdk_kinectv2sensor.h \
-    tdk_turntable.h
+    tdk_turntable.h \
+    TDK_PointOperations.h
 
 FORMS    += mainwindow.ui

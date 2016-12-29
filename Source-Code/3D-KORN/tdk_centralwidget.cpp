@@ -1,6 +1,5 @@
 #include "tdk_centralwidget.h"
 #include <QDebug>
-#include <pcl/registration/incremental_registration.h>
 
 TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     mv_CentralGridLayout(new QGridLayout),
@@ -9,10 +8,13 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     mv_GenerateMeshPushButton(new QPushButton(QString("GENERATE MESH"))),
     mv_RegistrationComboBox(new QComboBox),
     mv_RegistrationPushButton(new QPushButton(QString("REGISTER POINT CLOUDS"))),
-    mv_SelectionTabWidget(new QTabWidget),
+    mv_PointCloudExplorerTabWidget(new QTabWidget),
     mv_PointCloudListTab(new QListWidget),
     mv_RegisteredPointCloudListTab(new QListWidget),
-    mv_MeshListTab(new QListWidget)
+    mv_MeshListTab(new QListWidget),
+    mv_ScanRegistration(new TDK_ScanRegistration),
+    mv_numberOfPointCloudsSelected(0),
+    mv_numberOfMeshesSelected(0)
 {
     mf_setupUI();
 
@@ -40,7 +42,7 @@ void TDK_CentralWidget::mf_setupUI()
     mf_SetupPointCloudDisplayWidget();
     mf_SetupCropWidget();
     mf_SetupInformationWidget();
-    mf_SetupSelectionWidget();
+    mf_SetupPointCloudExplorerTabWidget();
     mf_SetupPointCloudOperationsWidget();
 
     mv_CentralGridLayout->setColumnMinimumWidth(0, 300);
@@ -109,14 +111,14 @@ void TDK_CentralWidget::mf_SetupInformationWidget()
     mv_CentralGridLayout->addWidget(dockWidget, 1, 2);
 }
 
-void TDK_CentralWidget::mf_SetupSelectionWidget()
+void TDK_CentralWidget::mf_SetupPointCloudExplorerTabWidget()
 {
-    QDockWidget *dockWidget = new QDockWidget(tr("Selection Widget"));
-    mv_SelectionTabWidget->addTab(mv_PointCloudListTab, QString("PC"));
-    mv_SelectionTabWidget->addTab(mv_RegisteredPointCloudListTab, QString("REGISTERED PC"));
-    mv_SelectionTabWidget->addTab(mv_MeshListTab, QString("MESH"));
+    QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Explorer"));
+    mv_PointCloudExplorerTabWidget->addTab(mv_PointCloudListTab, QString("PC"));
+    mv_PointCloudExplorerTabWidget->addTab(mv_RegisteredPointCloudListTab, QString("REGISTERED PC"));
+    mv_PointCloudExplorerTabWidget->addTab(mv_MeshListTab, QString("MESH"));
 
-    dockWidget->setWidget(mv_SelectionTabWidget);
+    dockWidget->setWidget(mv_PointCloudExplorerTabWidget);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
     mv_CentralGridLayout->addWidget(dockWidget, 0, 0);
 }
@@ -166,16 +168,48 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
 
 void TDK_CentralWidget::mf_SlotRegisterPointCloud()
 {
-    qDebug() << "Check if atleast one point cloud selected and run registration";
-    TDK_Database::mv_RegisteredPointCloudsName.push_back(QString("TDK_Registered_PointCloud"));
-    emit mf_SignalRegisteredPointCloudListUpdated();
+    qDebug() << "Check if atleast two point clouds selected and run registration";
+    if(mv_numberOfPointCloudsSelected > 1){
+        for (int i=0, len = mv_PointCloudListTab->count(); i < len; i++){
+            if(mv_PointCloudListTab->item(i)->checkState() == Qt::Checked){
+                mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[i], 0);
+            }
+        }
+        for (int i=0, len = mv_RegisteredPointCloudListTab->count(); i < len; i++){
+            if(mv_RegisteredPointCloudListTab->item(i)->checkState() == Qt::Checked){
+                mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_RegisteredPointCloudsVector[i], 0);
+            }
+        }
+        TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
+        emit mf_SignalRegisteredPointCloudListUpdated();
+    }
+    else{
+        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select atleast two point clouds from explorer widget to register."));
+    }
 }
 
 void TDK_CentralWidget::mf_SlotGenerateMesh()
 {
-    qDebug() << "Check if only one point cloud is selected and run mesh";
-    TDK_Database::mv_MeshesName.push_back(QString("TDK_Mesh"));
-    emit mf_SignalMeshListUpdated();
+    qDebug() << "Check if atleast one point cloud is selected and run mesh";
+    if(mv_numberOfPointCloudsSelected > 0){
+        for (int i=0, len = mv_PointCloudListTab->count(); i < len; i++){
+            if(mv_PointCloudListTab->item(i)->checkState() == Qt::Checked){
+                //Call mesh function
+                //TDK_Database::mf_StaticAddMesh(meshpointer);
+                //emit mf_SignalMeshListUpdated();
+            }
+        }
+        for (int i=0, len = mv_RegisteredPointCloudListTab->count(); i < len; i++){
+            if(mv_RegisteredPointCloudListTab->item(i)->checkState() == Qt::Checked){
+                //Call mesh function
+                //TDK_Database::mf_StaticAddMesh(meshpointer);
+                //emit mf_SignalMeshListUpdated();
+            }
+        }
+    }
+    else{
+        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select atleast one point cloud from explorer widget to generate mesh."));
+    }
 
 }
 
@@ -215,6 +249,7 @@ void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
             if(item->listWidget()->item(i)->text() == item->text())
             {
                 mv_PointCloudVisualizer->addPointCloud(TDK_Database::mv_PointCloudsVector[i] , item->text().toStdString());
+                mv_numberOfPointCloudsSelected++;
                 break;
             }
         }
@@ -222,6 +257,7 @@ void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
     else{
         qDebug() << item->text() << "Item unchecked";
         mv_PointCloudVisualizer->removePointCloud(item->text().toStdString());
+        mv_numberOfPointCloudsSelected--;
     }
     mv_PointCloudQVTKWidget->update();
 
@@ -236,6 +272,7 @@ void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem
             if(item->listWidget()->item(i)->text() == item->text())
             {
                 mv_PointCloudVisualizer->addPointCloud(TDK_Database::mv_RegisteredPointCloudsVector[i] , item->text().toStdString());
+                mv_numberOfPointCloudsSelected++;
                 break;
             }
         }
@@ -243,6 +280,7 @@ void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem
     else{
         qDebug() << item->text() << "Registered Item unchecked";
         mv_PointCloudVisualizer->removePointCloud(item->text().toStdString());
+        mv_numberOfPointCloudsSelected--;
     }
     mv_PointCloudQVTKWidget->update();
 }
@@ -256,6 +294,8 @@ void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
             if(item->listWidget()->item(i)->text() == item->text())
             {
                 mv_PointCloudVisualizer->addPolygonMesh(*(TDK_Database::mv_MeshesVector[i]) , item->text().toStdString());
+                mv_numberOfMeshesSelected++;
+
                 break;
             }
         }
@@ -263,6 +303,7 @@ void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
     else{
         qDebug() << item->text() << "Mesh Item unchecked";
         mv_PointCloudVisualizer->removePolygonMesh(item->text().toStdString());
+        mv_numberOfMeshesSelected--;
     }
     mv_PointCloudQVTKWidget->update();
 }

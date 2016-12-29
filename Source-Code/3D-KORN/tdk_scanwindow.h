@@ -30,6 +30,7 @@
 #include "tdk_sensorcontroller.h"
 #include "tdk_database.h"
 #include "tdk_scanregistration.h"
+#include "tdk_turntable.h"
 
 class TDK_ScanWindow : public QMainWindow
 {
@@ -44,8 +45,9 @@ public:
     TDK_Sensor *mv_Sensor;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudStreamVisualizer;
     QVTKWidget *mv_PointCloudStreamQVTKWidget;
-    unsigned int mv_NumberOfPointCloudsCaptured;
+    int mv_NumberOfPointCloudsCaptured;
     TDK_ScanRegistration *mv_ScanRegistration;
+    TDK_Turntable *mv_Turntable;
 
 
     //Flag variables
@@ -76,6 +78,7 @@ public:
     QLineEdit *mv_SerialPortNameLineEdit;
     QComboBox *mv_SerialPortBaudRateComboBox;
 
+
     void mf_setupUI();
     void mf_SetupPointCloudStreamWidget();
     void mf_SetupSensorWidget();
@@ -83,10 +86,14 @@ public:
     void mf_SetupDepthMapWidget();
     void mf_SetupPlatformParametersWidget();
 
+    int mf_GetNumberOfPointCloudsCaptured() const;
+    void mf_SetNumberOfPointCloudsCaptured(int value);
+
 signals:
     void mf_SignalStatusChanged(QString, QColor);
     void mf_SignalDatabasePointCloudUpdated();
     void mf_SignalDatabaseRegisteredPointCloudUpdated();
+    void mf_SignalNumberOfPointCloudUpdated(int);
 
 
 public slots:
@@ -99,7 +106,7 @@ public slots:
     void mf_SlotHandlePlatformParameters(bool flagEnablePlatformParameters);
 
     void mf_SlotUpdatePointCloudStream();
-    void mf_SlotCapturePointCloud(float degreesRotated);
+    void mf_SlotCapturePointCloud(int degreesRotated);
     void mf_SlotCapturePointCloudButtonClick();
 
     void mf_SlotUpdateStatusBar(QString status, QColor statusColor);

@@ -4,60 +4,60 @@
 QT_USE_NAMESPACE
 
 
-TDK_turntable::TDK_turntable(QSerialPort *serialPort, QObject *parent)
+TDK_Turntable::TDK_Turntable( QObject *parent)
     : QObject(parent)
-    , m_serialPort(serialPort)
-    , m_standardOutput(stdout)
+    , mv_SerialPort(new QSerialPort)
+    , mv_TotalAngle(0)
+    , mv_TotalRotations(0)
 {
-    mv_totalAngle=0;
-    mv_totalLaps=0;
-    connect(m_serialPort, &QSerialPort::readyRead, this, &TDK_turntable::handleReadyRead);
-    //connect(m_serialPort, static_cast<void (QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
-    //        this, &TDK_serialPortReader::handleError);
-    //connect(&m_timer, &QTimer::timeout, this, &SerialPortReader::handleTimeout);
 
-    //m_timer.start(5000);
 }
 
-
-TDK_turntable::~TDK_turntable()
+TDK_Turntable::~TDK_Turntable()
 {
-    if (m_serialPort->isOpen())
-        m_serialPort->close();
-}
 
-//function that sends via serial the command for stopping the turntable
-void TDK_turntable::mf_stopPlatform()
-{
-    int com=0;
-    this->mf_sendCommandViaSerial(com);
-}
-
-//function that sends via serial the command for setting the number of rotations desired to ddo
-void TDK_turntable::mf_setNumberOfRotations(int& num_rot)
-{
-    int com=num_rot;
-    this->mf_sendCommandViaSerial(com);
 }
 
 //function that sends via serial the command for starting the turntable
-void TDK_turntable::mf_startPlatform()
+void TDK_Turntable::mf_StartPlatform(QString serialPortName, int serialBaudRate)
 {
-    int com=9;
-    this->mf_sendCommandViaSerial(com);
+    mv_SerialPort->setPortName(serialPortName);
+    mv_SerialPort->setBaudRate(serialBaudRate);
+    mv_SerialPort->open(QIODevice::ReadWrite);
+    mv_FlagRunning = true;
+
+    connect(mv_SerialPort, &QSerialPort::readyRead, this, &TDK_Turntable::mf_SlotHandleReadyRead);
+    mv_TotalAngle = 0;
+    this->mf_SendCommandViaSerial(START);
+}
+
+
+//function that sends via serial the command for stopping the turntable
+void TDK_Turntable::mf_StopPlatform()
+{
+    disconnect(mv_SerialPort, &QSerialPort::readyRead, this, &TDK_Turntable::mf_SlotHandleReadyRead);
+    mv_FlagRunning = false;
+    this->mf_SendCommandViaSerial(STOP);
+    if (mv_SerialPort->isOpen())
+        mv_SerialPort->close();
+}
+
+bool TDK_Turntable::mf_IsRunning()
+{
+    return mv_FlagRunning;
 }
 
 
 //private function that sends a command via serial in an array
-void TDK_turntable::mf_sendCommandViaSerial(int& com)
+void TDK_Turntable::mf_SendCommandViaSerial(int command)
 {
-    if (m_serialPort->isOpen() && m_serialPort->isWritable())
+    if (mv_SerialPort->isOpen() && mv_SerialPort->isWritable())
     {
         QByteArray dayArray;
-        dayArray[0]=com;
-        m_serialPort->write(dayArray);
-        m_serialPort->flush();
-        m_serialPort->waitForBytesWritten(2);
+        dayArray[0]=command;
+        mv_SerialPort->write(dayArray);
+        mv_SerialPort->flush();
+        mv_SerialPort->waitForBytesWritten(2);
     }
     else
     {
@@ -68,28 +68,24 @@ void TDK_turntable::mf_sendCommandViaSerial(int& com)
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //Slot function for when the turntable has rotated 5 degrees
-void TDK_turntable::handleReadyRead()
+void TDK_Turntable::mf_SlotHandleReadyRead()
 {
     static int i=0;
-    m_readData.append(m_serialPort->readAll());
-    mv_totalAngle+=(int)m_readData[i];
-    m_standardOutput << mv_totalAngle<< endl;
-
-    emit(msig_degreesRotated());
-
-    //signal is emitted every time a new rotation is accomplished
-    if (mv_totalAngle % 360 == 0)
-    {
-        mv_totalLaps += 1;
-        emit (msig_lapDone());
-        m_standardOutput <<("1 complete turn done in the platform. Number of laps: ")<<  mv_totalLaps << endl;
-
-    }
+    mv_ReadData.append(mv_SerialPort->readAll());
+    mv_TotalAngle = (int)mv_ReadData[i];
+    qDebug() << mv_TotalAngle;
 
     //Signal is emitted every time we accomplish the step degrees
-    if (mv_totalAngle % mv_stepAngle == 0)
+    if (mv_TotalAngle % mv_StepAngle == 0)
     {
-        emit (msig_stepDegreesRotated());
+        emit (mf_SignalStepAngleRotated(mv_TotalAngle % 360));
+    }
+
+    //signal is emitted every when total rotation is accomplished
+    if (mv_TotalAngle / 360 >= mv_TotalRotations)
+    {
+        mf_StopPlatform();
+        emit (mf_SignalRotationsDone());
     }
 
     i++;
@@ -98,31 +94,22 @@ void TDK_turntable::handleReadyRead()
 
 //////////////////////////////////////////////////////////////////////////////////////
 
-/*
-
-//Slot function to handle the timeouts in case a timer is set
-void TDK_serialPortReader::handleTimeout()
+int TDK_Turntable::mf_GetTotalRotations() const
 {
-    if (m_readData.isEmpty()) {
-        m_standardOutput << QObject::tr("No data was currently available for reading from port %1").arg(m_serialPort->portName()) << endl;
-    } else {
-        m_standardOutput << QObject::tr("Data successfully received from port %1").arg(m_serialPort->portName()) << endl;
-        m_standardOutput << m_readData << endl;
-    }
-
-
-    QCoreApplication::quit();
-}
-*/
-
-/*
-//Slot function to handle a serial port error when the data is being read
-void TDK_serialPortReader::handleError(QSerialPort::SerialPortError serialPortError)
-{
-    if (serialPortError == QSerialPort::ReadError) {
-        m_standardOutput << QObject::tr("An I/O error occurred while reading the data from port %1, error: %2").arg(m_serialPort->portName()).arg(m_serialPort->errorString()) << endl;
-        QCoreApplication::exit(1);
-    }
+    return mv_TotalRotations;
 }
 
-*/
+void TDK_Turntable::mf_SetTotalRotations(int value)
+{
+    mv_TotalRotations = value;
+}
+
+int TDK_Turntable::mf_GetStepAngle() const
+{
+    return mv_StepAngle;
+}
+
+void TDK_Turntable::mf_SetStepAngle(int value)
+{
+    mv_StepAngle = value;
+}

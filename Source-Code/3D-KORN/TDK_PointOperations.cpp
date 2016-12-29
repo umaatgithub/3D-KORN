@@ -10,7 +10,7 @@ TDK_PointOperations::TDK_PointOperations()
 }
 
 //My try ---> decide to delete it or not !
-void TDK_PointOperations::FilterPCPassthrough(const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, const double &kx, const double &ky, const double &kz, uint &xi, uint &yi, uint &zi, const PointCloud<PointXYZ>::Ptr &cloud, PointCloud<PointXYZ>::Ptr &clouda){
+void TDK_PointOperations::FilterPCPassthrough(const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, const double &kx, const double &ky, const double &kz, unsigned int &xi, unsigned int &yi, unsigned int &zi, const PointCloud<PointXYZ>::Ptr &cloud, PointCloud<PointXYZ>::Ptr &clouda){
     PassThrough<PointXYZ> pass (true);
     //EXPECT_EQ (pass.getRemovedIndices()->size(), 0);
     pass.setFilterFieldName ("z");

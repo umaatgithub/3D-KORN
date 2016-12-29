@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QVTKWidget.h>
 #include <QListWidget>
+#include <QMessageBox>
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -21,6 +22,8 @@
 #include <vtkRenderWindow.h>
 
 #include "tdk_database.h"
+#include "tdk_scanregistration.h"
+#include "TDK_PointOperations.h"
 
 class TDK_CentralWidget : public QWidget
 {
@@ -40,19 +43,22 @@ private:
     QPushButton *mv_GenerateMeshPushButton;
     QComboBox *mv_RegistrationComboBox;
     QPushButton *mv_RegistrationPushButton;
+    TDK_ScanRegistration *mv_ScanRegistration;
 
-    //Selection widget
-    QTabWidget *mv_SelectionTabWidget;
+    //Explorer widget
+    QTabWidget *mv_PointCloudExplorerTabWidget;
     QListWidget *mv_PointCloudListTab;
     QListWidget *mv_RegisteredPointCloudListTab;
     QListWidget *mv_MeshListTab;
+    unsigned int mv_numberOfPointCloudsSelected;
+    unsigned int mv_numberOfMeshesSelected;
 
 
     void mf_setupUI();
     void mf_SetupPointCloudDisplayWidget();
     void mf_SetupCropWidget();
     void mf_SetupInformationWidget();
-    void mf_SetupSelectionWidget();
+    void mf_SetupPointCloudExplorerTabWidget();
     void mf_SetupPointCloudOperationsWidget();
 
 signals:

@@ -29,7 +29,8 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
     mv_NumberOfPointCloudsCapturedLabel(new QLabel("0")),
     mv_ScanRegistration(new TDK_ScanRegistration),
     mv_SerialPortNameLineEdit(new QLineEdit),
-    mv_SerialPortBaudRateComboBox(new QComboBox)
+    mv_SerialPortBaudRateComboBox(new QComboBox),
+    mv_Turntable(new TDK_Turntable)
 {
     this->setStatusBar(mv_StatusBar);
 
@@ -44,8 +45,10 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
     connect(mv_StartScanPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotStartScan()));
     connect(mv_StopScanPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotStopScan()));
     connect(mv_CapturePointCloudPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotCapturePointCloudButtonClick()));
-
     connect(mv_PlatformParametersYesRadioButton, SIGNAL(toggled(bool)), this, SLOT(mf_SlotHandlePlatformParameters(bool)));
+    connect(this, SIGNAL(mf_SignalNumberOfPointCloudUpdated(int)), mv_NumberOfPointCloudsCapturedLabel, SLOT(setNum(int)));
+    connect(mv_Turntable, SIGNAL(mf_SignalStepAngleRotated(int)), this, SLOT(mf_SlotCapturePointCloud(float)));
+    connect(mv_Turntable, SIGNAL(mf_SignalRotationsDone()), this, SLOT(mf_SlotStopScan()));
 
     connect(this, SIGNAL(mf_SignalStatusChanged(QString,QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString,QColor)));
 
@@ -297,18 +300,14 @@ void TDK_ScanWindow::mf_SlotUpdatePointCloudStream()
     mv_PointCloudStreamQVTKWidget->update();
 }
 
-void TDK_ScanWindow::mf_SlotCapturePointCloud(float degreesRotated)
+void TDK_ScanWindow::mf_SlotCapturePointCloud(int degreesRotated)
 {
     if(mv_FlagScanning && mv_FlagPointCloudExists){
+        mf_SetNumberOfPointCloudsCaptured(mf_GetNumberOfPointCloudsCaptured() + 1);
         TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
         emit mf_SignalDatabasePointCloudUpdated();
-//        TDK_Database::mv_PointCloudsVector.push_back(mv_Sensor->mf_GetMvPointCloud()->makeShared());
-//        TDK_Database::mv_PointCloudsRotation.push_back(degreesRotated);
-        //if(mv_FlagRealTimeScan){
-            //Call registration and pass the point cloud
-            qDebug() << "Register";
-            mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], degreesRotated);
-        //}
+        qDebug() << "Register";
+        mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], degreesRotated);
     }
 }
 
@@ -316,15 +315,11 @@ void TDK_ScanWindow::mf_SlotCapturePointCloudButtonClick()
 {
     qDebug() << "Clicked" << mv_FlagScanning << mv_FlagPointCloudExists << !mv_FlagTurnTableParametersEnabled;
     if(mv_FlagScanning && mv_FlagPointCloudExists && !mv_FlagTurnTableParametersEnabled){
+        mf_SetNumberOfPointCloudsCaptured(mf_GetNumberOfPointCloudsCaptured() + 1);
         TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
         emit mf_SignalDatabasePointCloudUpdated();
-//        TDK_Database::mv_PointCloudsVector.push_back(mv_Sensor->mf_GetMvPointCloud()->makeShared());
-//        TDK_Database::mv_PointCloudsRotation.push_back(0);
-        //if(mv_FlagRealTimeScan){
-            //Call registration and pass the point cloud
-            qDebug() << "Register";
-            mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], 0);
-        //}
+        qDebug() << "Register";
+        mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], 0);
     }
 }
 
@@ -366,6 +361,7 @@ void TDK_ScanWindow::mf_SlotStartScan()
     if(!mv_FlagScanning){
         emit mf_SignalStatusChanged(QString("Scanning..."), Qt::blue);
         mv_FlagScanning = true;
+        mf_SetNumberOfPointCloudsCaptured(0);
         mv_CapturePointCloudPushButton->setEnabled(true);
         mv_SensorComboBox->setEnabled(false);
         mv_XMinimumSpinBox->setEnabled(false);
@@ -377,6 +373,11 @@ void TDK_ScanWindow::mf_SlotStartScan()
         mv_RegisterationCheckBox->setEnabled(false);
         mv_StartScanPushButton->setEnabled(false);
         mv_FlagPointCloudExists = false;
+        if(mv_FlagTurnTableParametersEnabled && !mv_Turntable->mf_IsRunning()){
+            mv_Turntable->mf_SetStepAngle((int)mv_IncrementalRotationAngleSpinBox->value());
+            mv_Turntable->mf_SetTotalRotations((int)mv_NumberOfRotationsSpinBox->value());
+            mv_Turntable->mf_StartPlatform(mv_SerialPortNameLineEdit->text(), mv_SerialPortBaudRateComboBox->currentText().toInt());
+        }
     }
 }
 
@@ -396,18 +397,18 @@ void TDK_ScanWindow::mf_SlotStopScan()
         mv_RegisterationCheckBox->setEnabled(true);
         mv_StartScanPushButton->setEnabled(true);
 
+        if(mv_Turntable->mf_IsRunning()){
+            mv_Turntable->mf_StopPlatform();
+        }
+
         if(mv_FlagPointCloudExists){
-            //if(!mv_FlagRealTimeScan){
-                emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
-                //Call registration and pass the pointcloud vector
-                //qDebug() << "Register after stopping scan";
-                //mv_ScanRegistration->postProcess_and_getAlignedPC();
-                //mv_ScanRegistration->addAllPointClouds(TDK_Database::mv_PointCloudsVector, TDK_Database::mv_PointCloudsRotation);
-                //emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
-            //}
+            emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
             //TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
             //emit mf_SignalDatabaseRegisteredPointCloudUpdated();
+            emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
         }
+        mf_SetNumberOfPointCloudsCaptured(0);
+        this->close();
 
     }
 }
@@ -438,4 +439,15 @@ void TDK_ScanWindow::mf_SlotUpdateWindow(int sensorIndex)
     qDebug() << mv_Sensor->mf_GetMvName();
     connect(mv_Sensor, SIGNAL(mf_SignalPointCloudUpdated()), this, SLOT(mf_SlotUpdatePointCloudStream()));
     mv_Sensor->mf_StartSensor();
+}
+
+int TDK_ScanWindow::mf_GetNumberOfPointCloudsCaptured() const
+{
+    return mv_NumberOfPointCloudsCaptured;
+}
+
+void TDK_ScanWindow::mf_SetNumberOfPointCloudsCaptured(int value)
+{
+    mv_NumberOfPointCloudsCaptured = value;
+    emit mf_SignalNumberOfPointCloudUpdated(value);
 }
