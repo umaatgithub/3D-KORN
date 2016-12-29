@@ -15,6 +15,7 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
     mv_YMaximumSpinBox(new QDoubleSpinBox),
     mv_ZMinimumSpinBox(new QDoubleSpinBox),
     mv_ZMaximumSpinBox(new QDoubleSpinBox),
+    mv_InclinationSpinBox(new QDoubleSpinBox),
     mv_RegisterationCheckBox(new QCheckBox),
     mv_CapturePointCloudPushButton(new QPushButton(QString("CAPTURE POINT CLOUD"))),
     mv_StartScanPushButton(new QPushButton(QString("START SCAN"))),
@@ -41,6 +42,7 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
     connect(mv_YMaximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
     connect(mv_ZMinimumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
     connect(mv_ZMaximumSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
+    connect(mv_InclinationSpinBox, SIGNAL(valueChanged(double)), this, SLOT(mf_SlotUpdateBoundingBox()));
     connect(mv_RegisterationCheckBox, SIGNAL(clicked(bool)), this, SLOT(mf_SlotPointCloudRegistration(bool)));
     connect(mv_StartScanPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotStartScan()));
     connect(mv_StopScanPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotStopScan()));
@@ -96,14 +98,32 @@ void TDK_ScanWindow::mf_SetupPointCloudStreamWidget()
 
     mv_PointCloudStreamVisualizer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
     mv_PointCloudStreamVisualizer->setBackgroundColor (0.1, 0.1, 0.1);
-    //mv_PointCloudStreamVisualizer->setCameraPosition( 0.0, 0.0, 2.5, 0.0, 0.0, 0.0 );
+    mv_PointCloudStreamVisualizer->setCameraPosition( 0.0, 0.0, 2.5, 0.0, 0.0, 0.0 );
 
-    mv_PointCloudStreamVisualizer->addCoordinateSystem(1.0);
+
+    mv_PointCloudStreamVisualizer->addCoordinateSystem(0.1);
+
+
     mv_PointCloudStreamVisualizer->addCube(0, 1, 0, 1, 0, 1, 0, 0, 0,"cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
+
+    //Add turntableAxisOfRotation
+    float x_coord = mv_XMinimumSpinBox->value() + (mv_XMaximumSpinBox->value() - mv_XMinimumSpinBox->value())/2;
+    float z_coord = mv_ZMinimumSpinBox->value() + (mv_ZMaximumSpinBox->value() - mv_ZMinimumSpinBox->value())/2;
+
+    float inclinationDegrees = mv_InclinationSpinBox->value();
+    float top_z_coord = z_coord - (mv_YMaximumSpinBox->value() - mv_YMinimumSpinBox->value())*tan(inclinationDegrees*M_PI/180.0);
+    float bottom_z_coord = z_coord;
+
+    pcl::PointXYZ top(x_coord, mv_YMaximumSpinBox->value(), top_z_coord);
+    pcl::PointXYZ bottom(x_coord, mv_YMinimumSpinBox->value(), bottom_z_coord);
+
+    mv_PointCloudStreamVisualizer->addLine<pcl::PointXYZ>(bottom, top, 0.0, 0.9, 0.0, "rot_axis");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, "rot_axis");
+
 
     mv_PointCloudStreamQVTKWidget->SetRenderWindow ( mv_PointCloudStreamVisualizer->getRenderWindow () );
     mv_PointCloudStreamVisualizer->setupInteractor ( mv_PointCloudStreamQVTKWidget->GetInteractor (), mv_PointCloudStreamQVTKWidget->GetRenderWindow ());
@@ -128,7 +148,7 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
 
     mv_XMinimumSpinBox->setRange(-10, 10);
     mv_XMinimumSpinBox->setSingleStep(0.01);
-    mv_XMinimumSpinBox->setValue(0);
+    mv_XMinimumSpinBox->setValue(-1);
     mv_XMinimumSpinBox->setFixedHeight(22);
     mv_XMinimumSpinBox->setSuffix(QString("m"));
 
@@ -140,7 +160,7 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
 
     mv_YMinimumSpinBox->setRange(-10, 10);
     mv_YMinimumSpinBox->setSingleStep(0.01);
-    mv_YMinimumSpinBox->setValue(0);
+    mv_YMinimumSpinBox->setValue(-2);
     mv_YMinimumSpinBox->setFixedHeight(22);
     mv_YMinimumSpinBox->setSuffix(QString("m"));
 
@@ -152,15 +172,21 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
 
     mv_ZMinimumSpinBox->setRange(-10, 10);
     mv_ZMinimumSpinBox->setSingleStep(0.01);
-    mv_ZMinimumSpinBox->setValue(0);
+    mv_ZMinimumSpinBox->setValue(2);
     mv_ZMinimumSpinBox->setFixedHeight(22);
     mv_ZMinimumSpinBox->setSuffix(QString("m"));
 
     mv_ZMaximumSpinBox->setRange(-10, 10);
     mv_ZMaximumSpinBox->setSingleStep(0.01);
-    mv_ZMaximumSpinBox->setValue(1);
+    mv_ZMaximumSpinBox->setValue(3);
     mv_ZMaximumSpinBox->setFixedHeight(22);
     mv_ZMaximumSpinBox->setSuffix(QString("m"));
+
+    mv_InclinationSpinBox->setRange(-90, 90);
+    mv_InclinationSpinBox->setSingleStep(0.1);
+    mv_InclinationSpinBox->setValue(0);
+    mv_InclinationSpinBox->setFixedHeight(22);
+    mv_InclinationSpinBox->setSuffix(QString("º"));
 
     mv_CapturePointCloudPushButton->setFixedHeight(22);
     mv_CapturePointCloudPushButton->setEnabled(false);
@@ -184,12 +210,15 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     gridLayout->addWidget(mv_ZMinimumSpinBox, 3, 1);
     gridLayout->addWidget(new QLabel(QString("z-maximum : ")), 3, 2);
     gridLayout->addWidget(mv_ZMaximumSpinBox, 3, 3);
-    gridLayout->addWidget(mv_RegisterationCheckBox, 4, 0, 1, 4);
-    gridLayout->addWidget(mv_StartScanPushButton, 5, 0, 1, 2);
-    gridLayout->addWidget(mv_StopScanPushButton, 5, 2, 1, 2);
-    gridLayout->addWidget(new QLabel(QString("Number of point clouds captured : ")), 6, 0, 1, 3);
-    gridLayout->addWidget(mv_NumberOfPointCloudsCapturedLabel, 6, 3, 1, 1);
-    gridLayout->addWidget(mv_CapturePointCloudPushButton, 7, 0, 1, 4);
+    gridLayout->addWidget(new QLabel(QString("Inclination : ")), 4, 0);
+    gridLayout->addWidget(mv_InclinationSpinBox, 4, 1);
+
+    gridLayout->addWidget(mv_RegisterationCheckBox, 5, 0, 1, 4);
+    gridLayout->addWidget(mv_StartScanPushButton, 6, 0, 1, 2);
+    gridLayout->addWidget(mv_StopScanPushButton, 6, 2, 1, 2);
+    gridLayout->addWidget(new QLabel(QString("Number of point clouds captured : ")), 7, 0, 1, 3);
+    gridLayout->addWidget(mv_NumberOfPointCloudsCapturedLabel, 7, 3, 1, 1);
+    gridLayout->addWidget(mv_CapturePointCloudPushButton, 8, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
@@ -306,6 +335,7 @@ void TDK_ScanWindow::mf_SlotCapturePointCloud(int degreesRotated)
         mf_SetNumberOfPointCloudsCaptured(mf_GetNumberOfPointCloudsCaptured() + 1);
         TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
         emit mf_SignalDatabasePointCloudUpdated();
+
         qDebug() << "Register";
         mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], degreesRotated);
     }
@@ -318,6 +348,7 @@ void TDK_ScanWindow::mf_SlotCapturePointCloudButtonClick()
         mf_SetNumberOfPointCloudsCaptured(mf_GetNumberOfPointCloudsCaptured() + 1);
         TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
         emit mf_SignalDatabasePointCloudUpdated();
+
         qDebug() << "Register";
         mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_PointCloudsVector[TDK_Database::mv_PointCloudsVector.size()-1], 0);
     }
@@ -344,6 +375,21 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
+
+    //Add turntableAxisOfRotation
+    float x_coord = mv_XMinimumSpinBox->value() + (mv_XMaximumSpinBox->value() - mv_XMinimumSpinBox->value())/2;
+    float z_coord = mv_ZMinimumSpinBox->value() + (mv_ZMaximumSpinBox->value() - mv_ZMinimumSpinBox->value())/2;
+
+    float inclinationDegrees = mv_InclinationSpinBox->value();
+    float top_z_coord = z_coord - (mv_YMaximumSpinBox->value() - mv_YMinimumSpinBox->value())*tan(inclinationDegrees*M_PI/180.0);
+    float bottom_z_coord = z_coord;
+
+    pcl::PointXYZ top(x_coord, mv_YMaximumSpinBox->value(), top_z_coord);
+    pcl::PointXYZ bottom(x_coord, mv_YMinimumSpinBox->value(), bottom_z_coord);
+
+    mv_PointCloudStreamVisualizer->addLine<pcl::PointXYZ>(bottom, top, 0.0, 0.9, 0.0, "rot_axis");
+    mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, "rot_axis");
+
     mv_PointCloudStreamQVTKWidget->update();
 
 }
@@ -403,6 +449,7 @@ void TDK_ScanWindow::mf_SlotStopScan()
 
         if(mv_FlagPointCloudExists){
             emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
+
             //TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
             //emit mf_SignalDatabaseRegisteredPointCloudUpdated();
             emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
@@ -431,9 +478,9 @@ void TDK_ScanWindow::mf_SlotHandlePlatformParameters(bool flagEnablePlatformPara
 
 void TDK_ScanWindow::mf_SlotUpdateWindow(int sensorIndex)
 {
-//    if(mv_Sensor != nullptr){
-//        mv_Sensor->blockSignals(true);
-//    }
+    //    if(mv_Sensor != nullptr){
+    //        mv_Sensor->blockSignals(true);
+    //    }
     QString sensorName = mv_SensorComboBox->itemText(sensorIndex);
     mv_Sensor = mv_SensorController->mf_GetSensor(sensorName);
     qDebug() << mv_Sensor->mf_GetMvName();
