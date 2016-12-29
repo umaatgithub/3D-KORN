@@ -395,7 +395,7 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
 
 
     //Compute scanregistrator axis of rotation parameters
-    pcl::PointWithViewpoint turntableRotationAxis(x_coord, 0.0, z_coord, inclinationDegrees, 0.0, 0.0);
+    pcl::PointWithViewpoint turntableRotationAxis(x_coord, mv_YMinimumSpinBox->value(), z_coord, inclinationDegrees, 0.0, 0.0);
 
     //TODO: CONNECT WITH REGISTRATION CLASS OR PARAMETERS?
 

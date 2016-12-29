@@ -27,7 +27,6 @@ TDK_ScanRegistration::TDK_ScanRegistration(
 {
     mv_registerInRealTime = registerInRealTime;
     this->setDefaultParameters();
-
     this->setScannerRotationAxis(scannerCenter);
 }
 
@@ -84,7 +83,7 @@ bool TDK_ScanRegistration::addNextPointCloud(
                 Eigen::AngleAxisf(mv_scannerCenter.vp_z*(M_PI/180.0), Eigen::Vector3f::UnitZ()) *
                 Eigen::AngleAxisf(mv_accumulatedRotation*(M_PI/180.0), Eigen::Vector3f::UnitY()) *
                 Eigen::AngleAxisf(mv_scannerCenter.vp_x*(M_PI/180.0), Eigen::Vector3f::UnitX())* //20 for pamir
-                Eigen::Translation3f(-mv_scannerCenter.x, 0.0, -mv_scannerCenter.z);
+                Eigen::Translation3f(-mv_scannerCenter.x, -mv_scannerCenter.y, -mv_scannerCenter.z);
 
 
         pcl::transformPointCloud(*inputPointcloud, *transformedInputPointcloud, transform.matrix());
