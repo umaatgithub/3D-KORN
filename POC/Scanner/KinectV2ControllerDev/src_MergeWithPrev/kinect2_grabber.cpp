@@ -365,9 +365,9 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Kinect2Grabber::convertRGBDepthToPointXYZ
 {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud( new pcl::PointCloud<pcl::PointXYZRGB>() );
 
-    cloud->width = static_cast<uint32_t>( depthWidth );
-    cloud->height = static_cast<uint32_t>( depthHeight );
-    cloud->is_dense = false;
+    //cloud->width = static_cast<uint32_t>( depthWidth );
+   // cloud->height = static_cast<uint32_t>( depthHeight );
+    //cloud->is_dense = true;
 
     //Afegixen tots els ceros
     //cloud->points.resize( cloud->height * cloud->width );

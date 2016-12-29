@@ -199,11 +199,12 @@ LIBS += -lOpenNI2
 LIBS += -lkinect20
 
 
-HEADERS  += kinect2_grabber.h
-HEADERS  += tdk_kinect2grabber.h
+HEADERS  += kinect2_grabber.h \
+    TDK_Kinect2Controller.h
+HEADERS  +=
 
 SOURCES += \
     kinect2_grabber.cpp \
-    tdk_kinect2grabber.cpp \
-    main.cpp
+    main.cpp \
+    TDK_Kinect2Controller.cpp
 

@@ -4,13 +4,10 @@
 #endif
 
 //#pragma once
-
-#include "tdk_kinect2grabber.h"
-#include <pcl/visualization/pcl_visualizer.h>
+//#include <pcl/visualization/image_viewer.h>
+#include "TDK_Kinect2Controller.h"
 #include <QDebug>
 #include <QString>
-#include <pcl/io/pcd_io.h>
-#include <pcl/io/ply_io.h>
 #include <string>
 
 typedef pcl::PointXYZRGB PointType;
@@ -18,8 +15,8 @@ typedef pcl::PointXYZRGB PointType;
 int main()
 {
     TDK_Kinect2Grabber kinect;
-
-    kinect.mf_SetScanBoxLimits(-1.5, 1.5, -1.5, 1.5, 0.1, 3);
+    int x=-1.5;int y=1.6;int z=-1.5;int r=1.5;int g=0.1;int b=3;
+    kinect.mf_SetScanBoxLimits(x,y,z,r,g,b);
 
     // PCL Visualizer
     boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer(
@@ -28,22 +25,30 @@ int main()
 
     // Point Cloud
     pcl::PointCloud<PointType>::Ptr cloud;
-    
+
     //Spin once to initialize window
     viewer->spinOnce();
 
-    while( !viewer->wasStopped() ){
+
+    pcl::visualization::ImageViewer image_viewer;
+
+
+    while( !viewer->wasStopped() )
+    {
+        viewer->spinOnce();
+
         //if(kinect.hasNewFrame()){
             kinect.mf_getPointCloudFrame(cloud);
 
             //If cloud already added, update, if not added, add for first time
-            if( !viewer->updatePointCloud( cloud, "cloud" ) ){
+            if( !viewer->updatePointCloud( cloud, "cloud" ) )
+            {
                 viewer->addPointCloud( cloud, "cloud" );
                 viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 4, "cloud");
+                //kinect.mv_imageViewer->spinOnce();
             }
-            // Update Viewer
-            viewer->spinOnce();
-    //    }
+
+
         //Sleep to make polling a little bit more efficient
         boost::this_thread::sleep (boost::posix_time::microseconds (100000));
     }
