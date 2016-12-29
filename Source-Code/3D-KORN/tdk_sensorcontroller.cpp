@@ -2,15 +2,20 @@
 
 TDK_SensorController::TDK_SensorController(QObject *parent) : QObject(parent)
 {
-    TDK_Sensor *sensor = new TDK_KinectV2Sensor();
-    mv_Sensors[sensor->mf_GetMvName()] = sensor;
-    sensor = new TDK_IntelR200Sensor();
-    mv_Sensors[sensor->mf_GetMvName()] = sensor;
+
 }
 
 TDK_SensorController::~TDK_SensorController()
 {
 
+}
+
+void TDK_SensorController::mf_InitializeSensors()
+{
+    TDK_Sensor *sensor = new TDK_KinectV2Sensor();
+    mv_Sensors[sensor->mf_GetMvName()] = sensor;
+    sensor = new TDK_IntelR200Sensor();
+    mv_Sensors[sensor->mf_GetMvName()] = sensor;
 }
 
 bool TDK_SensorController::mf_IsSensorAvailable()

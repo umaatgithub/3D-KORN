@@ -14,6 +14,7 @@ public:
     explicit TDK_SensorController(QObject *parent = 0);
     ~TDK_SensorController();
 
+    void mf_InitializeSensors();
     bool mf_IsSensorAvailable();
     std::map<QString, QString> mf_GetAvailableSensorNames();
     TDK_Sensor *mf_GetSensor(QString sensorId);

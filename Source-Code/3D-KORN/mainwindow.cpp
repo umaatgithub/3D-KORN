@@ -20,7 +20,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_mf_NewScanToolBar_triggered()
 {
-
+    tdk_scanWindow->mv_SensorController->mf_InitializeSensors();
     if(tdk_scanWindow->mv_SensorController->mf_IsSensorAvailable()){
         tdk_scanWindow->mf_setupUI();
         tdk_scanWindow->setWindowTitle("3D KORN SCANNER - SCAN WINDOW");
