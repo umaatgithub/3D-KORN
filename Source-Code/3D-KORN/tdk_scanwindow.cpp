@@ -49,7 +49,7 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
     connect(mv_CapturePointCloudPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotCapturePointCloudButtonClick()));
     connect(mv_PlatformParametersYesRadioButton, SIGNAL(toggled(bool)), this, SLOT(mf_SlotHandlePlatformParameters(bool)));
     connect(this, SIGNAL(mf_SignalNumberOfPointCloudUpdated(int)), mv_NumberOfPointCloudsCapturedLabel, SLOT(setNum(int)));
-    connect(mv_Turntable, SIGNAL(mf_SignalStepAngleRotated(int)), this, SLOT(mf_SlotCapturePointCloud(float)));
+    connect(mv_Turntable, SIGNAL(mf_SignalStepAngleRotated(int)), this, SLOT(mf_SlotCapturePointCloud(int)));
     connect(mv_Turntable, SIGNAL(mf_SignalRotationsDone()), this, SLOT(mf_SlotStopScan()));
 
     connect(this, SIGNAL(mf_SignalStatusChanged(QString,QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString,QColor)));
@@ -272,8 +272,8 @@ void TDK_ScanWindow::mf_SetupPlatformParametersWidget()
     mv_PlatformParametersNoRadioButton->setChecked(true);
     mv_PlatformParametersYesRadioButton->setFixedHeight(22);
 
-    mv_IncrementalRotationAngleSpinBox->setRange(1, 360);
-    mv_IncrementalRotationAngleSpinBox->setSingleStep(0.5);
+    mv_IncrementalRotationAngleSpinBox->setRange(5, 360);
+    mv_IncrementalRotationAngleSpinBox->setSingleStep(5);
     mv_IncrementalRotationAngleSpinBox->setValue(10);
     mv_IncrementalRotationAngleSpinBox->setFixedHeight(22);
     mv_IncrementalRotationAngleSpinBox->setSuffix(QString("°"));
@@ -286,7 +286,6 @@ void TDK_ScanWindow::mf_SetupPlatformParametersWidget()
     mv_NumberOfRotationsSpinBox->setEnabled(false);
 
     mv_SerialPortBaudRateComboBox->addItem(QString("4800"));
-    mv_SerialPortBaudRateComboBox->addItem(QString("19200"));
     mv_SerialPortBaudRateComboBox->setEnabled(false);
 
     mv_SerialPortNameLineEdit->setText("COM3");
@@ -328,7 +327,9 @@ void TDK_ScanWindow::mf_SlotUpdatePointCloudStream()
 
 void TDK_ScanWindow::mf_SlotCapturePointCloud(int degreesRotated)
 {
+    qDebug() << "Trying :Capturing point cloud";
     if(mv_FlagScanning && mv_FlagPointCloudExists){
+        qDebug() << "Point cloud captured";
         mf_SetNumberOfPointCloudsCaptured(mf_GetNumberOfPointCloudsCaptured() + 1);
         TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
         emit mf_SignalDatabasePointCloudUpdated();
@@ -424,7 +425,9 @@ void TDK_ScanWindow::mf_SlotStartScan()
         mv_RegisterationCheckBox->setEnabled(false);
         mv_StartScanPushButton->setEnabled(false);
         mv_FlagPointCloudExists = false;
+        qDebug() << mv_FlagTurnTableParametersEnabled << !mv_Turntable->mf_IsRunning();
         if(mv_FlagTurnTableParametersEnabled && !mv_Turntable->mf_IsRunning()){
+            qDebug() << "Start platform from scan window";
             mv_Turntable->mf_SetStepAngle((int)mv_IncrementalRotationAngleSpinBox->value());
             mv_Turntable->mf_SetTotalRotations((int)mv_NumberOfRotationsSpinBox->value());
             mv_Turntable->mf_StartPlatform(mv_SerialPortNameLineEdit->text(), mv_SerialPortBaudRateComboBox->currentText().toInt());
@@ -467,7 +470,9 @@ void TDK_ScanWindow::mf_SlotStopScan()
 
 void TDK_ScanWindow::mf_SlotHandlePlatformParameters(bool flagEnablePlatformParameters)
 {
+    mv_FlagTurnTableParametersEnabled = flagEnablePlatformParameters;
     if(flagEnablePlatformParameters){
+
         mv_IncrementalRotationAngleSpinBox->setEnabled(true);
         mv_NumberOfRotationsSpinBox->setEnabled(true);
         mv_SerialPortNameLineEdit->setEnabled(true);

@@ -194,8 +194,9 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
     if(mv_numberOfPointCloudsSelected > 0){
         for (int i=0, len = mv_PointCloudListTab->count(); i < len; i++){
             if(mv_PointCloudListTab->item(i)->checkState() == Qt::Checked){
-                //Call mesh function
-                //TDK_Database::mf_StaticAddMesh(meshpointer);
+                //PolygonMesh::Ptr meshPtr ( new PolygonMesh );
+                //TDK_PointOperations::mf_PoissonMeshesWithConversion(TDK_Database::mv_PointCloudsVector[i] , meshPtr);
+                //TDK_Database::mf_StaticAddMesh(meshPtr);
                 //emit mf_SignalMeshListUpdated();
             }
         }
@@ -295,7 +296,6 @@ void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
             {
                 mv_PointCloudVisualizer->addPolygonMesh(*(TDK_Database::mv_MeshesVector[i]) , item->text().toStdString());
                 mv_numberOfMeshesSelected++;
-
                 break;
             }
         }

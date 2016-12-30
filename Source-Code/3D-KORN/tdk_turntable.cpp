@@ -9,6 +9,7 @@ TDK_Turntable::TDK_Turntable( QObject *parent)
     , mv_SerialPort(new QSerialPort)
     , mv_TotalAngle(0)
     , mv_TotalRotations(0)
+    , mv_FlagRunning(false)
 {
 
 }
@@ -21,6 +22,7 @@ TDK_Turntable::~TDK_Turntable()
 //function that sends via serial the command for starting the turntable
 void TDK_Turntable::mf_StartPlatform(QString serialPortName, int serialBaudRate)
 {
+    qDebug() << "Starting platform";
     mv_SerialPort->setPortName(serialPortName);
     mv_SerialPort->setBaudRate(serialBaudRate);
     mv_SerialPort->open(QIODevice::ReadWrite);
@@ -51,8 +53,10 @@ bool TDK_Turntable::mf_IsRunning()
 //private function that sends a command via serial in an array
 void TDK_Turntable::mf_SendCommandViaSerial(int command)
 {
+    qDebug() << "Command received " << command;
     if (mv_SerialPort->isOpen() && mv_SerialPort->isWritable())
     {
+        qDebug() << "Command sent to arduino";
         QByteArray dayArray;
         dayArray[0]=command;
         mv_SerialPort->write(dayArray);
@@ -72,12 +76,14 @@ void TDK_Turntable::mf_SlotHandleReadyRead()
 {
     static int i=0;
     mv_ReadData.append(mv_SerialPort->readAll());
-    mv_TotalAngle = (int)mv_ReadData[i];
+    mv_TotalAngle += (int)mv_ReadData[i];
     qDebug() << mv_TotalAngle;
+    qDebug() << "Step angle is " << mv_StepAngle;
 
     //Signal is emitted every time we accomplish the step degrees
     if (mv_TotalAngle % mv_StepAngle == 0)
     {
+        qDebug() << "-------------";
         emit (mf_SignalStepAngleRotated(mv_TotalAngle % 360));
     }
 

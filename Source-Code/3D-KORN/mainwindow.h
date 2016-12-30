@@ -3,8 +3,15 @@
 
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QFileDialog>
+
+#include <pcl/io/ply_io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/vtk_lib_io.h>
+
 
 #include "tdk_scanwindow.h"
+#include "tdk_database.h"
 
 namespace Ui {
 class MainWindow;
@@ -17,6 +24,10 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+signals:
+    void mf_SignalDatabasePointCloudUpdated();
+    void mf_SignalDatabaseMeshUpdated();
 
 private slots:
     //Tool Bar Actions
