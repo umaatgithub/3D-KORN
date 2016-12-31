@@ -1,5 +1,5 @@
 #include "kinect2_grabber.h"
-
+#include "QDebug"
 using namespace pcl;
 
 Kinect2Grabber::Kinect2Grabber()
@@ -63,9 +63,6 @@ Kinect2Grabber::Kinect2Grabber()
     result = sensor->get_InfraredFrameSource( &infraredSource );
     if( FAILED( result ) ){
         throw std::exception( "Exception : IKinectSensor::get_InfraredFrameSource()" );
-    }
-    if( infraredSource == nullptr){
-        available = false;
     }
 
     // Retrieved Color Frame Size
@@ -175,6 +172,7 @@ void Kinect2Grabber::start()
 
     // Open Depth Frame Reader
     result = depthSource->OpenReader( &depthReader );
+    qDebug() << "Depth reader result " << result;
     if( FAILED( result ) ){
         throw std::exception( "Exception : IDepthFrameSource::OpenReader()" );
     }
@@ -367,11 +365,11 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Kinect2Grabber::convertRGBDepthToPointXYZ
     cloud->height = static_cast<uint32_t>( depthHeight );
     cloud->is_dense = false;
 
-    cloud->points.resize( cloud->height * cloud->width );
+    //cloud->points.resize( cloud->height * cloud->width );
 
-    pcl::PointXYZRGB* pt = &cloud->points[0];
+    //pcl::PointXYZRGB* pt = &cloud->points[0];
     for( int y = 0; y < depthHeight; y++ ){
-        for( int x = 0; x < depthWidth; x++, pt++ ){
+        for( int x = 0; x < depthWidth; x++ ){
             pcl::PointXYZRGB point;
 
             DepthSpacePoint depthSpacePoint = { static_cast<float>( x ), static_cast<float>( y ) };
@@ -394,17 +392,30 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Kinect2Grabber::convertRGBDepthToPointXYZ
             mapper->MapDepthPointToCameraSpace( depthSpacePoint, depth, &cameraSpacePoint );
             if( ( 0 <= colorX ) && ( colorX < colorWidth ) && ( 0 <= colorY ) && ( colorY < colorHeight ) ){
        //      //A LIMIT IN THE DEPTH MUST BE SET WHEN WE KNOW THE OPERATING DISTANCE (Kinect to platform)
-                if (cameraSpacePoint.Z >= 0.2)
-                {
-                   if (cameraSpacePoint.Y <= 1.2 && cameraSpacePoint.Y >= -1.2)
-                   {
-                       if (cameraSpacePoint.X <= 0.6 && cameraSpacePoint.X >= -0.6 ){
-                       point.x = cameraSpacePoint.X;
-                       point.y = cameraSpacePoint.Y;
-                       point.z = cameraSpacePoint.Z;
+                if(mv_FlagFilterPoints){
+                    if ( cameraSpacePoint.Z <= mv_ZMax && cameraSpacePoint.Z >= mv_ZMin)
+                    {
+                        if (cameraSpacePoint.Y <= mv_YMax && cameraSpacePoint.Y >= mv_YMin)
+                        {
+                            if (cameraSpacePoint.X <= mv_XMax && cameraSpacePoint.X >= mv_XMin ){
+                                point.x = cameraSpacePoint.X;
+                                point.y = cameraSpacePoint.Y;
+                                point.z = cameraSpacePoint.Z;
 
-                       *pt = point;}
-                   }
+                                //*pt = point;
+
+                                cloud->points.push_back(point);
+
+                            }
+                        }
+                    }
+                }
+                else{
+                    point.x = cameraSpacePoint.X;
+                    point.y = cameraSpacePoint.Y;
+                    point.z = cameraSpacePoint.Z;
+
+                    cloud->points.push_back(point);
                 }
 
             }
@@ -460,4 +471,19 @@ pcl::PointCloud<pcl::PointXYZRGBA>::Ptr Kinect2Grabber::convertRGBADepthToPointX
     }
 
     return cloud;
+}
+
+void Kinect2Grabber::mf_SetMvFlagFilterPoints(bool value)
+{
+    mv_FlagFilterPoints = value;
+}
+
+void Kinect2Grabber::mf_SetFilterBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
+{
+    mv_XMin = xmin;
+    mv_XMax = xmax;
+    mv_YMin = ymin;
+    mv_YMax = ymax;
+    mv_ZMin = zmin;
+    mv_ZMax = zmax;
 }

@@ -43,6 +43,10 @@ namespace pcl
             virtual std::string getName() const;
             virtual float getFramesPerSecond() const;
 
+            void mf_SetMvFlagFilterPoints(bool value);
+            void mf_SetFilterBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
+
+
 
             typedef void ( signal_Kinect2_PointXYZ )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZ>>& );
             typedef void ( signal_Kinect2_PointXYZI )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZI>>& );
@@ -90,6 +94,13 @@ namespace pcl
             int infraredWidth;
             int infraredHeight;
             std::vector<UINT16> infraredBuffer;
+
+            bool mv_FlagFilterPoints;
+            float mv_XMin, mv_XMax;
+            float mv_YMin, mv_YMax;
+            float mv_ZMin, mv_ZMax;
+
+
     };
 
 

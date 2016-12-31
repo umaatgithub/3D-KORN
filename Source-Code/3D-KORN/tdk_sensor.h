@@ -33,14 +33,27 @@ public:
     QString mf_GetMvId() const;
     void mf_SetMvId(const QString &value);
 
+    bool mf_GetMvFlagFilterPoints() const;
+    void mf_SetMvFlagFilterPoints(bool value);
+
+    void mf_SetFilterBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
+
 protected:
     QString mv_Id;
     QString mv_Name;
     std::map<QString, QString> mv_SensorDetails;
     pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr mv_PointCloud;
 
+    bool mv_FlagFilterPoints;
+    float mv_XMin, mv_XMax;
+    float mv_YMin, mv_YMax;
+    float mv_ZMin, mv_ZMax;
+
+
 signals:
     void mf_SignalPointCloudUpdated();
+    void mf_SignalFlagFilterUpdated();
+    void mf_SignalFilterBoxUpdated();
 
 public slots:
 };

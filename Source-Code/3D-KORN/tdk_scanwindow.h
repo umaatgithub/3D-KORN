@@ -65,7 +65,8 @@ public:
     QDoubleSpinBox *mv_ZMinimumSpinBox;
     QDoubleSpinBox *mv_ZMaximumSpinBox;
     QDoubleSpinBox *mv_InclinationSpinBox;
-    QCheckBox *mv_RegisterationCheckBox;
+    QCheckBox *mv_FilterBoxCheckBox;
+    QCheckBox *mv_RegistrationCheckBox;
     QPushButton *mv_StartScanPushButton;
     QPushButton *mv_StopScanPushButton;
     QLabel *mv_NumberOfPointCloudsCapturedLabel;
@@ -100,6 +101,7 @@ signals:
 public slots:
     void mf_SlotUpdateWindow(int sensorIndex);
     void mf_SlotUpdateBoundingBox();
+    void mf_SlotActivateFiltering(bool flagFiltering);
     void mf_SlotPointCloudRegistration(bool flagRealTimeScan);
     void mf_SlotStartScan();
     void mf_SlotStopScan();

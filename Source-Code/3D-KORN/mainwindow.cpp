@@ -27,7 +27,7 @@ void MainWindow::on_mf_NewScanToolBar_triggered()
         tdk_scanWindow->mf_setupUI();
         tdk_scanWindow->setWindowTitle("3D KORN SCANNER - SCAN WINDOW");
         tdk_scanWindow->showMaximized();
-        tdk_scanWindow->setMinimumSize(tdk_scanWindow->size());
+        //tdk_scanWindow->setMinimumSize(tdk_scanWindow->size());
     }
     else{
         bool retryFlag = true;
@@ -44,7 +44,7 @@ void MainWindow::on_mf_NewScanToolBar_triggered()
                     tdk_scanWindow->mf_setupUI();
                     tdk_scanWindow->setWindowTitle("3D KORN SCANNER - SCAN WINDOW");
                     tdk_scanWindow->showMaximized();
-                    tdk_scanWindow->setMinimumSize(tdk_scanWindow->size());
+                    //tdk_scanWindow->setMinimumSize(tdk_scanWindow->size());
                     retryFlag = false;
                 }
                 break;
