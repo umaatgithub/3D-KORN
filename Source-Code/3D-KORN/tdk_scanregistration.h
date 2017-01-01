@@ -65,13 +65,14 @@ public:
     float get_voxelSideLength() const;
     double get_SVD_MaxDistance() const;
     float get_ICP_MaxCorrespondenceDistance() const;
+    bool get_FlagUseScannerCenterRotation() const;
 
     void set_normalRadiusSearch(float value);
     void set_voxelSideLength(float value);
     void set_SVD_MaxDistance(double value);
     void set_ICP_MaxCorrespondenceDistance(float value);
     void set_PostICP_MaxCorrespondanceDistance(float value);
-
+    void set_FlagUseScannerCenterRotation(bool value);
 
 private:
     //Class operation configuration
@@ -85,7 +86,7 @@ private:
     float mv_ICPPost_MaxCorrespondanceDistance;
 
     //Scanner orientation and rotation compensation
-    bool mv_scannerCenterRotationSet;
+    bool mv_FlagUseScannerCenterRotation;
     pcl::PointWithViewpoint mv_scannerCenter;
     float mv_accumulatedRotation;
 

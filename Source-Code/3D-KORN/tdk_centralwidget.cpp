@@ -28,6 +28,7 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     connect(mv_RegisteredPointCloudListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
     connect(mv_MeshListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
 
+    mv_ScanRegistration->set_FlagUseScannerCenterRotation(false);
 }
 
 TDK_CentralWidget::~TDK_CentralWidget()
@@ -194,17 +195,22 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
     if(mv_numberOfPointCloudsSelected > 0){
         for (int i=0, len = mv_PointCloudListTab->count(); i < len; i++){
             if(mv_PointCloudListTab->item(i)->checkState() == Qt::Checked){
-                //PolygonMesh::Ptr meshPtr ( new PolygonMesh );
-                //TDK_PointOperations::mf_PoissonMeshesWithConversion(TDK_Database::mv_PointCloudsVector[i] , meshPtr);
-                //TDK_Database::mf_StaticAddMesh(meshPtr);
-                //emit mf_SignalMeshListUpdated();
+                pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
+                pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
+                TDK_PointOperations::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_PointCloudsVector[i]->makeShared(), pointcloud);
+                TDK_PointOperations::mf_PoissonMeshes(pointcloud , meshPtr);
+                TDK_Database::mf_StaticAddMesh(meshPtr);
+                emit mf_SignalMeshListUpdated();
             }
         }
         for (int i=0, len = mv_RegisteredPointCloudListTab->count(); i < len; i++){
             if(mv_RegisteredPointCloudListTab->item(i)->checkState() == Qt::Checked){
-                //Call mesh function
-                //TDK_Database::mf_StaticAddMesh(meshpointer);
-                //emit mf_SignalMeshListUpdated();
+                pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
+                pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
+                TDK_PointOperations::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_RegisteredPointCloudsVector[i]->makeShared(), pointcloud);
+                TDK_PointOperations::mf_PoissonMeshes(pointcloud , meshPtr);
+                TDK_Database::mf_StaticAddMesh(meshPtr);
+                emit mf_SignalMeshListUpdated();
             }
         }
     }

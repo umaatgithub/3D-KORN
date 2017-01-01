@@ -23,7 +23,7 @@ TDK_IntelR200Sensor::~TDK_IntelR200Sensor()
 //returns true if sensor is connected
 bool TDK_IntelR200Sensor::mf_IsAvailable()
 {
-    return true;
+    return false;
 }
 
 //stops sensor

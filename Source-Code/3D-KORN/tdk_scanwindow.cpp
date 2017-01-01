@@ -57,8 +57,13 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
 
     connect(this, SIGNAL(mf_SignalStatusChanged(QString,QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString,QColor)));
 
-    pcl::PointWithViewpoint center;
-    mv_ScanRegistration->setScannerRotationAxis(center);
+    //Testing
+    float x_coord = mv_XMinimumSpinBox->value() + (mv_XMaximumSpinBox->value() - mv_XMinimumSpinBox->value())/2;
+    float z_coord = mv_ZMinimumSpinBox->value() + (mv_ZMaximumSpinBox->value() - mv_ZMinimumSpinBox->value())/2;
+    float inclinationDegrees = mv_InclinationSpinBox->value();
+    pcl::PointWithViewpoint turntableRotationAxis(x_coord, mv_YMinimumSpinBox->value(), z_coord, inclinationDegrees, 0.0, 0.0);
+    mv_ScanRegistration->setScannerRotationAxis(turntableRotationAxis);
+    mv_ScanRegistration->set_FlagUseScannerCenterRotation(false);
 
 }
 
@@ -402,6 +407,7 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
     pcl::PointWithViewpoint turntableRotationAxis(x_coord, mv_YMinimumSpinBox->value(), z_coord, inclinationDegrees, 0.0, 0.0);
 
     //TODO: CONNECT WITH REGISTRATION CLASS OR PARAMETERS?
+    mv_ScanRegistration->setScannerRotationAxis(turntableRotationAxis);
 
     mv_PointCloudStreamQVTKWidget->update();
 }
@@ -472,13 +478,12 @@ void TDK_ScanWindow::mf_SlotStopScan()
 
         if(mv_FlagPointCloudExists){
             emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
-
-            //TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
-            //emit mf_SignalDatabaseRegisteredPointCloudUpdated();
-            emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
+//            TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
+//            emit mf_SignalDatabaseRegisteredPointCloudUpdated();
+//            emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
         }
         mf_SetNumberOfPointCloudsCaptured(0);
-        this->close();
+        //this->close();
 
     }
 }
@@ -492,8 +497,10 @@ void TDK_ScanWindow::mf_SlotHandlePlatformParameters(bool flagEnablePlatformPara
         mv_NumberOfRotationsSpinBox->setEnabled(true);
         mv_SerialPortNameLineEdit->setEnabled(true);
         mv_SerialPortBaudRateComboBox->setEnabled(true);
+        mv_ScanRegistration->set_FlagUseScannerCenterRotation(true);
     }
     else{
+        mv_ScanRegistration->set_FlagUseScannerCenterRotation(false);
         mv_IncrementalRotationAngleSpinBox->setEnabled(false);
         mv_NumberOfRotationsSpinBox->setEnabled(false);
         mv_SerialPortNameLineEdit->setEnabled(false);
