@@ -6,7 +6,7 @@ using namespace std;
 TDK_ScanRegistration::TDK_ScanRegistration()
 {
     //Empty constructor
-
+    mv_registerInRealTime = false;
     this->setDefaultParameters();
 }
 
@@ -33,26 +33,24 @@ TDK_ScanRegistration::TDK_ScanRegistration(
 /////////////////////////////////////////////////////
 void TDK_ScanRegistration::setDefaultParameters()
 {
-    mv_registerInRealTime = false;
-    mv_FlagUseScannerCenterRotation = false;
-
+    mv_scannerCenterRotationSet = false;
     mv_accumulatedRotation = 0.0;
 
     //Size in meters used in the downsampling of input for inital alignment
     mv_voxelSideLength = 0.015;
 
     //Normal radius search for correspondence matching
-    mv_normalRadiusSearch=0.10;
+    mv_normalRadiusSearch=0.05;
 
     //Max distance in meters between two points to find correspondances for SVD
     mv_SVD_MaxDistance=0.15;
 
     //Max distance in meters between two points to find correspondances for ICP
-    mv_ICP_MaxCorrespondenceDistance = 0.15;
+    mv_ICP_MaxCorrespondenceDistance = 0.05;
 
     //Max distance in meters between two points to find correspondances for
     //loop closing and IncrementalICP layers
-    mv_ICPPost_MaxCorrespondanceDistance = 0.10;
+    mv_ICPPost_MaxCorrespondanceDistance = 0.03;
 }
 
 /////////////////////////////////////////////////////
@@ -69,69 +67,56 @@ bool TDK_ScanRegistration::addNextPointCloud(
 {
     //Prepare arrays for use later when we want to register everything at once
     if(!mv_registerInRealTime){
-        qDebug() << "ScanRegistration : Registration not real time.. Adding point cloud";
         mv_originalPCs.push_back(inputPointcloud);
         mv_originalPointcloudsYRotation.push_back(degreesRotatedY);
-        qDebug() << "ScanRegistration : Registration not real time.. Adding point cloud";
         return true;
     }
 
     //If we want to register in realtime
-    if(mv_FlagUseScannerCenterRotation){
+    if(mv_scannerCenterRotationSet){
         //Transform pointcloud
-        qDebug() << "ScanRegistration : Entering registration Center of rotation set";
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformedInputPointcloud(new  pcl::PointCloud<pcl::PointXYZRGB>());
 
-    qDebug() << "ScanRegistration : Entering registration Center of rotation set";
+
         //Create transform matrix that compensates for turning table orientation and distance, and rotation
         Eigen::Transform<float,3,Eigen::Affine> transform =
                 Eigen::AngleAxisf(mv_scannerCenter.vp_z*(M_PI/180.0), Eigen::Vector3f::UnitZ()) *
                 Eigen::AngleAxisf(mv_accumulatedRotation*(M_PI/180.0), Eigen::Vector3f::UnitY()) *
                 Eigen::AngleAxisf(mv_scannerCenter.vp_x*(M_PI/180.0), Eigen::Vector3f::UnitX())* //20 for pamir
                 Eigen::Translation3f(-mv_scannerCenter.x, -mv_scannerCenter.y, -mv_scannerCenter.z);
-    qDebug() << "ScanRegistration : Entering registration Center of rotation set";
+
 
         pcl::transformPointCloud(*inputPointcloud, *transformedInputPointcloud, transform.matrix());
-
-        qDebug() << "ScanRegistration : Entering registration Center of rotation set";
         mv_accumulatedRotation += degreesRotatedY;
-qDebug() << "ScanRegistration : Entering registration Center of rotation set";
+
         //Add reference of original pointcloud to array
         mv_originalRotatedPCs.push_back(transformedInputPointcloud);
-        qDebug() << "ScanRegistration : Entering registration Center of rotation set";
 
         //Remove outliers and store reference to denoised Pointcloud
-        mv_originalDenoisedPCs.push_back(mf_outlierRemovalPC(mv_originalRotatedPCs.back()));
-        qDebug() << "ScanRegistration : Entering registration Center of rotation set";
+        mv_originalRotatedDenoisedPCs.push_back(mf_outlierRemovalPC(mv_originalRotatedPCs.back()));
 
         //Call process that will roughly align the last pointcloud to all previous ones
         mf_processCorrespondencesSVDICP();
 
         return true;
     }else{
-        //qWarning() << "Scanner Center Rotation NOT SET, To prerotate pcs you need to set it";
-        //Add reference of original pointcloud to array
-        qDebug() << "ScanRegistration : Entering registration Center of rotation not set";
+        qDebug() << "ScanRegistration: Add pc w/out Compensation or Prealignment";
+        mv_originalRotatedPCs.push_back(inputPointcloud);
 
-        qDebug() << "ScanRegistration : Outlier removal";
         //Remove outliers and store reference to denoised Pointcloud
-        mv_originalDenoisedPCs.push_back(mf_outlierRemovalPC(inputPointcloud));
+        mv_originalRotatedDenoisedPCs.push_back(mf_outlierRemovalPC(mv_originalRotatedPCs.back()));
 
-        qDebug() << "ScanRegistration : Outlier removal done";
+        mf_processInPostWithICP();
 
-        //Call process that will roughly align the last pointcloud to all previous ones
-        mf_processCorrespondencesSVDICP();
-        qDebug() << "ScanRegistration : Registration done.";
-
-        return false;
+        return true;
     }
 }
 
 
 /////////////////////////////////////////////////////
 bool TDK_ScanRegistration::addAllPointClouds(
-         const vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &inputPCs,
-         const vector<float> degreesRotatedY
+        const vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &inputPCs,
+        const vector<float> degreesRotatedY
         )
 {
 
@@ -172,6 +157,11 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_get
         addAllPointClouds(mv_originalPCs, mv_originalPointcloudsYRotation);
     }
 
+    if(!mv_scannerCenterRotationSet){
+       qDebug() << "ScanRegistration: PostProcessing without prealignment.";
+       mv_ICPPost_MaxCorrespondanceDistance = 0.3;
+    }
+
     pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
                 new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
     icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
@@ -208,8 +198,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_get
         *mergedAlignedOriginal += *tmp;
     }
 
-    //return mf_outlierRemovalPC(mergedAlignedOriginal, 8, 2);
-    return mergedAlignedOriginal;
+    return mf_outlierRemovalPC(mergedAlignedOriginal, 8, 2);
 }
 
 /////////////////////////////////////////////////////
@@ -231,15 +220,14 @@ vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* TDK_ScanRegistration::getRotatio
 
 bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
 {
-    qDebug() << "ScanRegistration : Downsample and add pointcloud to array";
+
     //Downsample and add pointcloud to array
     mv_downSampledPCs.push_back(
                 mf_voxelDownSamplePointCloud(
-                    mv_originalDenoisedPCs.back(), mv_voxelSideLength
+                    mv_originalRotatedDenoisedPCs.back(), mv_voxelSideLength
                     )
                 );
 
-    qDebug() << "ScanRegistration : Compute normals from downsampled pointcloud for correspondence estimation";
     //Compute normals from downsampled pointcloud for correspondence estimation
     mv_downSampledNormals.push_back(
                 mf_computeNormals(
@@ -247,9 +235,8 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
                     )
                 );
 
-    qDebug() << "ScanRegistration : If pointcloud array has been initialized "<< mv_downSampledNormals.size();
     //If pointcloud array has been initialized
-    if(mv_downSampledNormals.size() > 1){
+    if(mv_originalRotatedPCs.size() > 1){
         //Compute correspondences between new pointcloud and last aligned pointcloud
         mv_downsampledCorrespondences.push_back(
                     mf_estimateCorrespondences(
@@ -260,62 +247,61 @@ bool TDK_ScanRegistration::mf_processCorrespondencesSVDICP()
                     );
 
 
-        qDebug() << "ScanRegistration : Align downsampled pointclouds using SVD and get transform to apply on original later";
         //Align downsampled pointclouds using SVD and get transform to apply on original later
-//        Eigen::Matrix4f SVDtransform;
-//        mv_alignedDownSampledPCs.push_back(
-//                    mf_SVDInitialAlignment(
-//                        mv_downSampledPCs.back(),        //New DownsampledPointclout to be aligned
-//                        mv_alignedDownSampledPCs.back(), //Previous DownsampledAlignedPointcloud
-//                        mv_downsampledCorrespondences.back(), SVDtransform
-//                        )
-//                    );
+        Eigen::Matrix4f SVDtransform;
+        mv_alignedDownSampledPCs.push_back(
+                    mf_SVDInitialAlignment(
+                        mv_downSampledPCs.back(),        //New DownsampledPointclout to be aligned
+                        mv_alignedDownSampledPCs.back(), //Previous DownsampledAlignedPointcloud
+                        mv_downsampledCorrespondences.back(), SVDtransform
+                        )
+                    );
 
-        qDebug() << "ScanRegistration : Store rough alignment transform for use later";
         //Store rough alignment transform for use later
-  //      mv_transformationMatrices.push_back(SVDtransform);
+        mv_transformationMatrices.push_back(SVDtransform);
 
-        qDebug() << "ScanRegistration : Perform second step of initial alignment with ICP";
         //Perform second step of initial alignment with ICP
-//        Eigen::Matrix4f ICPtransform;
-//        mv_alignedDownSampledPCs.back() =
-//                mf_iterativeClosestPointFinalAlignment<pcl::PointXYZ>(
-//                    *(mv_alignedDownSampledPCs.end()-1),
-//                    *(mv_alignedDownSampledPCs.end()-2),
-//                    mv_ICP_MaxCorrespondenceDistance, ICPtransform
-//                    );
+        Eigen::Matrix4f ICPtransform;
+        mv_alignedDownSampledPCs.back() =
+                mf_iterativeClosestPointFinalAlignment<pcl::PointXYZ>(
+                    *(mv_alignedDownSampledPCs.end()-1),
+                    *(mv_alignedDownSampledPCs.end()-2),
+                    mv_ICP_MaxCorrespondenceDistance, ICPtransform
+                    );
 
-        qDebug() << "ScanRegistration : Add both transforms together to make initial alignment transform";
         //Add both transforms together to make initial alignment transform
-       // mv_transformationMatrices.back() = ICPtransform * mv_transformationMatrices.back();
+        mv_transformationMatrices.back() = ICPtransform * mv_transformationMatrices.back();
 
-        //mv_transformationMatrices.push_back(ICPtransform);
-
-        qDebug() << "ScanRegistration : Apply compound transformation to roughly align original pointcloud to previous one";
         //Apply compound transformation to roughly align original pointcloud to previous one
-//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr alignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
-//        pcl::transformPointCloud(*mv_originalDenoisedPCs.back(), *alignedOriginal, mv_transformationMatrices.back());
-//        mv_alignedOriginalPCs.push_back(alignedOriginal);
+        pcl::PointCloud<pcl::PointXYZRGB>::Ptr alignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
+        pcl::transformPointCloud(*mv_originalRotatedDenoisedPCs.back(), *alignedOriginal, mv_transformationMatrices.back());
+        mv_alignedOriginalPCs.push_back(alignedOriginal);
 
-//        qDebug() << "ScanRegistration : Recompute Normals once the Downsampled pointcloud has been aligned for use later";
-//        //Recompute Normals once the Downsampled pointcloud has been aligned for use later
-//        mv_downSampledNormals.back() =
-//                mf_computeNormals(
-//                    mv_alignedDownSampledPCs.back(),
-//                    mv_normalRadiusSearch
-//                    );
-        mv_alignedOriginalPCs.push_back(mv_originalPCs.back());
-        mv_alignedDownSampledPCs.push_back(mv_downSampledPCs.back());
-
+        //Recompute Normals once the Downsampled pointcloud has been aligned for use later
+        mv_downSampledNormals.back() =
+                mf_computeNormals(
+                    mv_alignedDownSampledPCs.back(),
+                    mv_normalRadiusSearch
+                    );
     }else{
         //If its the first pointcloud, no need to align anything (it is already aligned to itself)
-        mv_alignedOriginalPCs.push_back(mv_originalPCs.back());
+        mv_alignedOriginalPCs.push_back(mv_originalRotatedDenoisedPCs.back());
         mv_alignedDownSampledPCs.push_back(mv_downSampledPCs.back());
     }
 
     return true;
 }
 
+
+/////////////////////////////////////////////////////
+
+bool TDK_ScanRegistration::mf_processInPostWithICP()
+{
+    qDebug() << "ScanRegistration: Process pc w/out Compensation or Prealignment";
+    mv_alignedOriginalPCs.push_back(mv_originalRotatedDenoisedPCs.back());
+
+    return true;
+}
 
 /////////////////////////////////////////////////////
 
@@ -401,7 +387,6 @@ TDK_ScanRegistration::mf_estimateCorrespondences(
         const double &max_distance
         )
 {
-    qDebug() << "ScanRegistration : Entering correspondence calculation";
     pcl::registration::CorrespondenceEstimationBackProjection<pcl::PointXYZ, pcl::PointXYZ, pcl::Normal> corr_est;
 
     corr_est.setInputSource(cloud1);
@@ -412,10 +397,8 @@ TDK_ScanRegistration::mf_estimateCorrespondences(
 
     pcl::CorrespondencesPtr all_correspondences(new pcl::Correspondences());
     corr_est.determineReciprocalCorrespondences(*all_correspondences);
-    qDebug() << "ScanRegistration : Determined reciprocal correspondences";
 
     pcl::registration::CorrespondenceRejectorSampleConsensus<pcl::PointXYZ> rejector;
-
 
     rejector.setInputSource(cloud1);
     rejector.setInputTarget(cloud2);
@@ -424,9 +407,7 @@ TDK_ScanRegistration::mf_estimateCorrespondences(
     //Add source and target pointcloud data to rejector?
     pcl::CorrespondencesPtr remaining_correspondences(new pcl::Correspondences());
     rejector.getCorrespondences(*remaining_correspondences);
-    qDebug() << "ScanRegistration : Determined correspondences after outlier removal";
 
-    qDebug() << "ScanRegistration : Exiting Correspondence calculation";
     return remaining_correspondences;
 }
 
@@ -485,14 +466,13 @@ TDK_ScanRegistration::mf_outlierRemovalPC(
         )
 {
 
-    qDebug() << "mf_outlierRemovalPC : " << cloud_in->points.size();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_out (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::StatisticalOutlierRemoval<pcl::PointXYZRGB> sorfilter (true);
     sorfilter.setInputCloud (cloud_in);
     sorfilter.setMeanK (meanK);
     sorfilter.setStddevMulThresh (std_dev);
     sorfilter.filter (*cloud_out);
-    qDebug() << "mf_outlierRemovalPC : " << cloud_out->points.size();
+
     return cloud_out;
 }
 
@@ -501,6 +481,7 @@ TDK_ScanRegistration::mf_outlierRemovalPC(
 void
 TDK_ScanRegistration::setScannerRotationAxis(const pcl::PointWithViewpoint &value)
 {
+    mv_scannerCenterRotationSet = true;
     mv_scannerCenter = value;
 }
 
@@ -527,16 +508,6 @@ float TDK_ScanRegistration::get_voxelSideLength() const
 void TDK_ScanRegistration::set_PostICP_MaxCorrespondanceDistance(float value)
 {
     mv_ICPPost_MaxCorrespondanceDistance = value;
-}
-
-bool TDK_ScanRegistration::get_FlagUseScannerCenterRotation() const
-{
-    return mv_FlagUseScannerCenterRotation;
-}
-
-void TDK_ScanRegistration::set_FlagUseScannerCenterRotation(bool value)
-{
-    mv_FlagUseScannerCenterRotation = value;
 }
 
 bool TDK_ScanRegistration::getRegisterInRealTime() const
