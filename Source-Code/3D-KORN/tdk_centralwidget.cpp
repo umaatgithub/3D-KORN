@@ -27,8 +27,6 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     connect(mv_PointCloudListTab        , SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdatePointCloudDisplay(QListWidgetItem*)));
     connect(mv_RegisteredPointCloudListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
     connect(mv_MeshListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
-
-    mv_ScanRegistration->set_FlagUseScannerCenterRotation(false);
 }
 
 TDK_CentralWidget::~TDK_CentralWidget()
