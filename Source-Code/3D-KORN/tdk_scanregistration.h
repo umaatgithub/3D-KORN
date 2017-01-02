@@ -44,7 +44,7 @@ public:
 
     //Input
     bool addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud,
-                           const float degreesRotatedY);
+                           const float degreesRotatedY=0.0);
 
     //Ouput
     pcl::PointCloud<pcl::PointXYZ>::Ptr getLastDownSampledPointcloud();
@@ -65,14 +65,13 @@ public:
     float get_voxelSideLength() const;
     double get_SVD_MaxDistance() const;
     float get_ICP_MaxCorrespondenceDistance() const;
-    bool get_FlagUseScannerCenterRotation() const;
 
     void set_normalRadiusSearch(float value);
     void set_voxelSideLength(float value);
     void set_SVD_MaxDistance(double value);
     void set_ICP_MaxCorrespondenceDistance(float value);
     void set_PostICP_MaxCorrespondanceDistance(float value);
-    void set_FlagUseScannerCenterRotation(bool value);
+
 
 private:
     //Class operation configuration
@@ -86,7 +85,7 @@ private:
     float mv_ICPPost_MaxCorrespondanceDistance;
 
     //Scanner orientation and rotation compensation
-    bool mv_FlagUseScannerCenterRotation;
+    bool mv_scannerCenterRotationSet;
     pcl::PointWithViewpoint mv_scannerCenter;
     float mv_accumulatedRotation;
 
@@ -94,7 +93,7 @@ private:
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_originalPCs;
     vector<float> mv_originalPointcloudsYRotation;
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_originalRotatedPCs;
-    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_originalDenoisedPCs;
+    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_originalRotatedDenoisedPCs;
     vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> mv_downSampledPCs;
     vector<pcl::PointCloud<pcl::Normal>::Ptr> mv_downSampledNormals;
     vector<pcl::CorrespondencesPtr> mv_downsampledCorrespondences;
@@ -105,6 +104,8 @@ private:
     //Private class functions
     bool
     mf_processCorrespondencesSVDICP();
+    bool
+    mf_processInPostWithICP();
 
     bool
     addAllPointClouds(const vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &inputPCs,

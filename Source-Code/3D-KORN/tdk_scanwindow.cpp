@@ -57,14 +57,6 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
 
     connect(this, SIGNAL(mf_SignalStatusChanged(QString,QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString,QColor)));
 
-    //Testing
-    float x_coord = mv_XMinimumSpinBox->value() + (mv_XMaximumSpinBox->value() - mv_XMinimumSpinBox->value())/2;
-    float z_coord = mv_ZMinimumSpinBox->value() + (mv_ZMaximumSpinBox->value() - mv_ZMinimumSpinBox->value())/2;
-    float inclinationDegrees = mv_InclinationSpinBox->value();
-    pcl::PointWithViewpoint turntableRotationAxis(x_coord, mv_YMinimumSpinBox->value(), z_coord, inclinationDegrees, 0.0, 0.0);
-    mv_ScanRegistration->setScannerRotationAxis(turntableRotationAxis);
-    mv_ScanRegistration->set_FlagUseScannerCenterRotation(false);
-
 }
 
 TDK_ScanWindow::~TDK_ScanWindow()
@@ -146,12 +138,6 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     std::map<QString, QString>::iterator it = sensorNames.begin();
 
     mv_SensorComboBox->setFixedHeight(22);
-//    qDebug() << "Sensor count " << mv_SensorComboBox->count();
-//    for(int i = 0;i < mv_SensorComboBox->count(); i++){
-//        qDebug() << "Sensor count " << mv_SensorComboBox->count();
-//        mv_SensorComboBox->removeItem(i);
-//        qDebug() << "Sensor count " << mv_SensorComboBox->count();
-//    }
 
     while(it != sensorNames.end()){
         mv_SensorComboBox->addItem(it->second, it->first);
@@ -409,13 +395,6 @@ void TDK_ScanWindow::mf_SlotUpdateBoundingBox()
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 3, "rot_axis");
     mv_PointCloudStreamVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.5, "rot_axis");
 
-
-    //Compute scanregistrator axis of rotation parameters
-    pcl::PointWithViewpoint turntableRotationAxis(x_coord, mv_YMinimumSpinBox->value(), z_coord, inclinationDegrees, 0.0, 0.0);
-
-    //TODO: CONNECT WITH REGISTRATION CLASS OR PARAMETERS?
-    mv_ScanRegistration->setScannerRotationAxis(turntableRotationAxis);
-
     mv_PointCloudStreamQVTKWidget->update();
 }
 
@@ -454,6 +433,7 @@ void TDK_ScanWindow::mf_SlotStartScan()
         qDebug() << mv_FlagTurnTableParametersEnabled << !mv_Turntable->mf_IsRunning();
         if(mv_FlagTurnTableParametersEnabled && !mv_Turntable->mf_IsRunning()){
             qDebug() << "Start platform from scan window";
+            mf_InitializeScannerCenter();
             mv_Turntable->mf_SetStepAngle((int)mv_IncrementalRotationAngleSpinBox->value());
             mv_Turntable->mf_SetTotalRotations((int)mv_NumberOfRotationsSpinBox->value());
             mv_Turntable->mf_StartPlatform(mv_SerialPortNameLineEdit->text(), mv_SerialPortBaudRateComboBox->currentText().toInt());
@@ -489,7 +469,7 @@ void TDK_ScanWindow::mf_SlotStopScan()
             emit mf_SignalDatabaseRegisteredPointCloudUpdated();
             emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
         }
-        mf_SetNumberOfPointCloudsCaptured(0);
+        //mf_SetNumberOfPointCloudsCaptured(0);
         //this->close();
 
     }
@@ -504,10 +484,8 @@ void TDK_ScanWindow::mf_SlotHandlePlatformParameters(bool flagEnablePlatformPara
         mv_NumberOfRotationsSpinBox->setEnabled(true);
         mv_SerialPortNameLineEdit->setEnabled(true);
         mv_SerialPortBaudRateComboBox->setEnabled(true);
-        mv_ScanRegistration->set_FlagUseScannerCenterRotation(true);
     }
     else{
-        mv_ScanRegistration->set_FlagUseScannerCenterRotation(false);
         mv_IncrementalRotationAngleSpinBox->setEnabled(false);
         mv_NumberOfRotationsSpinBox->setEnabled(false);
         mv_SerialPortNameLineEdit->setEnabled(false);
@@ -541,4 +519,20 @@ void TDK_ScanWindow::mf_SetNumberOfPointCloudsCaptured(int value)
 {
     mv_NumberOfPointCloudsCaptured = value;
     emit mf_SignalNumberOfPointCloudUpdated(value);
+}
+
+void TDK_ScanWindow::mf_InitializeScannerCenter()
+{
+    float x_coord = mv_XMinimumSpinBox->value() + (mv_XMaximumSpinBox->value() - mv_XMinimumSpinBox->value())/2;
+    float z_coord = mv_ZMinimumSpinBox->value() + (mv_ZMaximumSpinBox->value() - mv_ZMinimumSpinBox->value())/2;
+    float inclinationDegrees = mv_InclinationSpinBox->value();
+
+    mv_ScannerCenter.x = x_coord;
+    mv_ScannerCenter.y = mv_YMinimumSpinBox->value();
+    mv_ScannerCenter.z = z_coord;
+    mv_ScannerCenter.vp_x = inclinationDegrees;
+    mv_ScannerCenter.vp_y = 0.0;
+    mv_ScannerCenter.vp_z = 0.0;
+
+    mv_ScanRegistration->setScannerRotationAxis(mv_ScannerCenter);
 }

@@ -79,6 +79,7 @@ public:
     QDoubleSpinBox *mv_NumberOfRotationsSpinBox;
     QLineEdit *mv_SerialPortNameLineEdit;
     QComboBox *mv_SerialPortBaudRateComboBox;
+    pcl::PointWithViewpoint mv_ScannerCenter;
 
 
     void mf_setupUI();
@@ -90,6 +91,8 @@ public:
 
     int mf_GetNumberOfPointCloudsCaptured() const;
     void mf_SetNumberOfPointCloudsCaptured(int value);
+
+    void mf_InitializeScannerCenter();
 
 signals:
     void mf_SignalStatusChanged(QString, QColor);
