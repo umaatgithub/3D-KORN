@@ -361,8 +361,8 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Kinect2Grabber::convertRGBDepthToPointXYZ
 {
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud( new pcl::PointCloud<pcl::PointXYZRGB>() );
 
-    cloud->width = static_cast<uint32_t>( depthWidth );
-    cloud->height = static_cast<uint32_t>( depthHeight );
+//    cloud->width = static_cast<uint32_t>( depthWidth );
+//    cloud->height = static_cast<uint32_t>( depthHeight );
     cloud->is_dense = false;
 
     //cloud->points.resize( cloud->height * cloud->width );
@@ -411,11 +411,22 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Kinect2Grabber::convertRGBDepthToPointXYZ
                     }
                 }
                 else{
-                    point.x = cameraSpacePoint.X;
-                    point.y = cameraSpacePoint.Y;
-                    point.z = cameraSpacePoint.Z;
+                    /*if (cameraSpacePoint.Z >= 0.2)
+                                    {
+                                       if (cameraSpacePoint.Y <= 1.2 && cameraSpacePoint.Y >= -1.2)
+                                       {
+                                           if (cameraSpacePoint.X <= 0.6 && cameraSpacePoint.X >= -0.6 ){*/
+                                           point.x = cameraSpacePoint.X;
+                                           point.y = cameraSpacePoint.Y;
+                                           point.z = cameraSpacePoint.Z;
+                                            cloud->points.push_back(point);
 
-                    cloud->points.push_back(point);
+//                                           }
+//                                       }
+//                                    }
+
+
+
                 }
 
             }

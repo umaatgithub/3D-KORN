@@ -2,29 +2,29 @@
 #include <QDebug>
 
 TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
-    mv_CentralGridLayout(new QGridLayout),
-    mv_PointCloudQVTKWidget(new QVTKWidget),
-    mv_MeshAlgorithmComboBox(new QComboBox),
-    mv_GenerateMeshPushButton(new QPushButton(QString("GENERATE MESH"))),
-    mv_RegistrationComboBox(new QComboBox),
-    mv_RegistrationPushButton(new QPushButton(QString("REGISTER POINT CLOUDS"))),
-    mv_PointCloudExplorerTabWidget(new QTabWidget),
-    mv_PointCloudListTab(new QListWidget),
-    mv_RegisteredPointCloudListTab(new QListWidget),
-    mv_MeshListTab(new QListWidget),
-    mv_ScanRegistration(new TDK_ScanRegistration),
-    mv_numberOfPointCloudsSelected(0),
-    mv_numberOfMeshesSelected(0)
+    mv_CentralGridLayout            (new QGridLayout)                                   ,
+    mv_PointCloudQVTKWidget         (new QVTKWidget)                                    ,
+    mv_MeshAlgorithmComboBox        (new QComboBox)                                     ,
+    mv_GenerateMeshPushButton       (new QPushButton(QString("GENERATE MESH")))         ,
+    mv_RegistrationComboBox         (new QComboBox)                                     ,
+    mv_RegistrationPushButton       (new QPushButton(QString("REGISTER POINT CLOUDS"))) ,
+    mv_PointCloudExplorerTabWidget  (new QTabWidget)                                    ,
+    mv_PointCloudListTab            (new QListWidget)                                   ,
+    mv_RegisteredPointCloudListTab  (new QListWidget)                                   ,
+    mv_MeshListTab                  (new QListWidget)                                   ,
+    mv_ScanRegistration             (new TDK_ScanRegistration)                          ,
+    mv_numberOfPointCloudsSelected  (0)                                                 ,
+    mv_numberOfMeshesSelected       (0)
 {
     mf_setupUI();
 
-    connect(mv_RegistrationPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotRegisterPointCloud()));
-    connect(mv_GenerateMeshPushButton, SIGNAL(clicked(bool)), this, SLOT(mf_SlotGenerateMesh()));
+    connect(mv_RegistrationPushButton   , SIGNAL(clicked(bool)), this, SLOT(mf_SlotRegisterPointCloud()));
+    connect(mv_GenerateMeshPushButton   , SIGNAL(clicked(bool)), this, SLOT(mf_SlotGenerateMesh()));
 
-    connect(this, SIGNAL(mf_SignalRegisteredPointCloudListUpdated()), this, SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
-    connect(this, SIGNAL(mf_SignalMeshListUpdated()), this, SLOT(mf_SlotUpdateMeshListTab()));
+    connect(this                        , SIGNAL(mf_SignalRegisteredPointCloudListUpdated()), this, SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
+    connect(this                        , SIGNAL(mf_SignalMeshListUpdated()), this, SLOT(mf_SlotUpdateMeshListTab()));
 
-    connect(mv_PointCloudListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdatePointCloudDisplay(QListWidgetItem*)));
+    connect(mv_PointCloudListTab        , SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdatePointCloudDisplay(QListWidgetItem*)));
     connect(mv_RegisteredPointCloudListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
     connect(mv_MeshListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
 

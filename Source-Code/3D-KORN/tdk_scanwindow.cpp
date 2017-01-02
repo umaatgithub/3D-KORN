@@ -5,8 +5,8 @@ TDK_ScanWindow::TDK_ScanWindow(QMainWindow *parent) : QMainWindow(parent),
     mv_StatusBar(new QStatusBar),
     mv_CentralGridLayout(new QGridLayout),
     mv_SensorController(new TDK_SensorController),
-    mv_Sensor(nullptr),
     mv_SensorComboBox(new QComboBox),
+    mv_Sensor(nullptr),
     mv_PointCloudStreamQVTKWidget(new QVTKWidget),
     mv_FlagRealTimeScan(false),
     mv_FlagScanning(false),
@@ -146,6 +146,13 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
     std::map<QString, QString>::iterator it = sensorNames.begin();
 
     mv_SensorComboBox->setFixedHeight(22);
+//    qDebug() << "Sensor count " << mv_SensorComboBox->count();
+//    for(int i = 0;i < mv_SensorComboBox->count(); i++){
+//        qDebug() << "Sensor count " << mv_SensorComboBox->count();
+//        mv_SensorComboBox->removeItem(i);
+//        qDebug() << "Sensor count " << mv_SensorComboBox->count();
+//    }
+
     while(it != sensorNames.end()){
         mv_SensorComboBox->addItem(it->second, it->first);
         it++;
@@ -338,7 +345,7 @@ void TDK_ScanWindow::mf_SlotCapturePointCloud(int degreesRotated)
 {
     qDebug() << "Trying :Capturing point cloud";
     if(mv_FlagScanning && mv_FlagPointCloudExists){
-        qDebug() << "Point cloud captured";
+        qDebug() << "Point cloud captured " << mv_Sensor->mf_GetMvPointCloud()->points.size();
         mf_SetNumberOfPointCloudsCaptured(mf_GetNumberOfPointCloudsCaptured() + 1);
         TDK_Database::mf_StaticAddPointCloud(mv_Sensor->mf_GetMvPointCloud()->makeShared());
         emit mf_SignalDatabasePointCloudUpdated();
@@ -478,9 +485,9 @@ void TDK_ScanWindow::mf_SlotStopScan()
 
         if(mv_FlagPointCloudExists){
             emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
-//            TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
-//            emit mf_SignalDatabaseRegisteredPointCloudUpdated();
-//            emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
+            TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
+            emit mf_SignalDatabaseRegisteredPointCloudUpdated();
+            emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
         }
         mf_SetNumberOfPointCloudsCaptured(0);
         //this->close();
@@ -514,7 +521,9 @@ void TDK_ScanWindow::mf_SlotUpdateWindow(int sensorIndex)
         qDebug() << "Disconnecting sensor slot";
         disconnect(mv_Sensor, SIGNAL(mf_SignalPointCloudUpdated()), this, SLOT(mf_SlotUpdatePointCloudStream()));
     }
+    qDebug() << mv_SensorComboBox->count();
     QString sensorName = mv_SensorComboBox->itemText(sensorIndex);
+    qDebug() << "Getting sensor in ui";
     mv_Sensor = mv_SensorController->mf_GetSensor(sensorName);
     qDebug() << mv_Sensor->mf_GetMvName();
     mv_Sensor->mf_SetFilterBox(mv_XMinimumSpinBox->value(), mv_XMaximumSpinBox->value(), mv_YMinimumSpinBox->value(), mv_YMaximumSpinBox->value(), mv_ZMinimumSpinBox->value(), mv_ZMaximumSpinBox->value());

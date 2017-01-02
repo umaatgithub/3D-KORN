@@ -9,7 +9,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/vtk_lib_io.h>
 
-
 #include "tdk_scanwindow.h"
 #include "tdk_database.h"
 
@@ -30,21 +29,18 @@ signals:
     void mf_SignalDatabaseMeshUpdated();
 
 private slots:
-    //Tool Bar Actions
-    void on_mf_NewScanToolBar_triggered();
-
-    //Menu Bar Actions
-    void on_mf_ActionNewScanMenuBar_triggered();
-    void on_mf_ActionExitMenuBar_triggered();
-    void on_mf_ActionAboutMenuBar_triggered();
-    void on_mf_ActionImportPointCloudMenuBar_triggered();
-    void on_mf_ActionImportMeshMenuBar_triggered();
-    void on_mf_ActionExportPointCloudMenuBar_triggered();
-    void on_mf_ActionExportMeshMenuBar_triggered();
+    void on_actionNew_Scan_triggered();
+    void on_actionImportPointCloud_triggered();
+    void on_actionImportMesh_triggered();
+    void on_actionExportPCD_triggered();
+    void on_actionExportPLY_triggered();
+    void on_actionExportSTL_triggered();
+    void on_actionExportVTK_triggered();
+    void on_actionAbout_triggered();
 
 private:
     Ui::MainWindow *ui;
-    TDK_ScanWindow *tdk_scanWindow;
+    TDK_ScanWindow *mv_ScanWindow;
 };
 
 #endif // MAINWINDOW_H

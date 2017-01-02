@@ -1,7 +1,8 @@
 #include "tdk_intelr200sensor.h"
+#include <QException>
 
 //constructor
-TDK_IntelR200Sensor::TDK_IntelR200Sensor():TDK_Sensor()
+TDK_IntelR200Sensor::TDK_IntelR200Sensor():TDK_Sensor(), mv_Available(false)
 {
     mf_SetMvId(QString("INTELR200"));
     mf_SetMvName(QString("Intel R200"));
@@ -23,7 +24,9 @@ TDK_IntelR200Sensor::~TDK_IntelR200Sensor()
 //returns true if sensor is connected
 bool TDK_IntelR200Sensor::mf_IsAvailable()
 {
-    return false;
+    //qDebug() << "sensor is connected = " << mv_myManager->IsConnected();
+    //return ((bool) mv_myManager->IsConnected());
+    return mv_Available;
 }
 
 //stops sensor
@@ -43,7 +46,7 @@ void TDK_IntelR200Sensor::mf_GeneratePointCloud()
     //Aligned capture: returns aligned color and depth streams: block/stop return until both streams are ready
     //return NULL pointer if error in acquiring frame
     if (mv_myManager->AcquireFrame(true)<PXC_STATUS_NO_ERROR) {
- //       qDebug() <<"Error acquiring aligned frames!";
+        //       qDebug() <<"Error acquiring aligned frames!";
         return;
     }
 
@@ -54,7 +57,7 @@ void TDK_IntelR200Sensor::mf_GeneratePointCloud()
     // work on color and depth streams of
     mv_colorImage = mv_alignedImage->color;
     mv_depthImage = mv_alignedImage->depth;
-//    qDebug() << "color and depth streams extracted from alignedImage";
+    //    qDebug() << "color and depth streams extracted from alignedImage";
 
     //map the color image to depth image (Note: kinect grabber class maps depth to color)
     PXCImage* colorMappedToDepth;
@@ -62,7 +65,7 @@ void TDK_IntelR200Sensor::mf_GeneratePointCloud()
 
     // go fetching the next aligned-sample, if required : (this does not 'release' the manager interface)
     mv_myManager->ReleaseFrame();
-  //  qDebug() << "mv_myManager released frame, can fetch next aligned frames";
+    //  qDebug() << "mv_myManager released frame, can fetch next aligned frames";
 
     //-----For creating point cloud from depth image (by <projecting> depth image to world coordinates)-------
 
@@ -96,7 +99,7 @@ void TDK_IntelR200Sensor::mf_GeneratePointCloud()
     short *depthbuffer = (short*) depthImageData.planes[0];
     uint8_t *mappedColorbuffer = (uint8_t*) colorMappedToDepthData.planes[0];
 
-//    qDebug() << "Acquired buffer locations of depth and color streams";
+    //    qDebug() << "Acquired buffer locations of depth and color streams";
 
     //point cloud container for the current request (session)
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud ( new pcl::PointCloud <pcl::PointXYZRGB> () );
@@ -121,7 +124,17 @@ void TDK_IntelR200Sensor::mf_GeneratePointCloud()
             pclworldpoint.g = (float) mappedColorbuffer[1];
             pclworldpoint.r = (float) mappedColorbuffer[2];
 
-            cloud->points.push_back(pclworldpoint);
+            if (mv_FlagFilterPoints){
+                if (pclworldpoint.x > mv_XMin & pclworldpoint.x < mv_XMax &
+                        pclworldpoint.y > mv_YMin & pclworldpoint.y < mv_YMax &
+                        pclworldpoint.z > mv_ZMin & pclworldpoint.z < mv_ZMax){
+
+                    cloud->points.push_back(pclworldpoint);
+                }
+            }
+
+            else
+            {cloud->points.push_back(pclworldpoint);}
 
             depthbuffer++;
             mappedColorbuffer += 4;
@@ -129,10 +142,10 @@ void TDK_IntelR200Sensor::mf_GeneratePointCloud()
     }
 
     // mv_myManager->Release();
-//    qDebug() << "About to set point cloud";
+    //    qDebug() << "About to set point cloud";
     mf_SetMvPointCloud(cloud);
 
- //   qDebug() << "Point cloud set";
+    //   qDebug() << "Point cloud set";
 
 }
 
@@ -141,10 +154,10 @@ void TDK_IntelR200Sensor::mf_threadAcquireCloud()
 {
     //pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud;
     //cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>);
-//    qDebug() << "Intel R200 entering thread function";
+    //    qDebug() << "Intel R200 entering thread function";
     while (!mv_quit){
         boost::unique_lock<boost::mutex> lock(mutex);
-//        qDebug() << "Intel R200 inside thread while";
+        //        qDebug() << "Intel R200 inside thread while";
 
         mf_GeneratePointCloud();
 
@@ -164,7 +177,7 @@ bool TDK_IntelR200Sensor::mf_SetupSensor ()
     //pipelines; controls = pipeline.{start, stop, pause, getFrame resume}
     //here: mv_myManager provides interface to image acquisition pipeline and the current session and device
     mv_myManager = PXCSenseManager::CreateInstance();
-
+    qDebug() << "Manager instance created" ;
     //Notes:
     //The EnableStream[s] function requests that the specified
     //stream(s) be part of the streaming pipeline. The application
@@ -176,28 +189,50 @@ bool TDK_IntelR200Sensor::mf_SetupSensor ()
     mv_myManager->EnableStream(PXCCapture::STREAM_TYPE_COLOR, mv_colorWidth, mv_colorHeight, mv_fps);
     mv_myManager->EnableStream(PXCCapture::STREAM_TYPE_DEPTH, mv_depthWidth, mv_depthHeight, mv_fps);
 
+    qDebug() << "Streams enabled";
 
-    mv_myManager->Init();
-    //initialize a pcl pointcloud PointXYZRGB
-    //mv_cloud = new pcl::PointCloud <pcl::PointXYZRGB>;
+    pxcStatus initStatus = mv_myManager->Init();
+
+    if(initStatus == 0){
+        mv_Available = true;
+    }
+    else{
+        mv_Available = false;
+        return false;
+    }
+    qDebug() << "manager initialized status: " << initStatus;
 
     //Initialize session, capture and device interfaces
     mv_session = mv_myManager->QuerySession();
 
+    qDebug() << "session created from manager";
+
     PXCSession::ImplDesc desc={};
     desc.group=PXCSession::IMPL_GROUP_SENSOR;
     desc.subgroup=PXCSession::IMPL_SUBGROUP_VIDEO_CAPTURE;
-
     PXCSession::ImplDesc desc1;
     pxcStatus sts = mv_session->QueryImpl(&desc,0,&desc1);
     sts = mv_session->CreateImpl<PXCCapture>(&desc1,&mv_capture);
 
+
+    qDebug() << "stuff done for creating device";
+
     mv_device = mv_capture->CreateDevice(0);
 
+    qDebug() << "device created";
+
     //initialize the projection interface (for mapping between depth, color and world (camera) coordinates)
+
+
+
+    qDebug()<< "connected = "<< mv_myManager->IsConnected();
     mv_projection = mv_device->CreateProjection();
 
+    qDebug() << "try block end";
+
+
     qDebug() << "IntelR200 Setup done";
+    mv_Available = true;
     return true;
 }
 

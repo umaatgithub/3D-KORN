@@ -51,6 +51,8 @@ protected:
     //point cloud container
     pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr mv_cloud;
 
+    bool mv_Available;
+
     //color and depth images returned by the camera
     PXCImage *mv_colorImage, *mv_depthImage;
 

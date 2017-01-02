@@ -23,38 +23,49 @@
      <height>26</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuFile">
+   <widget class="QMenu" name="menuScan">
     <property name="title">
-     <string>File</string>
+     <string>Scan</string>
     </property>
-    <widget class="QMenu" name="menuImport">
+    <addaction name="actionNew_Scan"/>
+   </widget>
+   <widget class="QMenu" name="menuPointCloud">
+    <property name="title">
+     <string>PointCloud</string>
+    </property>
+    <widget class="QMenu" name="menuExport_2">
      <property name="title">
-      <string>Import</string>
+      <string>Export As</string>
      </property>
-     <addaction name="mf_ActionImportPointCloudMenuBar"/>
-     <addaction name="mf_ActionImportMeshMenuBar"/>
+     <addaction name="actionExportPCD"/>
+     <addaction name="actionExportPLY"/>
     </widget>
+    <addaction name="actionImportPointCloud"/>
+    <addaction name="menuExport_2"/>
+   </widget>
+   <widget class="QMenu" name="menuMesh">
+    <property name="title">
+     <string>Mesh</string>
+    </property>
     <widget class="QMenu" name="menuExport">
      <property name="title">
-      <string>Export</string>
+      <string>Export As</string>
      </property>
-     <addaction name="mf_ActionExportPointCloudMenuBar"/>
-     <addaction name="mf_ActionExportMeshMenuBar"/>
+     <addaction name="actionExportSTL"/>
+     <addaction name="actionExportVTK"/>
     </widget>
-    <addaction name="mf_ActionNewScanMenuBar"/>
-    <addaction name="separator"/>
-    <addaction name="menuImport"/>
+    <addaction name="actionImportMesh"/>
     <addaction name="menuExport"/>
-    <addaction name="separator"/>
-    <addaction name="mf_ActionExitMenuBar"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="mf_ActionAboutMenuBar"/>
+    <addaction name="actionAbout"/>
    </widget>
-   <addaction name="menuFile"/>
+   <addaction name="menuScan"/>
+   <addaction name="menuPointCloud"/>
+   <addaction name="menuMesh"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -64,50 +75,46 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="mf_NewScanToolBar"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="mf_NewScanToolBar">
-   <property name="text">
-    <string>New Scan</string>
-   </property>
-   <property name="toolTip">
-    <string>New Scan</string>
-   </property>
-  </action>
-  <action name="mf_ActionNewScanMenuBar">
+  <action name="actionNew_Scan">
    <property name="text">
     <string>New Scan</string>
    </property>
   </action>
-  <action name="mf_ActionExitMenuBar">
+  <action name="actionImportPointCloud">
    <property name="text">
-    <string>Exit</string>
+    <string>Import</string>
    </property>
   </action>
-  <action name="mf_ActionAboutMenuBar">
+  <action name="actionImportMesh">
+   <property name="text">
+    <string>Import</string>
+   </property>
+  </action>
+  <action name="actionExportPCD">
+   <property name="text">
+    <string>PCD</string>
+   </property>
+  </action>
+  <action name="actionExportPLY">
+   <property name="text">
+    <string>PLY</string>
+   </property>
+  </action>
+  <action name="actionExportSTL">
+   <property name="text">
+    <string>STL</string>
+   </property>
+  </action>
+  <action name="actionExportVTK">
+   <property name="text">
+    <string>VTK</string>
+   </property>
+  </action>
+  <action name="actionAbout">
    <property name="text">
     <string>About</string>
-   </property>
-  </action>
-  <action name="mf_ActionImportPointCloudMenuBar">
-   <property name="text">
-    <string>Point Cloud</string>
-   </property>
-  </action>
-  <action name="mf_ActionImportMeshMenuBar">
-   <property name="text">
-    <string>Mesh</string>
-   </property>
-  </action>
-  <action name="mf_ActionExportPointCloudMenuBar">
-   <property name="text">
-    <string>Point Cloud</string>
-   </property>
-  </action>
-  <action name="mf_ActionExportMeshMenuBar">
-   <property name="text">
-    <string>Mesh</string>
    </property>
   </action>
  </widget>
