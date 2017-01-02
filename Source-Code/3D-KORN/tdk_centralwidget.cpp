@@ -18,15 +18,22 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
 {
     mf_setupUI();
 
-    connect(mv_RegistrationPushButton   , SIGNAL(clicked(bool)), this, SLOT(mf_SlotRegisterPointCloud()));
-    connect(mv_GenerateMeshPushButton   , SIGNAL(clicked(bool)), this, SLOT(mf_SlotGenerateMesh()));
+    connect(mv_RegistrationPushButton       , SIGNAL(clicked(bool)),
+            this                            , SLOT(mf_SlotRegisterPointCloud()));
+    connect(mv_GenerateMeshPushButton       , SIGNAL(clicked(bool)),
+            this                            , SLOT(mf_SlotGenerateMesh()));
 
-    connect(this                        , SIGNAL(mf_SignalRegisteredPointCloudListUpdated()), this, SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
-    connect(this                        , SIGNAL(mf_SignalMeshListUpdated()), this, SLOT(mf_SlotUpdateMeshListTab()));
+    connect(this                            , SIGNAL(mf_SignalRegisteredPointCloudListUpdated()),
+            this                            , SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
+    connect(this                            , SIGNAL(mf_SignalMeshListUpdated())                ,
+            this                            , SLOT(mf_SlotUpdateMeshListTab()));
 
-    connect(mv_PointCloudListTab        , SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdatePointCloudDisplay(QListWidgetItem*)));
-    connect(mv_RegisteredPointCloudListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
-    connect(mv_MeshListTab, SIGNAL(itemChanged(QListWidgetItem*)), this, SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
+    connect(mv_PointCloudListTab            , SIGNAL(itemChanged(QListWidgetItem*)),
+            this                            , SLOT(mf_SlotUpdatePointCloudDisplay(QListWidgetItem*)));
+    connect(mv_RegisteredPointCloudListTab  , SIGNAL(itemChanged(QListWidgetItem*)),
+            this                            , SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
+    connect(mv_MeshListTab                  , SIGNAL(itemChanged(QListWidgetItem*)),
+            this                            , SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
 }
 
 TDK_CentralWidget::~TDK_CentralWidget()
@@ -56,6 +63,7 @@ void TDK_CentralWidget::mf_setupUI()
     this->setLayout(mv_CentralGridLayout);
 }
 
+
 void TDK_CentralWidget::mf_SetupPointCloudDisplayWidget()
 {
     QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Visualizer"));
@@ -65,19 +73,11 @@ void TDK_CentralWidget::mf_SetupPointCloudDisplayWidget()
 
     mv_PointCloudVisualizer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
     mv_PointCloudVisualizer->setBackgroundColor (0.1, 0.1, 0.1);
-    //mv_PointCloudStreamVisualizer->setCameraPosition( 0.0, 0.0, 2.5, 0.0, 0.0, 0.0 );
-
     mv_PointCloudVisualizer->addCoordinateSystem(1.0);
-//    mv_PointCloudVisualizer->addCube(0, 1, 0, 1, 0, 1, 0, 0, 0,"cube");
-//    mv_PointCloudVisualizer->setShapeRenderingProperties(pcl::visualization::PCL_VISUALIZER_REPRESENTATION, pcl::visualization::PCL_VISUALIZER_REPRESENTATION_WIREFRAME, "cube");
-//    mv_PointCloudVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_OPACITY, 0.8, "cube");
-//    mv_PointCloudVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_COLOR, 0.8, 0.0, 0.0, "cube");
-//    mv_PointCloudVisualizer->setShapeRenderingProperties (pcl::visualization::PCL_VISUALIZER_LINE_WIDTH, 2, "cube");
-
     mv_PointCloudQVTKWidget->SetRenderWindow ( mv_PointCloudVisualizer->getRenderWindow () );
     mv_PointCloudVisualizer->setupInteractor ( mv_PointCloudQVTKWidget->GetInteractor (), mv_PointCloudQVTKWidget->GetRenderWindow ());
-
 }
+
 
 void TDK_CentralWidget::mf_SetupCropWidget()
 {
@@ -86,15 +86,13 @@ void TDK_CentralWidget::mf_SetupCropWidget()
     QScrollArea *scrollArea = new QScrollArea;
     QWidget *widget = new QWidget;
 
-
-
     widget->setLayout(gridLayout);
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
     mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
-
 }
+
 
 void TDK_CentralWidget::mf_SetupInformationWidget()
 {
@@ -110,6 +108,7 @@ void TDK_CentralWidget::mf_SetupInformationWidget()
     mv_CentralGridLayout->addWidget(dockWidget, 1, 2);
 }
 
+
 void TDK_CentralWidget::mf_SetupPointCloudExplorerTabWidget()
 {
     QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Explorer"));
@@ -121,6 +120,7 @@ void TDK_CentralWidget::mf_SetupPointCloudExplorerTabWidget()
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
     mv_CentralGridLayout->addWidget(dockWidget, 0, 0);
 }
+
 
 void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
 {
@@ -152,7 +152,6 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     gridLayout->addWidget(mv_MeshAlgorithmComboBox, 3, 2, 1, 2);
     gridLayout->addWidget(mv_GenerateMeshPushButton, 4, 0, 1, 4);
 
-
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
     gridLayout->setVerticalSpacing(20);
@@ -164,6 +163,7 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
     mv_CentralGridLayout->addWidget(dockWidget, 0, 2);
 }
+
 
 void TDK_CentralWidget::mf_SlotRegisterPointCloud()
 {
@@ -186,6 +186,7 @@ void TDK_CentralWidget::mf_SlotRegisterPointCloud()
         QMessageBox::warning(this, QString("3D-KORN"), QString("Please select atleast two point clouds from explorer widget to register."));
     }
 }
+
 
 void TDK_CentralWidget::mf_SlotGenerateMesh()
 {
@@ -215,35 +216,38 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
     else{
         QMessageBox::warning(this, QString("3D-KORN"), QString("Please select atleast one point cloud from explorer widget to generate mesh."));
     }
-
 }
+
 
 void TDK_CentralWidget::mf_SlotUpdatePointCloudListTab()
 {
     QListWidgetItem* item = new QListWidgetItem;
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(Qt::Unchecked);
-    item->setText(TDK_Database::mv_PointCloudsName[TDK_Database::mv_PointCloudsName.size()-1]);
+    item->setText(TDK_Database::mv_PointCloudsName.back());
     mv_PointCloudListTab->addItem(item);
 }
+
 
 void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudListTab()
 {
     QListWidgetItem* item = new QListWidgetItem;
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(Qt::Unchecked);
-    item->setText(TDK_Database::mv_RegisteredPointCloudsName[TDK_Database::mv_RegisteredPointCloudsName.size()-1]);
+    item->setText(TDK_Database::mv_RegisteredPointCloudsName.back());
     mv_RegisteredPointCloudListTab->addItem(item);
 }
+
 
 void TDK_CentralWidget::mf_SlotUpdateMeshListTab()
 {
     QListWidgetItem* item = new QListWidgetItem;
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
     item->setCheckState(Qt::Unchecked);
-    item->setText(TDK_Database::mv_MeshesName[TDK_Database::mv_MeshesName.size()-1]);
+    item->setText(TDK_Database::mv_MeshesName.back());
     mv_MeshListTab->addItem(item);
 }
+
 
 void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
 {
@@ -268,6 +272,7 @@ void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
 
 }
 
+
 void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem *item)
 {
     if(item->checkState() == Qt::Checked){
@@ -289,6 +294,7 @@ void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem
     }
     mv_PointCloudQVTKWidget->update();
 }
+
 
 void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
 {

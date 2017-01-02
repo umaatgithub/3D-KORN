@@ -1,25 +1,31 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    mv_ScanWindow (new TDK_ScanWindow(this))
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
+    ui              (new Ui::MainWindow),
+    mv_ScanWindow   (new TDK_ScanWindow(this))
 {
+
     ui->setupUi(this);
 
-    connect(mv_ScanWindow   ,   SIGNAL(mf_SignalDatabasePointCloudUpdated()),   ui->centralWidget,  SLOT(mf_SlotUpdatePointCloudListTab()));
-    connect(mv_ScanWindow   ,   SIGNAL(mf_SignalDatabaseRegisteredPointCloudUpdated()),   ui->centralWidget,  SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
+    connect(mv_ScanWindow           , SIGNAL(mf_SignalDatabasePointCloudUpdated()),
+            ui->centralWidget       , SLOT(mf_SlotUpdatePointCloudListTab()));
+    connect(mv_ScanWindow           , SIGNAL(mf_SignalDatabaseRegisteredPointCloudUpdated()),
+            ui->centralWidget       , SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
 
-    connect(this            ,   SIGNAL(mf_SignalDatabasePointCloudUpdated()),   ui->centralWidget,  SLOT(mf_SlotUpdatePointCloudListTab()));
-    connect(this            ,   SIGNAL(mf_SignalDatabaseMeshUpdated())      ,   ui->centralWidget,  SLOT(mf_SlotUpdateMeshListTab()));
+    connect(this                    , SIGNAL(mf_SignalDatabasePointCloudUpdated()),
+            ui->centralWidget       , SLOT(mf_SlotUpdatePointCloudListTab()));
+    connect(this                    , SIGNAL(mf_SignalDatabaseMeshUpdated()),
+            ui->centralWidget       , SLOT(mf_SlotUpdateMeshListTab()));
 
 }
+
 
 MainWindow::~MainWindow()
 {
     delete ui;
 }
+
 
 void MainWindow::on_actionNew_Scan_triggered()
 {
@@ -39,6 +45,7 @@ void MainWindow::on_actionNew_Scan_triggered()
             sensorWarningMessageBox.setDefaultButton(QMessageBox::Retry);
             int retryValue = sensorWarningMessageBox.exec();
             switch (retryValue) {
+
             case QMessageBox::Retry:
                 if(mv_ScanWindow->mv_SensorController->mf_IsSensorAvailable()){
                     mv_ScanWindow->mf_setupUI();
@@ -47,9 +54,11 @@ void MainWindow::on_actionNew_Scan_triggered()
                     retryFlag = false;
                 }
                 break;
+
             case QMessageBox::Cancel:
                 retryFlag = false;
                 break;
+
             default:
                 retryFlag = false;
                 break;
@@ -95,7 +104,6 @@ void MainWindow::on_actionImportMesh_triggered()
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalDatabaseMeshUpdated();
             }
-
         }
     }
 }
@@ -111,6 +119,7 @@ void MainWindow::on_actionExportPCD_triggered()
         if(directoryName != ""){
             QString filePath;
             QListWidgetItem* item;
+
             for(int i = 0, len = centralwidget->mv_PointCloudListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_PointCloudListTab->item(i);
@@ -121,6 +130,7 @@ void MainWindow::on_actionExportPCD_triggered()
                     pcl::io::savePCDFile(filePath.toStdString(), *(TDK_Database::mv_PointCloudsVector[i]));
                 }
             }
+
             for(int i = 0, len = centralwidget->mv_RegisteredPointCloudListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_RegisteredPointCloudListTab->item(i);
@@ -170,6 +180,7 @@ void MainWindow::on_actionExportPLY_triggered()
     }
 }
 
+
 void MainWindow::on_actionExportSTL_triggered()
 {
     TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
@@ -194,6 +205,7 @@ void MainWindow::on_actionExportSTL_triggered()
         }
     }
 }
+
 
 void MainWindow::on_actionExportVTK_triggered()
 {
@@ -220,6 +232,7 @@ void MainWindow::on_actionExportVTK_triggered()
         }
     }
 }
+
 
 void MainWindow::on_actionAbout_triggered()
 {

@@ -16,44 +16,42 @@ public:
     explicit TDK_Sensor(QObject *parent = 0);
     ~TDK_Sensor();
 
-    virtual bool mf_IsAvailable() = 0;
-    virtual bool mf_SetupSensor() = 0;
-    virtual bool mf_StartSensor() = 0;
-    virtual bool mf_StopSensor() = 0;
+    virtual bool    mf_IsAvailable      () = 0;
+    virtual bool    mf_SetupSensor      () = 0;
+    virtual bool    mf_StartSensor      () = 0;
+    virtual bool    mf_StopSensor       () = 0;
 
-    std::map<QString, QString> mf_GetMvSensorDetails() const;
-    void mf_SetMvSensorDetails(const std::map<QString, QString> &sensorDetails);
 
-    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr mf_GetMvPointCloud() const;
-    void mf_SetMvPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pointCloudPtr);
+    void    mf_SetMvSensorDetails       (const std::map<QString, QString> &sensorDetails);
+    void    mf_SetMvPointCloud          (const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr &pointCloudPtr);
+    void    mf_SetMvName                (const QString &value);
+    void    mf_SetMvId                  (const QString &value);
+    void    mf_SetMvFlagFilterPoints    (bool value);
 
-    QString mf_GetMvName() const;
-    void mf_SetMvName(const QString &value);
+    void    mf_SetFilterBox             (float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 
-    QString mf_GetMvId() const;
-    void mf_SetMvId(const QString &value);
-
-    bool mf_GetMvFlagFilterPoints() const;
-    void mf_SetMvFlagFilterPoints(bool value);
-
-    void mf_SetFilterBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
+    std::map<QString, QString>                  mf_GetMvSensorDetails       () const;
+    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr mf_GetMvPointCloud          () const;
+    QString                                     mf_GetMvName                () const;
+    QString                                     mf_GetMvId                  () const;
+    bool                                        mf_GetMvFlagFilterPoints    () const;
 
 protected:
     QString mv_Id;
     QString mv_Name;
-    std::map<QString, QString> mv_SensorDetails;
-    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr mv_PointCloud;
 
-    bool mv_FlagFilterPoints;
-    float mv_XMin, mv_XMax;
-    float mv_YMin, mv_YMax;
-    float mv_ZMin, mv_ZMax;
+    std::map<QString, QString>                      mv_SensorDetails;
+    pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr     mv_PointCloud;
 
+    bool    mv_FlagFilterPoints;
+    float   mv_XMin, mv_XMax;
+    float   mv_YMin, mv_YMax;
+    float   mv_ZMin, mv_ZMax;
 
 signals:
-    void mf_SignalPointCloudUpdated();
-    void mf_SignalFlagFilterUpdated();
-    void mf_SignalFilterBoxUpdated();
+    void    mf_SignalPointCloudUpdated  ();
+    void    mf_SignalFlagFilterUpdated  ();
+    void    mf_SignalFilterBoxUpdated   ();
 
 public slots:
 };

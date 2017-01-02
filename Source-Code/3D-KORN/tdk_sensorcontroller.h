@@ -14,17 +14,14 @@ public:
     explicit TDK_SensorController(QObject *parent = 0);
     ~TDK_SensorController();
 
-    void mf_InitializeSensors();
-    bool mf_IsSensorAvailable();
-    std::map<QString, QString> mf_GetAvailableSensorNames();
-    TDK_Sensor *mf_GetSensor(QString sensorId);
+    void                            mf_InitializeSensors            ();
+    bool                            mf_IsSensorAvailable            ();
+    std::map<QString, QString>      mf_GetAvailableSensorNames      ();
+    TDK_Sensor                     *mf_GetSensor                    (QString sensorId);
 
 protected:
-    std::map<QString, TDK_Sensor*> mv_Sensors;
+    std::map<QString, TDK_Sensor*>  mv_Sensors;
 
-signals:
-
-public slots:
 };
 
 #endif // TDK_SENSORCONTROLLER_H

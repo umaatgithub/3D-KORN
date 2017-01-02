@@ -16,9 +16,9 @@ public:
     explicit TDK_Edit(QObject *parent = 0);
 
 protected:
-    QString mv_EditId;
-    QString mv_EditDescription;
-    std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr > *mv_PointcloudVector;
+    QString     mv_EditId;
+    QString     mv_EditDescription;
+    std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr >    *mv_PointcloudVector;
 
 signals:
 

@@ -19,14 +19,14 @@ public:
     explicit TDK_Database(QObject *parent = 0);
     ~TDK_Database();
 
-    static void mf_StaticAddPointCloud          (pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloudPtr,
-                                                 QString pointCloudName = "U1425_AUTOGENERATE");
+    static void     mf_StaticAddPointCloud              (pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloudPtr,
+                                                        QString pointCloudName = "U1425_AUTOGENERATE");
 
-    static void mf_StaticAddRegisteredPointCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr registeredPointCloudPtr,
-                                                 QString registeredPointCloudName = "U1425_AUTOGENERATE");
+    static void     mf_StaticAddRegisteredPointCloud    (pcl::PointCloud<pcl::PointXYZRGB>::Ptr registeredPointCloudPtr,
+                                                        QString registeredPointCloudName = "U1425_AUTOGENERATE");
 
-    static void mf_StaticAddMesh                (pcl::PolygonMesh::Ptr meshPtr,
-                                                 QString meshName = "U1425_AUTOGENERATE");
+    static void     mf_StaticAddMesh                    (pcl::PolygonMesh::Ptr meshPtr,
+                                                        QString meshName = "U1425_AUTOGENERATE");
 
     //TO BE IMPLEMENTED
     static std::vector<TDK_Edit*>                               mv_EditHistoryVector;

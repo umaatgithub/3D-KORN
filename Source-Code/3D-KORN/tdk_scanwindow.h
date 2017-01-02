@@ -38,84 +38,84 @@ class TDK_ScanWindow : public QMainWindow
 public:
     explicit TDK_ScanWindow(QMainWindow *parent = 0);
     ~TDK_ScanWindow();
-    QWidget *mv_CentralWidget;
-    QStatusBar *mv_StatusBar;
-    QGridLayout *mv_CentralGridLayout;
-    TDK_SensorController *mv_SensorController;
-    TDK_Sensor *mv_Sensor;
+
+    QWidget                                             *mv_CentralWidget;
+    QStatusBar                                          *mv_StatusBar;
+    QGridLayout                                         *mv_CentralGridLayout;
+    TDK_SensorController                                *mv_SensorController;
+    TDK_Sensor                                          *mv_Sensor;
     boost::shared_ptr<pcl::visualization::PCLVisualizer> mv_PointCloudStreamVisualizer;
-    QVTKWidget *mv_PointCloudStreamQVTKWidget;
-    int mv_NumberOfPointCloudsCaptured;
-    TDK_ScanRegistration *mv_ScanRegistration;
-    TDK_Turntable *mv_Turntable;
+    QVTKWidget                                          *mv_PointCloudStreamQVTKWidget;
+    int                                                  mv_NumberOfPointCloudsCaptured;
+    TDK_ScanRegistration                                *mv_ScanRegistration;
+    TDK_Turntable                                       *mv_Turntable;
 
 
     //Flag variables
-    bool mv_FlagRealTimeScan;
-    bool mv_FlagScanning;
-    bool mv_FlagTurnTableParametersEnabled;
-    bool mv_FlagPointCloudExists;
+    bool        mv_FlagRealTimeScan;
+    bool        mv_FlagScanning;
+    bool        mv_FlagTurnTableParametersEnabled;
+    bool        mv_FlagPointCloudExists;
 
     //Sensor widgets
-    QComboBox *mv_SensorComboBox;
-    QDoubleSpinBox *mv_XMinimumSpinBox;
-    QDoubleSpinBox *mv_XMaximumSpinBox;
-    QDoubleSpinBox *mv_YMinimumSpinBox;
-    QDoubleSpinBox *mv_YMaximumSpinBox;
-    QDoubleSpinBox *mv_ZMinimumSpinBox;
-    QDoubleSpinBox *mv_ZMaximumSpinBox;
-    QDoubleSpinBox *mv_InclinationSpinBox;
-    QCheckBox *mv_FilterBoxCheckBox;
-    QCheckBox *mv_RegistrationCheckBox;
-    QPushButton *mv_StartScanPushButton;
-    QPushButton *mv_StopScanPushButton;
-    QLabel *mv_NumberOfPointCloudsCapturedLabel;
-    QPushButton *mv_CapturePointCloudPushButton;
+    QComboBox           *mv_SensorComboBox;
+    QDoubleSpinBox      *mv_XMinimumSpinBox;
+    QDoubleSpinBox      *mv_XMaximumSpinBox;
+    QDoubleSpinBox      *mv_YMinimumSpinBox;
+    QDoubleSpinBox      *mv_YMaximumSpinBox;
+    QDoubleSpinBox      *mv_ZMinimumSpinBox;
+    QDoubleSpinBox      *mv_ZMaximumSpinBox;
+    QDoubleSpinBox      *mv_InclinationSpinBox;
+    QCheckBox           *mv_FilterBoxCheckBox;
+    QCheckBox           *mv_RegistrationCheckBox;
+    QPushButton         *mv_StartScanPushButton;
+    QPushButton         *mv_StopScanPushButton;
+    QLabel              *mv_NumberOfPointCloudsCapturedLabel;
+    QPushButton         *mv_CapturePointCloudPushButton;
 
     //Platform parameters widgets
-    QRadioButton *mv_PlatformParametersYesRadioButton;
-    QRadioButton *mv_PlatformParametersNoRadioButton;
-    QDoubleSpinBox *mv_IncrementalRotationAngleSpinBox;
-    QDoubleSpinBox *mv_NumberOfRotationsSpinBox;
-    QLineEdit *mv_SerialPortNameLineEdit;
-    QComboBox *mv_SerialPortBaudRateComboBox;
-    pcl::PointWithViewpoint mv_ScannerCenter;
+    QRadioButton                *mv_PlatformParametersYesRadioButton;
+    QRadioButton                *mv_PlatformParametersNoRadioButton;
+    QDoubleSpinBox              *mv_IncrementalRotationAngleSpinBox;
+    QDoubleSpinBox              *mv_NumberOfRotationsSpinBox;
+    QLineEdit                   *mv_SerialPortNameLineEdit;
+    QComboBox                   *mv_SerialPortBaudRateComboBox;
+    pcl::PointWithViewpoint      mv_ScannerCenter;
 
+    void    mf_setupUI                                  ();
+    void    mf_SetupPointCloudStreamWidget              ();
+    void    mf_SetupSensorWidget                        ();
+    void    mf_SetupVideoStreamWidget                   ();
+    void    mf_SetupDepthMapWidget                      ();
+    void    mf_SetupPlatformParametersWidget            ();
 
-    void mf_setupUI();
-    void mf_SetupPointCloudStreamWidget();
-    void mf_SetupSensorWidget();
-    void mf_SetupVideoStreamWidget();
-    void mf_SetupDepthMapWidget();
-    void mf_SetupPlatformParametersWidget();
+    int     mf_GetNumberOfPointCloudsCaptured           ()                          const;
+    void    mf_SetNumberOfPointCloudsCaptured           (int value);
 
-    int mf_GetNumberOfPointCloudsCaptured() const;
-    void mf_SetNumberOfPointCloudsCaptured(int value);
-
-    void mf_InitializeScannerCenter();
+    void    mf_InitializeScannerCenter                  ();
 
 signals:
-    void mf_SignalStatusChanged(QString, QColor);
-    void mf_SignalDatabasePointCloudUpdated();
-    void mf_SignalDatabaseRegisteredPointCloudUpdated();
-    void mf_SignalNumberOfPointCloudUpdated(int);
+    void    mf_SignalStatusChanged                      (QString, QColor);
+    void    mf_SignalDatabasePointCloudUpdated          ();
+    void    mf_SignalDatabaseRegisteredPointCloudUpdated();
+    void    mf_SignalNumberOfPointCloudUpdated          (int);
 
 
 public slots:
-    void mf_SlotUpdateWindow(int sensorIndex);
-    void mf_SlotUpdateBoundingBox();
-    void mf_SlotActivateFiltering(bool flagFiltering);
-    void mf_SlotPointCloudRegistration(bool flagRealTimeScan);
-    void mf_SlotStartScan();
-    void mf_SlotStopScan();
+    void    mf_SlotUpdateWindow                         (int sensorIndex);
+    void    mf_SlotUpdateBoundingBox                    ();
+    void    mf_SlotActivateFiltering                    (bool flagFiltering);
+    void    mf_SlotPointCloudRegistration               (bool flagRealTimeScan);
+    void    mf_SlotStartScan                            ();
+    void    mf_SlotStopScan                             ();
 
-    void mf_SlotHandlePlatformParameters(bool flagEnablePlatformParameters);
+    void    mf_SlotHandlePlatformParameters             (bool flagEnablePlatformParameters);
 
-    void mf_SlotUpdatePointCloudStream();
-    void mf_SlotCapturePointCloud(int degreesRotated);
-    void mf_SlotCapturePointCloudButtonClick();
+    void    mf_SlotUpdatePointCloudStream               ();
+    void    mf_SlotCapturePointCloud                    (int degreesRotated);
+    void    mf_SlotCapturePointCloudButtonClick         ();
 
-    void mf_SlotUpdateStatusBar(QString status, QColor statusColor);
+    void    mf_SlotUpdateStatusBar                      (QString status, QColor statusColor);
 
 };
 

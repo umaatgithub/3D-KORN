@@ -25,22 +25,22 @@ public:
     ~MainWindow();
 
 signals:
-    void mf_SignalDatabasePointCloudUpdated();
-    void mf_SignalDatabaseMeshUpdated();
+    void    mf_SignalDatabasePointCloudUpdated      ();
+    void    mf_SignalDatabaseMeshUpdated            ();
 
 private slots:
-    void on_actionNew_Scan_triggered();
-    void on_actionImportPointCloud_triggered();
-    void on_actionImportMesh_triggered();
-    void on_actionExportPCD_triggered();
-    void on_actionExportPLY_triggered();
-    void on_actionExportSTL_triggered();
-    void on_actionExportVTK_triggered();
-    void on_actionAbout_triggered();
+    void    on_actionNew_Scan_triggered             ();
+    void    on_actionImportPointCloud_triggered     ();
+    void    on_actionImportMesh_triggered           ();
+    void    on_actionExportPCD_triggered            ();
+    void    on_actionExportPLY_triggered            ();
+    void    on_actionExportSTL_triggered            ();
+    void    on_actionExportVTK_triggered            ();
+    void    on_actionAbout_triggered                ();
 
 private:
-    Ui::MainWindow *ui;
-    TDK_ScanWindow *mv_ScanWindow;
+    Ui::MainWindow      *ui;
+    TDK_ScanWindow      *mv_ScanWindow;
 };
 
 #endif // MAINWINDOW_H

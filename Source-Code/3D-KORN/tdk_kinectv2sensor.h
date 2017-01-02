@@ -13,10 +13,10 @@ public:
     TDK_KinectV2Sensor();
     ~TDK_KinectV2Sensor();
 
-    bool mf_IsAvailable();
-    bool mf_SetupSensor();
-    bool mf_StartSensor();
-    bool mf_StopSensor();
+    bool    mf_IsAvailable();
+    bool    mf_SetupSensor();
+    bool    mf_StartSensor();
+    bool    mf_StopSensor();
 
     boost::function<void( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& )> mv_PointCloudCallback =
             [this]( const pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr& ptr ){
@@ -26,13 +26,13 @@ public:
     };
 
 protected:
-    boost::mutex mv_Mutex;
-    boost::shared_ptr<pcl::Kinect2Grabber> mv_Grabber;
-    boost::signals2::connection mv_Connection;
+    boost::mutex                            mv_Mutex;
+    boost::shared_ptr<pcl::Kinect2Grabber>  mv_Grabber;
+    boost::signals2::connection             mv_Connection;
 
 public slots:
-    void mf_SlotUpdateFlagFilter();
-    void mf_SlotUpdateFilterBox();
+    void    mf_SlotUpdateFlagFilter();
+    void    mf_SlotUpdateFilterBox();
 
 };
 

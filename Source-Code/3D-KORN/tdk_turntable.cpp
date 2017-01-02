@@ -61,7 +61,10 @@ void TDK_Turntable::mf_SendCommandViaSerial(int command)
         dayArray[0]=command;
         mv_SerialPort->write(dayArray);
         mv_SerialPort->flush();
-        mv_SerialPort->waitForBytesWritten(2);
+        bool ret = mv_SerialPort->waitForBytesWritten(2);
+        if (!ret){
+            qDebug("Could not write in the serial port. Try again!");
+        }
     }
     else
     {
@@ -84,7 +87,7 @@ void TDK_Turntable::mf_SlotHandleReadyRead()
     if (mv_TotalAngle % mv_StepAngle == 0)
     {
         qDebug() << "-------------";
-        emit (mf_SignalStepAngleRotated(mv_TotalAngle % 360));
+        emit (mf_SignalStepAngleRotated(mv_StepAngle));
     }
 
     //signal is emitted every when total rotation is accomplished

@@ -74,9 +74,10 @@ bool TDK_ScanRegistration::addNextPointCloud(
 
     //If we want to register in realtime
     if(mv_scannerCenterRotationSet){
+        qDebug() << "ScanRegistration: Rotating with " << degreesRotatedY << "º ";
+
         //Transform pointcloud
         pcl::PointCloud<pcl::PointXYZRGB>::Ptr transformedInputPointcloud(new  pcl::PointCloud<pcl::PointXYZRGB>());
-
 
         //Create transform matrix that compensates for turning table orientation and distance, and rotation
         Eigen::Transform<float,3,Eigen::Affine> transform =
@@ -93,7 +94,17 @@ bool TDK_ScanRegistration::addNextPointCloud(
         mv_originalRotatedPCs.push_back(transformedInputPointcloud);
 
         //Remove outliers and store reference to denoised Pointcloud
-        mv_originalRotatedDenoisedPCs.push_back(mf_outlierRemovalPC(mv_originalRotatedPCs.back()));
+        int neighs = 80;
+        float stddev = 2.5;
+        mv_originalRotatedDenoisedPCs.push_back(
+                    mf_outlierRemovalPC(
+                        mf_outlierRemovalPC(
+                            mf_outlierRemovalPC(
+                                mv_originalRotatedPCs.back(),
+                                neighs, stddev)
+                            , neighs, stddev),
+                        neighs, stddev)
+                    );
 
         //Call process that will roughly align the last pointcloud to all previous ones
         mf_processCorrespondencesSVDICP();
@@ -158,8 +169,8 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_get
     }
 
     if(!mv_scannerCenterRotationSet){
-       qDebug() << "ScanRegistration: PostProcessing without prealignment.";
-       mv_ICPPost_MaxCorrespondanceDistance = 0.3;
+        qDebug() << "ScanRegistration: PostProcessing without prealignment.";
+        mv_ICPPost_MaxCorrespondanceDistance = 0.15;
     }
 
     pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
@@ -213,7 +224,7 @@ vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* TDK_ScanRegistration::getRoughly
 
 vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* TDK_ScanRegistration::getRotationCompensatedPCs()
 {
-    return &mv_originalRotatedPCs;
+    return &mv_originalRotatedDenoisedPCs;
 }
 
 /////////////////////////////////////////////////////
@@ -483,6 +494,14 @@ TDK_ScanRegistration::setScannerRotationAxis(const pcl::PointWithViewpoint &valu
 {
     mv_scannerCenterRotationSet = true;
     mv_scannerCenter = value;
+
+    qDebug() << "ScanRegistration: Center of rotation = ("
+             << value.x << ", "
+             << value.y << ", "
+             << value.z << ", "
+             << value.vp_x << ", "
+             << value.vp_y << ", "
+             << value.vp_z << ")";
 }
 
 pcl::PointWithViewpoint TDK_ScanRegistration::getScannerRotationAxis() const
