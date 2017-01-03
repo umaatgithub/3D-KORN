@@ -1,8 +1,8 @@
 #ifndef PCOPERATIONS_H
 #define PCOPERATIONS_H
 
-//#include "pclviewer.h"
-//#include "../build/ui_pclviewer.h"
+#include "pclviewer.h"
+#include "../build/ui_pclviewer.h"
 #include <pcl/surface/poisson.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/filters/passthrough.h>
@@ -41,9 +41,14 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/surface/processing.h>
 #include <pcl/surface/vtk_smoothing/vtk.h>
+#include <pcl/features/integral_image_normal.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/surface/vtk_smoothing/vtk_mesh_smoothing_laplacian.h>
+#include <pcl/surface/marching_cubes.h>
 
 
-
+#include <QDebug>
 
 
 
@@ -56,7 +61,7 @@ class TDK_PointOperations
 public:
     TDK_PointOperations();
     //function for trying class -> i dont use it right now
-    static void FilterPCPassthrough(const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, const double &kx, const double &ky, const double &kz, unsigned int &xi, unsigned int &yi, unsigned int &zi, const PointCloud<PointXYZ>::Ptr &input, PointCloud<PointXYZ>::Ptr &output);
+    static void FilterPCPassthrough(const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, const double &kx, const double &ky, const double &kz, uint &xi, uint &yi, uint &zi, const PointCloud<PointXYZ>::Ptr &input, PointCloud<PointXYZ>::Ptr &output);
 
     //new passthrough filter
     static void mf_FilterPassthrough(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, PointCloud<PointXYZ>::Ptr &mv_PointCloudOutput);
@@ -72,6 +77,7 @@ public:
     static void mf_PoissonMeshes(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput , PolygonMesh::Ptr &mv_MeshesOutput);
     static void mf_ConvertFromXYZRGBtoXYZ(const PointCloud<pcl::PointXYZRGB>::Ptr &mv_PointCloudInput, PointCloud<pcl::PointXYZ>::Ptr &mv_PointCloudOutput);
 
+    static void mf_TriangulationMeshes(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, pcl::PolygonMesh::Ptr &mv_MeshesOutput);
 };
 
 #endif // TDK_POINTOPERATIONS_H
