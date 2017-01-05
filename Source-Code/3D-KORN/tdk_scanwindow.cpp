@@ -74,13 +74,10 @@ void TDK_ScanWindow::mf_setupUI()
 
     mf_SetupPointCloudStreamWidget();
     mf_SetupSensorWidget();
-    mf_SetupVideoStreamWidget();
-    mf_SetupDepthMapWidget();
     mf_SetupPlatformParametersWidget();
 
     mv_CentralGridLayout->setColumnMinimumWidth(0, 300);
     mv_CentralGridLayout->setColumnMinimumWidth(1, 300);
-    mv_CentralGridLayout->setColumnMinimumWidth(2, 300);
 
     mv_CentralGridLayout->setRowMinimumHeight(0, 300);
     mv_CentralGridLayout->setRowMinimumHeight(1, 300);
@@ -234,33 +231,6 @@ void TDK_ScanWindow::mf_SetupSensorWidget()
 
 }
 
-void TDK_ScanWindow::mf_SetupVideoStreamWidget()
-{
-    QDockWidget *dockWidget = new QDockWidget(tr("Video Stream"));
-    QGridLayout *gridLayout = new QGridLayout;
-    QScrollArea *scrollArea = new QScrollArea;
-    QWidget *widget = new QWidget;
-
-    widget->setLayout(gridLayout);
-    scrollArea->setWidget(widget);
-    dockWidget->setWidget(scrollArea);
-    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 0, 2);
-}
-
-void TDK_ScanWindow::mf_SetupDepthMapWidget()
-{
-    QDockWidget *dockWidget = new QDockWidget(tr("Depth Map"));
-    QGridLayout *gridLayout = new QGridLayout;
-    QScrollArea *scrollArea = new QScrollArea;
-    QWidget *widget = new QWidget;
-
-    widget->setLayout(gridLayout);
-    scrollArea->setWidget(widget);
-    dockWidget->setWidget(scrollArea);
-    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 1, 2);
-}
 
 void TDK_ScanWindow::mf_SetupPlatformParametersWidget()
 {

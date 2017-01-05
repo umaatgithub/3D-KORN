@@ -1,8 +1,7 @@
 #ifndef PCOPERATIONS_H
 #define PCOPERATIONS_H
 
-#include "pclviewer.h"
-#include "../build/ui_pclviewer.h"
+
 #include <pcl/surface/poisson.h>
 #include <pcl/features/normal_3d_omp.h>
 #include <pcl/filters/passthrough.h>
@@ -61,10 +60,10 @@ class TDK_PointOperations
 public:
     TDK_PointOperations();
     //function for trying class -> i dont use it right now
-    static void FilterPCPassthrough(const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, const double &kx, const double &ky, const double &kz, uint &xi, uint &yi, uint &zi, const PointCloud<PointXYZ>::Ptr &input, PointCloud<PointXYZ>::Ptr &output);
+    static void FilterPCPassthrough(const double &ci, const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, uint &xi, uint &yi, uint &zi, const PointCloud<PointXYZ>::Ptr &input, PointCloud<PointXYZ>::Ptr &output);
 
     //new passthrough filter
-    static void mf_FilterPassthrough(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, PointCloud<PointXYZ>::Ptr &mv_PointCloudOutput);
+
     static void mf_NormalEstimation(PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, PointCloud<pcl::PointNormal>::Ptr &mv_PointNormalOutput);
 
     //marching cube

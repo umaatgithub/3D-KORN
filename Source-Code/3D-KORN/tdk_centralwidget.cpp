@@ -46,14 +46,11 @@ void TDK_CentralWidget::mf_setupUI()
     vtkObject::GlobalWarningDisplayOff();
 
     mf_SetupPointCloudDisplayWidget();
-    mf_SetupCropWidget();
-    mf_SetupInformationWidget();
     mf_SetupPointCloudExplorerTabWidget();
     mf_SetupPointCloudOperationsWidget();
 
     mv_CentralGridLayout->setColumnMinimumWidth(0, 300);
     mv_CentralGridLayout->setColumnMinimumWidth(1, 300);
-    mv_CentralGridLayout->setColumnMinimumWidth(2, 300);
 
     mv_CentralGridLayout->setRowMinimumHeight(0, 300);
     mv_CentralGridLayout->setRowMinimumHeight(1, 300);
@@ -76,36 +73,6 @@ void TDK_CentralWidget::mf_SetupPointCloudDisplayWidget()
     mv_PointCloudVisualizer->addCoordinateSystem(1.0);
     mv_PointCloudQVTKWidget->SetRenderWindow ( mv_PointCloudVisualizer->getRenderWindow () );
     mv_PointCloudVisualizer->setupInteractor ( mv_PointCloudQVTKWidget->GetInteractor (), mv_PointCloudQVTKWidget->GetRenderWindow ());
-}
-
-
-void TDK_CentralWidget::mf_SetupCropWidget()
-{
-    QDockWidget *dockWidget = new QDockWidget(tr("Crop Widget"));
-    QGridLayout *gridLayout = new QGridLayout;
-    QScrollArea *scrollArea = new QScrollArea;
-    QWidget *widget = new QWidget;
-
-    widget->setLayout(gridLayout);
-    scrollArea->setWidget(widget);
-    dockWidget->setWidget(scrollArea);
-    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
-}
-
-
-void TDK_CentralWidget::mf_SetupInformationWidget()
-{
-    QDockWidget *dockWidget = new QDockWidget(tr("Information"));
-    QGridLayout *gridLayout = new QGridLayout;
-    QScrollArea *scrollArea = new QScrollArea;
-    QWidget *widget = new QWidget;
-
-    widget->setLayout(gridLayout);
-    scrollArea->setWidget(widget);
-    dockWidget->setWidget(scrollArea);
-    dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 1, 2);
 }
 
 
@@ -161,7 +128,7 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     scrollArea->setWidget(widget);
     dockWidget->setWidget(scrollArea);
     dockWidget->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    mv_CentralGridLayout->addWidget(dockWidget, 0, 2);
+    mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
 }
 
 

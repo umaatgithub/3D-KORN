@@ -85,8 +85,6 @@ public:
     void    mf_setupUI                                  ();
     void    mf_SetupPointCloudStreamWidget              ();
     void    mf_SetupSensorWidget                        ();
-    void    mf_SetupVideoStreamWidget                   ();
-    void    mf_SetupDepthMapWidget                      ();
     void    mf_SetupPlatformParametersWidget            ();
 
     int     mf_GetNumberOfPointCloudsCaptured           ()                          const;

@@ -11,33 +11,50 @@ TDK_PointOperations::TDK_PointOperations()
 }
 
 
-void TDK_PointOperations::FilterPCPassthrough(const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, const double &kx, const double &ky, const double &kz, uint &xi, uint &yi, uint &zi, const PointCloud<PointXYZ>::Ptr &cloud, PointCloud<PointXYZ>::Ptr &clouda){
 
+void TDK_PointOperations::FilterPCPassthrough(const double &ci, const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, uint &xi, uint &yi, uint &zi, const PointCloud<PointXYZ>::Ptr &cloud, PointCloud<PointXYZ>::Ptr &clouda){
+
+    double xremapplus,xremapminus,yremapplus,yremapminus,zremapplus,zremapminus;
+
+    xremapplus  =  maxx - xi*(maxx-minx)/255;
+    xremapminus =  xi*(maxx-minx)/255+minx;
+
+    yremapplus  =  maxy - yi*(maxy-miny)/255;
+    yremapminus =  yi*(maxy-miny)/255+miny;
+
+    zremapplus  =  maxz - zi*(maxz-minz)/255;
+    zremapminus =  zi*(maxz-minz)/255+minz;
     PassThrough<PointXYZ> pass (true);
-    pass.setFilterFieldName ("z");
-    pass.setFilterLimits (maxz-(zi*(maxz-minz)/255), maxz);
-    pass.setInputCloud (cloud);
-    pass.filter (*clouda);
-    pass.setFilterFieldName ("y");
-    pass.setFilterLimits (maxy-(yi*(maxy-miny)/255), maxy);
-    pass.setInputCloud (clouda);
-    pass.filter (*clouda);
-    pass.setFilterFieldName ("x");
-    pass.setFilterLimits (maxx-(xi*(maxx-minx)/255), maxx); //maxx
-    pass.setInputCloud (clouda);
-    pass.filter (*clouda);
 
+    if (ci == 1){
+        pass.setFilterFieldName ("z");
+        pass.setFilterLimits (zremapplus, maxz);
+        pass.setInputCloud (cloud);
+        pass.filter (*clouda);
+        pass.setFilterFieldName ("y");
+        pass.setFilterLimits (yremapplus, maxy);
+        pass.setInputCloud (clouda);
+        pass.filter (*clouda);
+        pass.setFilterFieldName ("x");
+        pass.setFilterLimits (xremapplus, maxx); //maxx
+        pass.setInputCloud (clouda);
+        pass.filter (*clouda);
+    }
+    else{
+        pass.setFilterFieldName ("z");
+        pass.setFilterLimits (minz,zremapminus);
+        pass.setInputCloud (clouda);
+        pass.filter (*clouda);
+        pass.setFilterFieldName ("y");
+        pass.setFilterLimits (miny,yremapminus);
+        pass.setInputCloud (clouda);
+        pass.filter (*clouda);
+        pass.setFilterFieldName ("x");
+        pass.setFilterLimits (minx,xremapminus);
+        pass.setInputCloud (clouda);
+        pass.filter (*clouda);
+    }
 }
-
-//PassThrough Filter for Optimization
-void TDK_PointOperations::mf_FilterPassthrough(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, PointCloud<PointXYZ>::Ptr &mv_PointCloudOutput){
-    cout << "begin passthrough filter" << endl ;
-    PassThrough<PointXYZ> filter;
-    filter.setInputCloud(mv_PointCloudInput);
-    filter.filter(*mv_PointCloudOutput); //Filtered PointCloud set as OutPut
-    cout << "passthrough filter complete" << endl;
-}
-
 //With NormalEstimationFunction we normalize the output received from the FilterPassThrough
 //mf_NormalEstimation receives as input the filtered PointCloud and gives as output a PointNormal
 void TDK_PointOperations::mf_NormalEstimation(PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, PointCloud<pcl::PointNormal>::Ptr &mv_PointNormalOutput){
@@ -49,7 +66,7 @@ void TDK_PointOperations::mf_NormalEstimation(PointCloud<PointXYZ>::Ptr &mv_Poin
     NormalEstimationOMP<PointXYZ, Normal> mv_Normal;
 
     mv_Normal.setNumberOfThreads(8);
-
+    mv_Normal.setSearchMethod(mv_Tree);
     mv_Normal.setInputCloud(mv_PointCloudInput);
     mv_Normal.setRadiusSearch(0.3);
     Eigen::Vector4f centroid;

@@ -1,7 +1,7 @@
 #ifndef TDK_CENTRALWIDGET_H
 #define TDK_CENTRALWIDGET_H
 
-//QT libraries
+//Include QT libraries
 #include <QWidget>
 #include <QGridLayout>
 #include <QDockWidget>
@@ -13,17 +13,17 @@
 #include <QListWidget>
 #include <QMessageBox>
 
-//PCL IO libraries
+//Include PCL IO libraries
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
 
-//PCL visualizer
+//Include PCL visualizer
 #include <pcl/visualization/pcl_visualizer.h>
 #include <vtkRenderWindow.h>
 
-//Custom classes
+//Include custom classes
 #include "tdk_database.h"
 #include "tdk_scanregistration.h"
 #include "TDK_PointOperations.h"
@@ -57,8 +57,6 @@ public:
 
     void    mf_setupUI                              ();
     void    mf_SetupPointCloudDisplayWidget         ();
-    void    mf_SetupCropWidget                      ();
-    void    mf_SetupInformationWidget               ();
     void    mf_SetupPointCloudExplorerTabWidget     ();
     void    mf_SetupPointCloudOperationsWidget      ();
 
