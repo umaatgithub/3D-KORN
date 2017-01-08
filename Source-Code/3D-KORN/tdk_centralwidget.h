@@ -12,6 +12,7 @@
 #include <QVTKWidget.h>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QDebug>
 
 //Include PCL IO libraries
 #include <pcl/point_cloud.h>
@@ -54,25 +55,29 @@ public:
     unsigned int          mv_numberOfPointCloudsSelected;
     unsigned int          mv_numberOfMeshesSelected;
 
-
+    //Setup widget functions
     void    mf_setupUI                              ();
     void    mf_SetupPointCloudDisplayWidget         ();
     void    mf_SetupPointCloudExplorerTabWidget     ();
     void    mf_SetupPointCloudOperationsWidget      ();
 
 signals:
+    //Signals when pointclouds and meshes are updated
     void    mf_SignalPointCloudListUpdated          ();
     void    mf_SignalRegisteredPointCloudListUpdated();
     void    mf_SignalMeshListUpdated                ();
 
 public slots:
+    //Slots to handle register point cloud and generate mesh
     void    mf_SlotRegisterPointCloud               ();
     void    mf_SlotGenerateMesh                     ();
 
+    //Slots to update pointcloud and mesh list tab
     void    mf_SlotUpdatePointCloudListTab          ();
     void    mf_SlotUpdateRegisteredPointCloudListTab();
     void    mf_SlotUpdateMeshListTab                ();
 
+    //Slots to display pointclouds and meshes selected in list tab
     void    mf_SlotUpdatePointCloudDisplay          (QListWidgetItem* item);
     void    mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem* item);
     void    mf_SlotUpdateMeshDisplay                (QListWidgetItem* item);

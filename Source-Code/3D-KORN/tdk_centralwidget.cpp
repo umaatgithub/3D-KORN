@@ -1,6 +1,11 @@
 #include "tdk_centralwidget.h"
-#include <QDebug>
 
+/***************************************************************************
+ * Input argument(s) : QWidget *parent - Parent class pointer
+ * Return type       : NA
+ * Functionality     : Constructor to initialize variables
+ *
+ **************************************************************************/
 TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     mv_CentralGridLayout            (new QGridLayout)                                   ,
     mv_PointCloudQVTKWidget         (new QVTKWidget)                                    ,
@@ -18,16 +23,19 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
 {
     mf_setupUI();
 
+    //Connections for register pointcloud and generate mesh button clicks
     connect(mv_RegistrationPushButton       , SIGNAL(clicked(bool)),
             this                            , SLOT(mf_SlotRegisterPointCloud()));
     connect(mv_GenerateMeshPushButton       , SIGNAL(clicked(bool)),
             this                            , SLOT(mf_SlotGenerateMesh()));
 
+    //Connections for updating registered pointcloud and mesh tabs
     connect(this                            , SIGNAL(mf_SignalRegisteredPointCloudListUpdated()),
             this                            , SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
     connect(this                            , SIGNAL(mf_SignalMeshListUpdated())                ,
             this                            , SLOT(mf_SlotUpdateMeshListTab()));
 
+    //Connections for updating visualizer display
     connect(mv_PointCloudListTab            , SIGNAL(itemChanged(QListWidgetItem*)),
             this                            , SLOT(mf_SlotUpdatePointCloudDisplay(QListWidgetItem*)));
     connect(mv_RegisteredPointCloudListTab  , SIGNAL(itemChanged(QListWidgetItem*)),
@@ -36,11 +44,23 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
             this                            , SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
 }
 
+/***************************************************************************
+ * Input argument(s) : NA
+ * Return type       : NA
+ * Functionality     : Destructor to free variables
+ *
+ **************************************************************************/
 TDK_CentralWidget::~TDK_CentralWidget()
 {
 
 }
 
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Function to setup central widget ui.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_setupUI()
 {
     vtkObject::GlobalWarningDisplayOff();
@@ -60,7 +80,12 @@ void TDK_CentralWidget::mf_setupUI()
     this->setLayout(mv_CentralGridLayout);
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Function to setup pointcloud display widget
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SetupPointCloudDisplayWidget()
 {
     QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Visualizer"));
@@ -75,7 +100,12 @@ void TDK_CentralWidget::mf_SetupPointCloudDisplayWidget()
     mv_PointCloudVisualizer->setupInteractor ( mv_PointCloudQVTKWidget->GetInteractor (), mv_PointCloudQVTKWidget->GetRenderWindow ());
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Function to setup pointcloud explorer widget.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SetupPointCloudExplorerTabWidget()
 {
     QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Explorer"));
@@ -88,7 +118,12 @@ void TDK_CentralWidget::mf_SetupPointCloudExplorerTabWidget()
     mv_CentralGridLayout->addWidget(dockWidget, 0, 0);
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Function to setup pointcloud operations widget.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
 {
     QDockWidget *dockWidget = new QDockWidget(tr("Point Cloud Operations"));
@@ -131,7 +166,12 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     mv_CentralGridLayout->addWidget(dockWidget, 1, 0);
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle pointcloud registration.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotRegisterPointCloud()
 {
     qDebug() << "Check if atleast two point clouds selected and run registration";
@@ -154,7 +194,12 @@ void TDK_CentralWidget::mf_SlotRegisterPointCloud()
     }
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle generate mes.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotGenerateMesh()
 {
     qDebug() << "Check if atleast one point cloud is selected and run mesh";
@@ -185,7 +230,12 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
     }
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to update pointcloud list tab.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotUpdatePointCloudListTab()
 {
     QListWidgetItem* item = new QListWidgetItem;
@@ -195,7 +245,13 @@ void TDK_CentralWidget::mf_SlotUpdatePointCloudListTab()
     mv_PointCloudListTab->addItem(item);
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to update registered pointcloud
+ *                     list tab.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudListTab()
 {
     QListWidgetItem* item = new QListWidgetItem;
@@ -205,7 +261,12 @@ void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudListTab()
     mv_RegisteredPointCloudListTab->addItem(item);
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to update mesh list tab.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotUpdateMeshListTab()
 {
     QListWidgetItem* item = new QListWidgetItem;
@@ -215,7 +276,13 @@ void TDK_CentralWidget::mf_SlotUpdateMeshListTab()
     mv_MeshListTab->addItem(item);
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to visualize pointcloud in display
+ *                     on selection in explorer widget.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
 {
     if(item->checkState() == Qt::Checked){
@@ -236,10 +303,15 @@ void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
         mv_numberOfPointCloudsSelected--;
     }
     mv_PointCloudQVTKWidget->update();
-
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to visualize registered pointcloud
+ *                     in display on selection in explorer widget.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem *item)
 {
     if(item->checkState() == Qt::Checked){
@@ -262,7 +334,13 @@ void TDK_CentralWidget::mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem
     mv_PointCloudQVTKWidget->update();
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to visualize mesh in display
+ *                     on selection in explorer widget.
+ *
+ **************************************************************************/
 void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
 {
     if(item->checkState() == Qt::Checked){

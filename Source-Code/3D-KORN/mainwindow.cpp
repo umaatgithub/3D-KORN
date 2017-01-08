@@ -1,6 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/***************************************************************************
+ * Input argument(s) : QWidget *parent - Parent class pointer
+ * Return type       : NA
+ * Functionality     : Constructor to initialize variables
+ *
+ **************************************************************************/
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui              (new Ui::MainWindow),
     mv_ScanWindow   (new TDK_ScanWindow(this))
@@ -8,11 +14,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
     ui->setupUi(this);
 
+    //Connection to update pointcloud and registered pointcloud list after scan from scan window
     connect(mv_ScanWindow           , SIGNAL(mf_SignalDatabasePointCloudUpdated()),
             ui->centralWidget       , SLOT(mf_SlotUpdatePointCloudListTab()));
     connect(mv_ScanWindow           , SIGNAL(mf_SignalDatabaseRegisteredPointCloudUpdated()),
             ui->centralWidget       , SLOT(mf_SlotUpdateRegisteredPointCloudListTab()));
 
+    //Connection to update pointcloud and mesh list after import from main window
     connect(this                    , SIGNAL(mf_SignalDatabasePointCloudUpdated()),
             ui->centralWidget       , SLOT(mf_SlotUpdatePointCloudListTab()));
     connect(this                    , SIGNAL(mf_SignalDatabaseMeshUpdated()),
@@ -20,13 +28,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
 
 }
 
-
+/***************************************************************************
+ * Input argument(s) : NA
+ * Return type       : NA
+ * Functionality     : Destructor to free variables
+ *
+ **************************************************************************/
 MainWindow::~MainWindow()
 {
     delete ui;
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle new scan action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionNew_Scan_triggered()
 {
     mv_ScanWindow->mv_SensorController->mf_InitializeSensors();
@@ -67,17 +85,25 @@ void MainWindow::on_actionNew_Scan_triggered()
     }
 }
 
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle import pointcloud action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionImportPointCloud_triggered()
 {
     QStringList pointCloudFileNamesList = QFileDialog::getOpenFileNames(this, QString("Import point clouds"), QString(""), QString("Point Cloud (*.pcd *.ply)"));
     if(pointCloudFileNamesList.size() !=0){
         for(int i = 0; i < pointCloudFileNamesList.size(); i++){
             pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloudPtr (new pcl::PointCloud<pcl::PointXYZRGB>());
+            //Load ply files
             if(pointCloudFileNamesList[i].endsWith(".ply")){
                 pcl::io::loadPLYFile(pointCloudFileNamesList[i].toStdString(), *pointCloudPtr);
                 TDK_Database::mf_StaticAddPointCloud(pointCloudPtr);
                 emit mf_SignalDatabasePointCloudUpdated();
             }
+            //Load pcd files
             else if(pointCloudFileNamesList[i].endsWith(".pcd")){
                 pcl::io::loadPCDFile(pointCloudFileNamesList[i].toStdString(), *pointCloudPtr);
                 TDK_Database::mf_StaticAddPointCloud(pointCloudPtr);
@@ -88,17 +114,27 @@ void MainWindow::on_actionImportPointCloud_triggered()
     }
 }
 
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle import mesh action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionImportMesh_triggered()
 {
     QStringList meshFileNamesList = QFileDialog::getOpenFileNames(this, QString("Import mesh"), QString(""), QString("Mesh (*.vtk *.stl)"));
     if(meshFileNamesList.size() !=0){
         for(int i = 0; i < meshFileNamesList.size(); i++){
             pcl::PolygonMesh::Ptr meshPtr (new pcl::PolygonMesh());
+
+            //Load stl files
             if(meshFileNamesList[i].endsWith(".stl")){
                 pcl::io::loadPolygonFileSTL(meshFileNamesList[i].toStdString(), *meshPtr);
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalDatabaseMeshUpdated();
             }
+
+            //Load vtk files
             else if(meshFileNamesList[i].endsWith(".vtk")){
                 pcl::io::loadPolygonFileVTK(meshFileNamesList[i].toStdString(), *meshPtr);
                 TDK_Database::mf_StaticAddMesh(meshPtr);
@@ -108,6 +144,12 @@ void MainWindow::on_actionImportMesh_triggered()
     }
 }
 
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle export pcd action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionExportPCD_triggered()
 {
     TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
@@ -120,6 +162,7 @@ void MainWindow::on_actionExportPCD_triggered()
             QString filePath;
             QListWidgetItem* item;
 
+            //Save pointclouds selected in pointcloud tab
             for(int i = 0, len = centralwidget->mv_PointCloudListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_PointCloudListTab->item(i);
@@ -131,6 +174,7 @@ void MainWindow::on_actionExportPCD_triggered()
                 }
             }
 
+            //Save pointclouds selected in registered pointcloud tab
             for(int i = 0, len = centralwidget->mv_RegisteredPointCloudListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_RegisteredPointCloudListTab->item(i);
@@ -145,6 +189,12 @@ void MainWindow::on_actionExportPCD_triggered()
     }
 }
 
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle export ply action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionExportPLY_triggered()
 {
     TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
@@ -156,6 +206,8 @@ void MainWindow::on_actionExportPLY_triggered()
         if(directoryName != ""){
             QString filePath;
             QListWidgetItem* item;
+
+            //Save pointclouds selected in pointcloud tab
             for(int i = 0, len = centralwidget->mv_PointCloudListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_PointCloudListTab->item(i);
@@ -166,6 +218,8 @@ void MainWindow::on_actionExportPLY_triggered()
                     pcl::io::savePLYFile(filePath.toStdString(), *(TDK_Database::mv_PointCloudsVector[i]));
                 }
             }
+
+            //Save pointclouds selected in registered pointcloud tab
             for(int i = 0, len = centralwidget->mv_RegisteredPointCloudListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_RegisteredPointCloudListTab->item(i);
@@ -180,7 +234,12 @@ void MainWindow::on_actionExportPLY_triggered()
     }
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle export stl action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionExportSTL_triggered()
 {
     TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
@@ -192,6 +251,8 @@ void MainWindow::on_actionExportSTL_triggered()
         if(directoryName != ""){
             QString filePath;
             QListWidgetItem* item;
+
+            //Save meshes selected in mesh tab
             for(int i = 0, len = centralwidget->mv_MeshListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_MeshListTab->item(i);
@@ -206,7 +267,12 @@ void MainWindow::on_actionExportSTL_triggered()
     }
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle export vtk action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionExportVTK_triggered()
 {
 
@@ -219,6 +285,8 @@ void MainWindow::on_actionExportVTK_triggered()
         if(directoryName != ""){
             QString filePath;
             QListWidgetItem* item;
+
+            //Save meshes selected in mesh tab
             for(int i = 0, len = centralwidget->mv_MeshListTab->count(); i < len; i++)
             {
                 item = centralwidget->mv_MeshListTab->item(i);
@@ -233,7 +301,12 @@ void MainWindow::on_actionExportVTK_triggered()
     }
 }
 
-
+/***************************************************************************
+ * Input argument(s) : void
+ * Return type       : void
+ * Functionality     : Slot function to handle About action.
+ *
+ **************************************************************************/
 void MainWindow::on_actionAbout_triggered()
 {
 
