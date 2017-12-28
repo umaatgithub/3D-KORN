@@ -1,9 +1,13 @@
 #ifndef REGISTRATION_H
 #define REGISTRATION_H
 
+
+
 #endif // REGISTRATION_H
 
 #include <iostream>
+#include <string>
+
 #include <pcl/io/io.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/io/ply_io.h>
@@ -32,6 +36,11 @@
 #include <pcl/surface/marching_cubes_hoppe.h>
 #include <pcl/surface/mls.h>
 
+//Include PCL libraries
+#include <pcl/io/ply_io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/vtk_lib_io.h>
+
 using namespace std;
 
 typedef pcl::PointXYZ PointT;
@@ -40,6 +49,8 @@ typedef pcl::PointNormal PointNormalT;
 typedef pcl::PointCloud<PointNormalT> PointCloudWithNormals;
 
 
-PointCloud Register (PointCloud , PointCloud);
+void ReadPointC(const std::string, PointCloud::Ptr);
 
-void Save_PointC(PointCloud::Ptr);
+PointCloud::Ptr Register (PointCloud::Ptr, PointCloud::Ptr);
+
+void Save_PointC(const string, PointCloud::Ptr);

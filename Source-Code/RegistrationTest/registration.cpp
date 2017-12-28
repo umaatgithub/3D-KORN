@@ -1,5 +1,9 @@
 #include "registration.h"
 
+void ReadPointC (const std::string path, PointCloud::Ptr inputPointC){
+
+    pcl::io::loadPLYFile(path, *inputPointC);
+}
 
 PointCloud::Ptr Register (PointCloud::Ptr src, PointCloud::Ptr tgt){
 
@@ -56,12 +60,11 @@ PointCloud::Ptr Register (PointCloud::Ptr src, PointCloud::Ptr tgt){
 
 
 
+void Save_PointC(const std::string path, PointCloud::Ptr outputPointC){
 
-
-void Save_PointC(PointCloud::Ptr){
-
-
+    pcl::io::savePCDFile(path, *outputPointC);
 
 
 
 }
+
