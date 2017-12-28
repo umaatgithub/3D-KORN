@@ -25,6 +25,14 @@
 #include <pcl/registration/incremental_registration.h>
 #include <pcl/PCLPointCloud2.h>
 
+
+
+//typedef pcl::PointXYZ PointT;
+//typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
+typedef pcl::PointNormal PointNormalT;
+typedef pcl::PointCloud<PointNormalT> PointCloudWithNormals;
+
+
 using namespace std;
 
 void PointCloudXYZRGBtoXYZ(
@@ -45,10 +53,16 @@ public:
     //Input
     bool addNextPointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inputPointcloud,
                            const float degreesRotatedY=0.0);
+    // OUR REGISTRATION FUNCTIONS
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Register(std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &Data );
 
     //Ouput
     pcl::PointCloud<pcl::PointXYZ>::Ptr getLastDownSampledPointcloud();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getRoughlyAlignedPC();
+
+
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr postProcess_and_getAlignedPC();
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRotationCompensatedPCs();
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRoughlyAlignedPCs();
