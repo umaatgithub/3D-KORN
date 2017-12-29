@@ -168,35 +168,42 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Register(std::vector<pcl::PointCloud<pcl:
 
    // PCL_INFO (" \n Loaded %d datasets ... \n", (int)Data.size ());
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr src (new pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr src (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_src (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_tgt (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr result1 (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr result2 (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr result3 (new pcl::PointCloud<pcl::PointXYZRGB>);
 
+    const float VoxelGridLeafSize = 0.002; // 0.004
 
-    float MaxDistance1 = 0.05, RansacVar1= 0.01; int Iterations1= 80;
-    float MaxDistance2 = 0.015, RansacVar2= 0.01; int Iterations2 = 100;
-    float VoxelGridLeafSize = 0.002; // 0.004
-    float OutlierRemovalThreshold = 5.0;
 
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr data (new pcl::PointCloud<pcl::PointXYZ>);
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr data1 (new pcl::PointCloud<pcl::PointXYZ>);
+
+
+    //PointCloudXYZRGBtoXYZ(Data[0] , data);
     result2 = Data[0];
+
     for (size_t i = 1; i < Data.size (); ++i)
     {
-        //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
 
+        //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
+       // PointCloudXYZRGBtoXYZ(Data[i] , data1);
         cloud_src = result2; // source
         cloud_tgt = Data[i]; // target
 
-        src = TDK_ScanRegistration::mf_voxelDownSamplePointCloud(cloud_src, VoxelGridLeafSize);
-        tgt = TDK_ScanRegistration::mf_voxelDownSamplePointCloud(cloud_tgt, VoxelGridLeafSize);
+        src = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_src, VoxelGridLeafSize);
+        tgt = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_tgt, VoxelGridLeafSize);
 
-        result1 = TDK_ScanRegistration::ICPormal(src, tgt, MaxDistance2, RansacVar2, Iterations2);
+        result1 = TDK_ScanRegistration::ICPNormal(src, tgt);
+
+        //result1 = TDK_ScanRegistration::ICP(src , tgt);
+
         *result1 += *cloud_tgt;
 
-        result2 = TDK_ScanRegistration::mf_outlierRemovalPC(result1);
+        result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(result1);
 
         std::cout << std::endl;
     }
@@ -215,6 +222,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRG
         float MaxDistance=0.015;
         float RansacVar = 0.01;
         float Iterations = 100;
+
 
         pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src (new pcl::PointCloud<pcl::PointNormal>);
         pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt (new pcl::PointCloud<pcl::PointNormal>);
@@ -260,6 +268,39 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRG
         return cloud_norm;
 
   }
+
+
+///////////////////////////////////////////////////
+
+//pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICP(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt){
+//    // Start first ICP
+//    float MaxDistance=0.015;
+//    float RansacVar = 0.01;
+//    float Iterations = 100;
+
+//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final (new pcl::PointCloud<pcl::PointXYZRGB>);
+
+//    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
+//    icp.setMaxCorrespondenceDistance (MaxDistance); //0.10 //0.015
+//    icp.setRANSACOutlierRejectionThreshold (RansacVar); // 0.05
+//    icp.setTransformationEpsilon (1e-8);
+//    icp.setMaximumIterations (Iterations);
+//    icp.setInputSource(src);
+//    icp.setInputTarget(tgt);
+//    icp.align(*Final);
+
+//    //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
+
+//    std::cout << "ICP converged with score: " << icp.getFitnessScore() << std::endl;
+//    //std::cout << "first Icp converged:" << icp.hasConverged() << " score: " <<
+//    //             icp.getFitnessScore() << std::endl;
+//    //std::cout << icp.getFinalTransformation() << std::endl;
+//    //Eigen::Matrix4f transformation = icp.getFinalTransformation ();
+//    //pcl::transformPointCloud (*src, *Final, transformation);
+//    return Final;
+
+//}
+
 /////////////////////////////////////////////////////
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_getAlignedPC()
@@ -315,7 +356,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_get
 //    }
  // return mf_outlierRemovalPC(mergedAlignedOriginal, 8, 2);
 
-    mergedAlignedOriginal = TDK_ScanRegistration::Register(mv_alignedOriginalPCs);
+    //mergedAlignedOriginal = TDK_ScanRegistration::Register(mv_alignedOriginalPCs);
     return mergedAlignedOriginal;
 }
 
@@ -423,25 +464,43 @@ bool TDK_ScanRegistration::mf_processInPostWithICP()
 
 /////////////////////////////////////////////////////
 
-pcl::PointCloud<pcl::PointXYZ>::Ptr TDK_ScanRegistration::mf_voxelDownSamplePointCloud(
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::mf_voxelDownSamplePointCloud(
         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_in,
         const float &voxelSideLength
         )
 {
-    pcl::PointCloud<pcl::PointXYZ>::Ptr downSampledPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr downSampledPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>);
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in_xyz(new pcl::PointCloud<pcl::PointXYZ>);
-    PointCloudXYZRGBtoXYZ(cloud_in, cloud_in_xyz);
 
-    pcl::VoxelGrid<pcl::PointXYZ> vg;
+    pcl::VoxelGrid<pcl::PointXYZRGB> vg;
     vg.setLeafSize (voxelSideLength, voxelSideLength, voxelSideLength);
 
-    vg.setInputCloud (cloud_in_xyz);
+    vg.setInputCloud (cloud_in);
     vg.filter (*downSampledPointCloud);
 
     return downSampledPointCloud;
 }
 
+/////////////////////////////////////////////////////
+
+pcl::PointCloud<pcl::PointXYZ>::Ptr TDK_ScanRegistration::mf_voxelDownSamplePointCloud(
+        const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
+        const float &voxelSideLength
+        )
+{
+    pcl::PointCloud<pcl::PointXYZ>::Ptr downSampledPointCloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+    //pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in_xyz(new pcl::PointCloud<pcl::PointXYZ>);
+    //PointCloudXYZRGBtoXYZ(cloud_in, cloud_in_xyz);
+
+    pcl::VoxelGrid<pcl::PointXYZ> vg;
+    vg.setLeafSize (voxelSideLength, voxelSideLength, voxelSideLength);
+
+    vg.setInputCloud (cloud_in);
+    vg.filter (*downSampledPointCloud);
+
+    return downSampledPointCloud;
+}
 
 /////////////////////////////////////////////////////
 

@@ -25,12 +25,39 @@
 #include <pcl/registration/incremental_registration.h>
 #include <pcl/PCLPointCloud2.h>
 
+// From Group 3
 
+#include <pcl/io/io.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/ply_io.h>
+#include <pcl/visualization/cloud_viewer.h>
+#include <pcl/point_types.h>
+#include <pcl/filters/passthrough.h>
+#include <pcl/filters/statistical_outlier_removal.h>
+#include <pcl/filters/conditional_removal.h>
+//#include <pcl/console/parse.h>
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/surface/mls.h>
+#include <pcl/common/transforms.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/registration/icp.h>
+#include <pcl/registration/ia_ransac.h>
+#include <cstddef>
+#include <cstdint>
 
-//typedef pcl::PointXYZ PointT;
-//typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
-typedef pcl::PointNormal PointNormalT;
-typedef pcl::PointCloud<PointNormalT> PointCloudWithNormals;
+#include <pcl/features/normal_3d_omp.h>
+#include <pcl/surface/gp3.h>
+#include <pcl/io/vtk_io.h>
+#include <pcl/surface/poisson.h>
+#include <pcl/surface/grid_projection.h>
+#include <pcl/surface/vtk_smoothing/vtk_mesh_smoothing_laplacian.h>
+#include <pcl/surface/marching_cubes_hoppe.h>
+#include <pcl/surface/mls.h>
+
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/PolygonMesh.h>
 
 
 using namespace std;
@@ -55,9 +82,9 @@ public:
                            const float degreesRotatedY=0.0);
     // OUR REGISTRATION FUNCTIONS
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt);
+    static pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICP(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt);
+    static pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr Register(std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &Data );
-
     //Ouput
     pcl::PointCloud<pcl::PointXYZ>::Ptr getLastDownSampledPointcloud();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getRoughlyAlignedPC();
@@ -66,6 +93,31 @@ public:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr postProcess_and_getAlignedPC();
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRotationCompensatedPCs();
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRoughlyAlignedPCs();
+
+
+    static pcl::PointCloud<pcl::PointXYZ>::Ptr
+    mf_voxelDownSamplePointCloud(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
+                                 const float &voxelSideLength);
+
+
+    static pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+    mf_voxelDownSamplePointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_in,
+                                 const float &voxelSideLength);
+
+
+    //Utility functions
+    static pcl::PointCloud<pcl::PointXYZ>::Ptr
+    mf_outlierRemovalPC(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
+                        const float meanK=8,
+                        const float std_dev=2.5);
+
+
+
+    static pcl::PointCloud<pcl::PointXYZRGB>::Ptr
+    mf_outlierRemovalPC(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_in,
+                        const float meanK=8,
+                        const float std_dev=2.5);
+
 
     //Configuration parameters getters and setters
     bool getRegisterInRealTime() const;
@@ -128,20 +180,7 @@ private:
     void
     setDefaultParameters();
 
-    //Utility functions
-    pcl::PointCloud<pcl::PointXYZ>::Ptr
-    mf_outlierRemovalPC(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
-                        const float meanK=8,
-                        const float std_dev=2.5);
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr
-    mf_outlierRemovalPC(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_in,
-                        const float meanK=8,
-                        const float std_dev=2.5);
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr
-    mf_voxelDownSamplePointCloud(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_in,
-                                 const float &voxelSideLength);
 
     pcl::PointCloud<pcl::Normal>::Ptr
     mf_computeNormals(const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
