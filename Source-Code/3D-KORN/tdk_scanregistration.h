@@ -25,11 +25,24 @@
 #include <pcl/registration/incremental_registration.h>
 #include <pcl/PCLPointCloud2.h>
 
+#include "tdk_2dfeaturedetection.h"
+
 using namespace std;
 
 void PointCloudXYZRGBtoXYZ(
         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
         pcl::PointCloud<pcl::PointXYZ>::Ptr &out
+        );
+/*!
+ * \brief tdk_PointCloudXYZRGBtoXYZI
+ * \param in pointer for input point cloud
+ * \param out output transformed point cloud
+ *
+ * Function transforms input XYZRGB (colored) point cloud into XYZI (intensity) point cloud
+ */
+void tdk_PointCloudXYZRGBtoXYZI(
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
+        pcl::PointCloud<pcl::PointXYZI>::Ptr &out
         );
 
 
@@ -100,6 +113,9 @@ private:
     vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> mv_alignedDownSampledPCs;
     vector<Eigen::Matrix4f> mv_transformationMatrices;
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_alignedOriginalPCs;
+
+    //feature detection service
+    TDK_2DFeatureDetection mv_2DFeatureDetectionPtr;
 
     //Private class functions
     bool

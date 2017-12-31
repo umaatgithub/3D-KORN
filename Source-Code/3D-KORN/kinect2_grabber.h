@@ -13,6 +13,9 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+#include <opencv2/features2d.hpp>
+#include <math.h>
+
 
 namespace pcl
 {
@@ -46,7 +49,13 @@ namespace pcl
             void mf_SetMvFlagFilterPoints(bool value);
             void mf_SetFilterBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 
-
+            void convertCameraPointToColorPoint(const pcl::PointXYZI &inP, ColorSpacePoint &outP);
+            void convertPixelToXYZ(const ColorSpacePoint colorPoint, const UINT16 *depthBuffer, pcl::PointXYZ& outPointXYZ);
+            void convertPixelsToPointCloudXYZ(const std::vector<cv::DMatch> &match, const UINT16 *depthBuffer, pcl::PointCloud<pcl::PointXYZ>& outPointCloudXYZ);
+            int getColorWidth();
+            int getColorHeight();
+            int getDepthWidth();
+            int getDepthHeight();
 
             typedef void ( signal_Kinect2_PointXYZ )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZ>>& );
             typedef void ( signal_Kinect2_PointXYZI )( const boost::shared_ptr<const pcl::PointCloud<pcl::PointXYZI>>& );
@@ -100,7 +109,16 @@ namespace pcl
             float mv_YMin, mv_YMax;
             float mv_ZMin, mv_ZMax;
 
-
+            //camera properties for coordinates transformation
+            static const float cx;
+            static const float cy;
+            static const float fx;
+            static const float fy;
+            static const float k1;
+            static const float k2;
+            static const float k3;
+            static const float p1;
+            static const float p2;
     };
 
 
