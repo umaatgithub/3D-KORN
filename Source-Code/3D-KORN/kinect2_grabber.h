@@ -50,8 +50,6 @@ namespace pcl
             void mf_SetFilterBox(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax);
 
             void convertCameraPointToColorPoint(const pcl::PointXYZI &inP, ColorSpacePoint &outP);
-            void convertPixelToXYZ(const ColorSpacePoint colorPoint, const UINT16 *depthBuffer, pcl::PointXYZ& outPointXYZ);
-            void convertPixelsToPointCloudXYZ(const std::vector<cv::DMatch> &match, const UINT16 *depthBuffer, pcl::PointCloud<pcl::PointXYZ>& outPointCloudXYZ);
             int getColorWidth();
             int getColorHeight();
             int getDepthWidth();

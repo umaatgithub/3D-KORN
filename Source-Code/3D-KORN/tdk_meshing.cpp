@@ -1,63 +1,19 @@
-#include "TDK_PointOperations.h"
-
-
+#include "tdk_meshing.h"
 using namespace pcl;
 
-
-TDK_PointOperations::TDK_PointOperations()
+TDK_Meshing::TDK_Meshing()
 {
 
+}
+
+TDK_Meshing::~TDK_Meshing(){
 
 }
 
-
-
-void TDK_PointOperations::FilterPCPassthrough(const double &ci, const double &minx, const double &maxx, const double &miny, const double &maxy, const double &minz, const double &maxz, uint &xi, uint &yi, uint &zi, const PointCloud<PointXYZ>::Ptr &cloud, PointCloud<PointXYZ>::Ptr &clouda){
-
-    double xremapplus,xremapminus,yremapplus,yremapminus,zremapplus,zremapminus;
-
-    xremapplus  =  maxx - xi*(maxx-minx)/255;
-    xremapminus =  xi*(maxx-minx)/255+minx;
-
-    yremapplus  =  maxy - yi*(maxy-miny)/255;
-    yremapminus =  yi*(maxy-miny)/255+miny;
-
-    zremapplus  =  maxz - zi*(maxz-minz)/255;
-    zremapminus =  zi*(maxz-minz)/255+minz;
-    PassThrough<PointXYZ> pass (true);
-
-    if (ci == 1){
-        pass.setFilterFieldName ("z");
-        pass.setFilterLimits (zremapplus, maxz);
-        pass.setInputCloud (cloud);
-        pass.filter (*clouda);
-        pass.setFilterFieldName ("y");
-        pass.setFilterLimits (yremapplus, maxy);
-        pass.setInputCloud (clouda);
-        pass.filter (*clouda);
-        pass.setFilterFieldName ("x");
-        pass.setFilterLimits (xremapplus, maxx); //maxx
-        pass.setInputCloud (clouda);
-        pass.filter (*clouda);
-    }
-    else{
-        pass.setFilterFieldName ("z");
-        pass.setFilterLimits (minz,zremapminus);
-        pass.setInputCloud (clouda);
-        pass.filter (*clouda);
-        pass.setFilterFieldName ("y");
-        pass.setFilterLimits (miny,yremapminus);
-        pass.setInputCloud (clouda);
-        pass.filter (*clouda);
-        pass.setFilterFieldName ("x");
-        pass.setFilterLimits (minx,xremapminus);
-        pass.setInputCloud (clouda);
-        pass.filter (*clouda);
-    }
-}
 //With NormalEstimationFunction we normalize the output received from the FilterPassThrough
 //mf_NormalEstimation receives as input the filtered PointCloud and gives as output a PointNormal
-void TDK_PointOperations::mf_NormalEstimation(PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, PointCloud<pcl::PointNormal>::Ptr &mv_PointNormalOutput){
+void TDK_Meshing::mf_NormalEstimation(PointCloud<PointXYZ>::Ptr &mv_PointCloudInput,
+                                              PointCloud<pcl::PointNormal>::Ptr &mv_PointNormalOutput){
 
     pcl::search::KdTree<pcl::PointXYZ>::Ptr mv_Tree;
     mv_Tree.reset(new pcl::search:: KdTree<pcl::PointXYZ>(false) ) ;
@@ -90,10 +46,11 @@ void TDK_PointOperations::mf_NormalEstimation(PointCloud<PointXYZ>::Ptr &mv_Poin
 
 
 //mf_PoissonMeshes takes as input a PointCloud, applies all the function defined above and gives as output a mesh
-void TDK_PointOperations::mf_TriangulationMeshes(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput ,  pcl::PolygonMesh::Ptr &mv_MeshesOutput){
+void TDK_Meshing::mf_TriangulationMeshes(const pcl::PointCloud<pcl::PointXYZ>::Ptr &mv_PointCloudInput,
+                                                 pcl::PolygonMesh::Ptr &mv_MeshesOutput){
 
     //voxel filterin
-    pcl::PointCloud<PointXYZ>::Ptr mv_CloudFiltered (new pcl::PointCloud<PointXYZ> ()); //cloud_filtered
+    pcl::PointCloud<pcl::PointXYZ>::Ptr mv_CloudFiltered (new pcl::PointCloud<PointXYZ> ()); //cloud_filtered
     pcl::VoxelGrid<pcl::PointXYZ> mv_VoxelGrid;
     // mv_VoxelGrid.setInputCloud (mv_PointCloudForFiltering);
     mv_VoxelGrid.setInputCloud (mv_PointCloudInput);
@@ -115,7 +72,7 @@ void TDK_PointOperations::mf_TriangulationMeshes(const PointCloud<PointXYZ>::Ptr
 
 
     PointCloud<PointNormal>::Ptr mv_PointNormal1(new PointCloud<PointNormal>());
-    TDK_PointOperations::mf_NormalEstimation(mv_PointCloud1, mv_PointNormal1);
+    TDK_Meshing::mf_NormalEstimation(mv_PointCloud1, mv_PointNormal1);
 
     //TRIANGULIZATION
     pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
@@ -145,31 +102,23 @@ void TDK_PointOperations::mf_TriangulationMeshes(const PointCloud<PointXYZ>::Ptr
     mv_VTK.process(*mv_MeshesOutput);
 }
 
-void TDK_PointOperations::mf_PoissonMeshes(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput ,  pcl::PolygonMesh::Ptr &mv_MeshesOutput){
+void TDK_Meshing::mf_PoissonMeshes(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput,
+                                   pcl::PolygonMesh::Ptr &mv_MeshesOutput){
 
-    //voxel filterin
-    pcl::PointCloud<PointXYZ>::Ptr mv_CloudFiltered (new pcl::PointCloud<PointXYZ> ()); //cloud_filtered
-    pcl::VoxelGrid<pcl::PointXYZ> mv_VoxelGrid;
-    mv_VoxelGrid.setLeafSize (0.01f, 0.01f, 0.01f);
-    mv_VoxelGrid.setInputCloud (mv_PointCloudInput);
-    mv_VoxelGrid.filter (*mv_CloudFiltered);
+    //Perform outlier removal
+    pcl::PointCloud<pcl::PointXYZ>::Ptr mv_cloud_filtered (new  pcl::PointCloud<pcl::PointXYZ>);
+    TDK_Filters::mf_FilterStatisticalOutlierRemoval(mv_PointCloudInput, mv_cloud_filtered, 5);
 
-    pcl::search::KdTree<pcl::PointXYZ>::Ptr mv_Tree1 (new pcl::search::KdTree<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr mv_PointCloud1 (new  pcl::PointCloud<pcl::PointXYZ>);
-    pcl::MovingLeastSquares<pcl::PointXYZ, pcl::PointXYZ> mv_MovingLeastSquares;
-    mv_MovingLeastSquares.setInputCloud (mv_CloudFiltered);
-    mv_MovingLeastSquares.setComputeNormals (true);//need this true
-    mv_MovingLeastSquares.setSearchMethod(mv_Tree1);
-    mv_MovingLeastSquares.setPolynomialFit (true);
-    mv_MovingLeastSquares.setSearchRadius (0.03);
-    // mv_MovingLeastSquares.setSearchRadius (0.01);
-    mv_MovingLeastSquares.process (*mv_PointCloud1);
+    //Apply the MLS smoothing filter
+    pcl::PointCloud<pcl::PointXYZ>::Ptr mv_cloud_smoothed (new  pcl::PointCloud<pcl::PointXYZ>);
+    TDK_Filters::mf_FilterSmoothing(mv_cloud_filtered, mv_cloud_smoothed, 0.03);
 
-    PointCloud<PointNormal>::Ptr mv_PointNormal1(new PointCloud<PointNormal>());
-    TDK_PointOperations::mf_NormalEstimation(mv_PointCloud1, mv_PointNormal1);
+    //Obtain a normal point estimation
+    pcl::PointCloud<pcl::PointNormal>::Ptr mv_PointNormal1(new pcl::PointCloud<pcl::PointNormal>());
+    TDK_Meshing::mf_NormalEstimation(mv_cloud_smoothed, mv_PointNormal1);
 
     //Poisson Function
-    Poisson<PointNormal> mv_Poisson;
+    pcl::Poisson<PointNormal> mv_Poisson;
     mv_Poisson.setInputCloud(mv_PointNormal1);
     mv_Poisson.setDepth(9);
     mv_Poisson.setSolverDivide (8); //8 is the best value
@@ -196,17 +145,18 @@ void TDK_PointOperations::mf_PoissonMeshes(const PointCloud<PointXYZ>::Ptr &mv_P
     mv_VTK.process(*mv_MeshesOutput);
 }
 
-static void mf_PoissonMeshesWithConversion(const PointCloud<PointXYZRGB>::Ptr &PointCloudXYZRGB, PolygonMesh::Ptr &mv_MeshesOutput){
+void TDK_Meshing::mf_PoissonMeshesWithConversion(const PointCloud<PointXYZRGB>::Ptr &PointCloudXYZRGB,
+                                                        PolygonMesh::Ptr &mv_MeshesOutput){
 
     PointCloud<PointXYZ>::Ptr mv_PointCloudInput  ((new PointCloud<PointXYZ>)) ;
-    TDK_PointOperations::mf_ConvertFromXYZRGBtoXYZ(PointCloudXYZRGB, mv_PointCloudInput) ;
+    TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(PointCloudXYZRGB, mv_PointCloudInput) ;
 
     //Normal Estimation function
     PointCloud<PointNormal>::Ptr mv_PointNormal(new PointCloud<PointNormal>());
-    TDK_PointOperations::mf_NormalEstimation(mv_PointCloudInput, mv_PointNormal);
+    TDK_Meshing::mf_NormalEstimation(mv_PointCloudInput, mv_PointNormal);
 
     //Poisson Function
-    Poisson<PointNormal> mv_Poisson;
+    pcl::Poisson<PointNormal> mv_Poisson;
     mv_Poisson.setInputCloud(mv_PointNormal);
     mv_Poisson.setDepth(10);
     mv_Poisson.setSolverDivide (8);
@@ -219,8 +169,7 @@ static void mf_PoissonMeshesWithConversion(const PointCloud<PointXYZRGB>::Ptr &P
 }
 
 
-void TDK_PointOperations::mf_ConvertFromXYZRGBtoXYZ(const PointCloud<pcl::PointXYZRGB>::Ptr &mv_PointCloudInput, PointCloud<pcl::PointXYZ>::Ptr &mv_PointCloudOutput){
-    copyPointCloud(*mv_PointCloudInput, *mv_PointCloudOutput);
+void TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(const PointCloud<pcl::PointXYZRGB>::Ptr &mv_PointCloudInput,
+                                            PointCloud<pcl::PointXYZ>::Ptr &mv_PointCloudOutput){
+    pcl::copyPointCloud(*mv_PointCloudInput, *mv_PointCloudOutput);
 }
-
-
