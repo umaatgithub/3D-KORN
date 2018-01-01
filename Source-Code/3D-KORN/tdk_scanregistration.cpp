@@ -195,7 +195,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_get
 
     //Create and setup the Incremental registration object
     pcl::registration::IncrementalRegistration<pcl::PointXYZRGB> incremental_icp;
-    //incremental_icp.setRegistration(icp);
+    incremental_icp.setRegistration(icp);
 
     //Result pointcloud
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
