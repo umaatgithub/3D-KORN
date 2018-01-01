@@ -542,16 +542,3 @@ void Kinect2Grabber::mf_SetFilterBox(float xmin, float xmax, float ymin, float y
     mv_ZMin = zmin;
     mv_ZMax = zmax;
 }
-
-void Kinect2Grabber::convertPixelToXYZ(const ColorSpacePoint colorPoint,
-                                       const UINT16 *depthBuffer,
-                                       pcl::PointXYZ& outPointXYZ)
-{
-    //mapper->
-}
-void Kinect2Grabber::convertPixelsToPointCloudXYZ(const std::vector<cv::DMatch> &match,
-                                                  const UINT16 *depthBuffer,
-                                                  pcl::PointCloud<pcl::PointXYZ>& outPointCloudXYZ)
-{
-
-}

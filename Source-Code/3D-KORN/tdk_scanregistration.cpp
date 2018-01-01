@@ -163,7 +163,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::getRoughlyAlignedPC
 
 /////////////////////////////////////////////////////
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_getAlignedPC()
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Process_and_getAlignedPC()
 {
     if(! mv_registerInRealTime){
         mv_registerInRealTime = true;

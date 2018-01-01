@@ -1,29 +1,24 @@
 #ifndef TDK_SCANREGISTRATION_H
 #define TDK_SCANREGISTRATION_H
 
-#include <math.h>
-#include <vector>
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <pcl/kdtree/kdtree_flann.h>
-
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types_conversion.h>
+#include <math.h>
+#include <pcl/PCLPointCloud2.h>
 #include <pcl/common/transforms.h>
 #include <pcl/features/normal_3d.h>
-
-#include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/point_types_conversion.h>
 #include <pcl/registration/correspondence_estimation_backprojection.h>
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
-#include <pcl/registration/transformation_estimation_svd.h>
-#include <pcl/registration/icp.h>
 #include <pcl/registration/elch.h>
+#include <pcl/registration/icp.h>
 #include <pcl/registration/incremental_registration.h>
-#include <pcl/PCLPointCloud2.h>
+#include <pcl/registration/transformation_estimation_svd.h>
+#include <vector>
 
 #include "tdk_2dfeaturedetection.h"
 
@@ -62,7 +57,7 @@ public:
     //Ouput
     pcl::PointCloud<pcl::PointXYZ>::Ptr getLastDownSampledPointcloud();
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getRoughlyAlignedPC();
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr postProcess_and_getAlignedPC();
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Process_and_getAlignedPC();
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRotationCompensatedPCs();
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRoughlyAlignedPCs();
 

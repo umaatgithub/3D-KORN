@@ -448,8 +448,9 @@ SOURCES += main.cpp\
     tdk_sensorcontroller.cpp \
     tdk_kinectv2sensor.cpp \
     tdk_turntable.cpp \
-    TDK_PointOperations.cpp \
-    tdk_2dfeaturedetection.cpp
+    tdk_2dfeaturedetection.cpp \
+    tdk_meshing.cpp \
+    tdk_filters.cpp
 
 HEADERS  += mainwindow.h \
     tdk_centralwidget.h \
@@ -463,7 +464,8 @@ HEADERS  += mainwindow.h \
     tdk_sensorcontroller.h \
     tdk_kinectv2sensor.h \
     tdk_turntable.h \
-    TDK_PointOperations.h \
-    tdk_2dfeaturedetection.h
+    tdk_2dfeaturedetection.h \
+    tdk_meshing.h \
+    tdk_filters.h
 
 FORMS    += mainwindow.ui
