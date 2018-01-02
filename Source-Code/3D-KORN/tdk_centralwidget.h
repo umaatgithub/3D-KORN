@@ -27,7 +27,8 @@
 //Include custom classes
 #include "tdk_database.h"
 #include "tdk_scanregistration.h"
-#include "TDK_PointOperations.h"
+#include "tdk_meshing.h"
+#include "tdk_filters.h"
 
 class TDK_CentralWidget : public QWidget
 {
