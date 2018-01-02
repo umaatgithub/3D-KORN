@@ -11,8 +11,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui              (new Ui::MainWindow),
     mv_ScanWindow   (new TDK_ScanWindow(this))
 {
-
     ui->setupUi(this);
+    mv_StatusBar = this->statusBar();
 
     //Connection to update pointcloud and registered pointcloud list after scan from scan window
     connect(mv_ScanWindow           , SIGNAL(mf_SignalDatabasePointCloudUpdated()),
@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     connect(this                    , SIGNAL(mf_SignalDatabaseMeshUpdated()),
             ui->centralWidget       , SLOT(mf_SlotUpdateMeshListTab()));
 
+    connect(ui->centralWidget, SIGNAL(mf_SignalStatusChanged(QString,QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString,QColor)));
 }
 
 /***************************************************************************
@@ -310,4 +311,17 @@ void MainWindow::on_actionExportVTK_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
 
+}
+
+void MainWindow::mf_SlotUpdateStatusBar(QString status, QColor statusColor)
+{
+    QPalette statusBarPalette;
+    statusBarPalette.setColor( QPalette::WindowText, statusColor );
+    mv_StatusBar->setPalette(statusBarPalette);
+    if(statusColor == Qt::blue){
+        mv_StatusBar->showMessage(status);
+    }
+    else{
+        mv_StatusBar->showMessage(status, 5000);
+    }
 }

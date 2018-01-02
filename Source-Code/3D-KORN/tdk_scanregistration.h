@@ -19,6 +19,9 @@
 #include <pcl/registration/incremental_registration.h>
 #include <pcl/registration/transformation_estimation_svd.h>
 #include <vector>
+#include <QColor>
+#include <QObject>
+#include <QString>
 
 #include "tdk_2dfeaturedetection.h"
 
@@ -41,8 +44,9 @@ void tdk_PointCloudXYZRGBtoXYZI(
         );
 
 
-class TDK_ScanRegistration
+class TDK_ScanRegistration: public QObject
 {
+    Q_OBJECT
 public:
     TDK_ScanRegistration();
     TDK_ScanRegistration(const bool registerInRealTime);
@@ -79,6 +83,9 @@ public:
     void set_SVD_MaxDistance(double value);
     void set_ICP_MaxCorrespondenceDistance(float value);
     void set_PostICP_MaxCorrespondanceDistance(float value);
+
+signals:
+    void mf_SignalStatusChanged(QString, QColor);
 
 
 private:
