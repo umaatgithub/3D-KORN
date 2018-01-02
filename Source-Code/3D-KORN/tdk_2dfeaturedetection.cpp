@@ -83,7 +83,7 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
                         static_cast<int>(tempKeyPointTrain.pt.x)
                         );
 
-            CameraSpacePoint tempSpacePointTarget = trainImgCameraSpaceMap.at<CameraSpacePoint>(
+            CameraSpacePoint tempSpacePointTarget = queryImgCameraSpaceMap.at<CameraSpacePoint>(
                         static_cast<int>(tempKeyPointQuery.pt.y),
                         static_cast<int>(tempKeyPointQuery.pt.x)
                         );
@@ -118,7 +118,7 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
                             static_cast<int>(tempKeyPointTrain.pt.x)
                             );
 
-                CameraSpacePoint tempSpacePointTarget = trainImgCameraSpaceMap.at<CameraSpacePoint>(
+                CameraSpacePoint tempSpacePointTarget = queryImgCameraSpaceMap.at<CameraSpacePoint>(
                             static_cast<int>(tempKeyPointQuery.pt.y),
                             static_cast<int>(tempKeyPointQuery.pt.x)
                             );
