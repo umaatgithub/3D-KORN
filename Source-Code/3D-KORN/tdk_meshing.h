@@ -25,17 +25,23 @@ public:
 
     static void mf_NormalEstimation(PointCloud<PointXYZ>::Ptr &mv_PointCloudInput,
                                           PointCloud<pcl::PointNormal>::Ptr &mv_PointNormalOutput);
-    //for input of type PointXYZRGB
-    static void mf_PoissonMeshesWithConversion(const PointCloud<PointXYZRGB>::Ptr &mv_PointCloudInput ,
-                                               PolygonMesh::Ptr &mv_MeshesOutput);
-
-    //for input of type PointXYZ
-    static void mf_PoissonMeshes(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput , PolygonMesh::Ptr &mv_MeshesOutput);
     static void mf_ConvertFromXYZRGBtoXYZ(const PointCloud<pcl::PointXYZRGB>::Ptr &mv_PointCloudInput,
                                           PointCloud<pcl::PointXYZ>::Ptr &mv_PointCloudOutput);
 
-    static void mf_TriangulationMeshes(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput,
+    //for input of type PointXYZ
+    static void mf_Poisson(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput, PolygonMesh::Ptr &mv_MeshesOutput);
+    static void mf_Poisson(const PointCloud<PointXYZRGB>::Ptr &mv_PointCloudInputRGB,PolygonMesh::Ptr &mv_MeshesOutput);
+
+    static void mf_Greedy_Projection_Triangulation(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput,
                                        pcl::PolygonMesh::Ptr &mv_MeshesOutput);
+    static void mf_Greedy_Projection_Triangulation(const PointCloud<PointXYZRGB>::Ptr &mv_PointCloudInputRGB,
+                                       pcl::PolygonMesh::Ptr &mv_MeshesOutput);
+
+    static void mf_Grid_Projection(const PointCloud<PointXYZ>::Ptr &mv_PointCloudInput,
+                                       pcl::PolygonMesh::Ptr &mv_MeshesOutput);
+    static void mf_Grid_Projection(const PointCloud<PointXYZRGB>::Ptr &mv_PointCloudInputRGB,
+                                       pcl::PolygonMesh::Ptr &mv_MeshesOutput);
+
 };
 
 #endif // TDK_MESHING_H

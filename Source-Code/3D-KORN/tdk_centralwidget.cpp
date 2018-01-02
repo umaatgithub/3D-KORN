@@ -209,7 +209,7 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_PointCloudsVector[i]->makeShared(), pointcloud);
-                TDK_Meshing::mf_PoissonMeshes(pointcloud , meshPtr);
+                TDK_Meshing::mf_Poisson(pointcloud , meshPtr);
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
@@ -219,7 +219,7 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_RegisteredPointCloudsVector[i]->makeShared(), pointcloud);
-                TDK_Meshing::mf_PoissonMeshes(pointcloud , meshPtr);
+                TDK_Meshing::mf_Poisson(pointcloud , meshPtr);
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
