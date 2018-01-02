@@ -42,6 +42,8 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
             this                            , SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
     connect(mv_MeshListTab                  , SIGNAL(itemChanged(QListWidgetItem*)),
             this                            , SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
+
+    connect(mv_ScanRegistration, SIGNAL(mf_SignalStatusChanged(QString, QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString, QColor)));
 }
 
 /***************************************************************************
@@ -361,4 +363,9 @@ void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
         mv_numberOfMeshesSelected--;
     }
     mv_PointCloudQVTKWidget->update();
+}
+
+void TDK_CentralWidget::mf_SlotUpdateStatusBar(QString status, QColor statusColor)
+{
+    emit mf_SignalStatusChanged(status, statusColor);
 }
