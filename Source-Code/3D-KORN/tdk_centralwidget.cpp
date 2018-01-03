@@ -142,6 +142,8 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
 
     mv_MeshAlgorithmComboBox->setFixedHeight(22);
     mv_MeshAlgorithmComboBox->addItem("Poisson", "Poisson");
+    mv_MeshAlgorithmComboBox->addItem("Greedy_Triangulation", "Greedy_Triangulation");
+    mv_MeshAlgorithmComboBox->addItem("Grid_Projection", "Grid_Projection");
 
     mv_GenerateMeshPushButton->setFixedHeight(22);
     mv_GenerateMeshPushButton->setMinimumWidth(300);
@@ -209,7 +211,9 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_PointCloudsVector[i]->makeShared(), pointcloud);
-                TDK_Meshing::mf_Poisson(pointcloud , meshPtr);
+                if(mv_MeshAlgorithmComboBox->currentText() == "Poisson"){TDK_Meshing::mf_Poisson(pointcloud, meshPtr);}
+                else if (mv_MeshAlgorithmComboBox->currentText() == "Greedy_Triangulation"){TDK_Meshing::mf_Greedy_Projection_Triangulation(pointcloud, meshPtr);}
+                else if (mv_MeshAlgorithmComboBox->currentText() == "Grid_Projection"){TDK_Meshing::mf_Grid_Projection(pointcloud,meshPtr);}
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
@@ -219,14 +223,16 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_RegisteredPointCloudsVector[i]->makeShared(), pointcloud);
-                TDK_Meshing::mf_Poisson(pointcloud , meshPtr);
+                if(mv_MeshAlgorithmComboBox->currentText() == "Poisson"){TDK_Meshing::mf_Poisson(pointcloud, meshPtr);}
+                else if (mv_MeshAlgorithmComboBox->currentText() == "Greedy_Triangulation"){TDK_Meshing::mf_Greedy_Projection_Triangulation(pointcloud, meshPtr);}
+                else if (mv_MeshAlgorithmComboBox->currentText() == "Grid_Projection"){TDK_Meshing::mf_Grid_Projection(pointcloud,meshPtr);}
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
         }
     }
     else{
-        QMessageBox::warning(this, QString("u2.cloud"), QString("Please select atleast one point cloud from explorer widget to generate mesh."));
+        QMessageBox::warning(this, QString("u2.cloud"), QString("Please select at least one point cloud from explorer widget to generate mesh."));
     }
 }
 

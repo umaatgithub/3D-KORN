@@ -155,11 +155,11 @@ void TDK_Filters::mf_FilterMLSSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cl
 }
 
 //Laplacian Filter Smoothing:
-//Input: PointCloud, PointCloud(smoothed)
+//Input: Mesh, Mesh(smoothed)
 //Output: void
 void TDK_Filters::mf_FilterLaplacianSmoothing(const boost::shared_ptr<pcl::PolygonMesh> &triangles, pcl::PolygonMesh::Ptr &mv_MeshesOutput1){
 
-    pcl:: MeshSmoothingLaplacianVTK laplacian;
+    pcl::MeshSmoothingLaplacianVTK laplacian;
     laplacian.setInputMesh(triangles);
     laplacian.setNumIter(20000);
     laplacian.setConvergence(0.0001);
@@ -167,6 +167,6 @@ void TDK_Filters::mf_FilterLaplacianSmoothing(const boost::shared_ptr<pcl::Polyg
     laplacian.setFeatureEdgeSmoothing(true);
     laplacian.setFeatureAngle(M_PI/5);
     laplacian.setBoundarySmoothing(true);
-    laplacian.process(mv_MeshesOutput1);
+    laplacian.process(*mv_MeshesOutput1);
     qDebug()<<"Triangulation Finished";
 }
