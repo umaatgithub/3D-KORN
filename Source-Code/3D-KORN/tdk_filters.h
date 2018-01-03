@@ -69,8 +69,12 @@ public:
                                              pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered, float leafsize);
 
     //Function for smoothing using MLS
-    static void mf_FilterSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cloud,
+    static void mf_FilterMLSSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cloud,
                                    pcl::PointCloud<PointXYZ>::Ptr &cloud_smoothed, float searchradius);
+
+    //Function for Laplacian Smoothing
+    static void mf_FilterLaplacianSmoothing(const boost::shared_ptr<pcl::PolygonMesh> &triangles,
+                                                  pcl::PolygonMesh::Ptr &mv_MeshesOutput1);
 };
 
 #endif // TDK_FILTERS_H

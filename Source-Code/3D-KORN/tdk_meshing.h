@@ -11,6 +11,7 @@
 #include <pcl/surface/mls.h>
 #include <pcl/surface/poisson.h>
 #include <pcl/surface/vtk_smoothing/vtk_mesh_smoothing_laplacian.h>
+#include <pcl/surface/marching_cubes_hoppe.h>
 
 #include "tdk_filters.h"
 
