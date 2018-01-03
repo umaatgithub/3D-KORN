@@ -577,6 +577,11 @@ TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
     mv_ICP_MaxCorrespondenceDistance = value;
 }
 
+void TDK_ScanRegistration::set_Use2DFeatureDetection(int stateOfCheckbox)
+{
+    mv_use2DFeatureDetection = !!stateOfCheckbox;
+}
+
 /////////////////////////////////////////////////////
 void PointCloudXYZRGBtoXYZ(
         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
