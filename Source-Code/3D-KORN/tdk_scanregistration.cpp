@@ -1,6 +1,6 @@
 #include "tdk_scanregistration.h"
 #include <QDebug>
-
+#include <iostream>
 using namespace std;
 
 TDK_ScanRegistration::TDK_ScanRegistration()
@@ -164,7 +164,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::getRoughlyAlignedPC
 
 
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr Register(std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &Data ) {
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &Data ) {
 
    // PCL_INFO (" \n Loaded %d datasets ... \n", (int)Data.size ());
 
@@ -189,7 +189,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Register(std::vector<pcl::PointCloud<pcl:
     for (size_t i = 1; i < Data.size (); ++i)
     {
 
-        //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
+        std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
        // PointCloudXYZRGBtoXYZ(Data[i] , data1);
         cloud_src = result2; // source
         cloud_tgt = Data[i]; // target
@@ -197,9 +197,9 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Register(std::vector<pcl::PointCloud<pcl:
         src = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_src, VoxelGridLeafSize);
         tgt = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_tgt, VoxelGridLeafSize);
 
-        result1 = TDK_ScanRegistration::ICPNormal(src, tgt);
+       // result1 = TDK_ScanRegistration::ICPNormal(src, tgt);
 
-        //result1 = TDK_ScanRegistration::ICP(src , tgt);
+        result1 = TDK_ScanRegistration::ICP(src , tgt);
 
         *result1 += *cloud_tgt;
 
@@ -216,7 +216,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr Register(std::vector<pcl::PointCloud<pcl:
 
 
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt){
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICPNormal(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt){
 
 
         float MaxDistance=0.015;
@@ -264,7 +264,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRG
         Eigen::Matrix4f transform_normals = reg.getFinalTransformation ();
         pcl::transformPointCloud (*src, *cloud_norm, transform_normals);
 
-
+        std::cout<<cloud_norm<<std::endl;
         return cloud_norm;
 
   }
@@ -272,34 +272,34 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr ICPNormal(pcl::PointCloud<pcl::PointXYZRG
 
 ///////////////////////////////////////////////////
 
-//pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICP(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt){
-//    // Start first ICP
-//    float MaxDistance=0.015;
-//    float RansacVar = 0.01;
-//    float Iterations = 100;
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICP(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt){
+    // Start first ICP
+    float MaxDistance=0.015;
+    float RansacVar = 0.01;
+    float Iterations = 100;
 
-//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Final (new pcl::PointCloud<pcl::PointXYZRGB>);
 
-//    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
-//    icp.setMaxCorrespondenceDistance (MaxDistance); //0.10 //0.015
-//    icp.setRANSACOutlierRejectionThreshold (RansacVar); // 0.05
-//    icp.setTransformationEpsilon (1e-8);
-//    icp.setMaximumIterations (Iterations);
-//    icp.setInputSource(src);
-//    icp.setInputTarget(tgt);
-//    icp.align(*Final);
+    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB> icp;
+    icp.setMaxCorrespondenceDistance (MaxDistance); //0.10 //0.015
+    icp.setRANSACOutlierRejectionThreshold (RansacVar); // 0.05
+    icp.setTransformationEpsilon (1e-8);
+    icp.setMaximumIterations (Iterations);
+    icp.setInputSource(src);
+    icp.setInputTarget(tgt);
+    icp.align(*Final);
 
-//    //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
+    //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
 
-//    std::cout << "ICP converged with score: " << icp.getFitnessScore() << std::endl;
-//    //std::cout << "first Icp converged:" << icp.hasConverged() << " score: " <<
-//    //             icp.getFitnessScore() << std::endl;
-//    //std::cout << icp.getFinalTransformation() << std::endl;
-//    //Eigen::Matrix4f transformation = icp.getFinalTransformation ();
-//    //pcl::transformPointCloud (*src, *Final, transformation);
-//    return Final;
+    std::cout << "ICP converged with score: " << icp.getFitnessScore() << std::endl;
+    //std::cout << "first Icp converged:" << icp.hasConverged() << " score: " <<
+    //             icp.getFitnessScore() << std::endl;
+    //std::cout << icp.getFinalTransformation() << std::endl;
+    //Eigen::Matrix4f transformation = icp.getFinalTransformation ();
+    //pcl::transformPointCloud (*src, *Final, transformation);
+    return Final;
 
-//}
+}
 
 /////////////////////////////////////////////////////
 
@@ -356,7 +356,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_get
 //    }
  // return mf_outlierRemovalPC(mergedAlignedOriginal, 8, 2);
 
-    //mergedAlignedOriginal = TDK_ScanRegistration::Register(mv_alignedOriginalPCs);
+    mergedAlignedOriginal = TDK_ScanRegistration::Register(mv_alignedOriginalPCs);
     return mergedAlignedOriginal;
 }
 
