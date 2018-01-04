@@ -321,43 +321,87 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Process_and_getAlig
         mv_ICPPost_MaxCorrespondanceDistance = 0.15;
     }
 
+
+
+//    emit mf_SignalStatusChanged(tr("Registration started..."), QColor(Qt::red));
+
 //    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
 //                new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
 //    icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
 //    icp->setMaximumIterations (300);
 
+    // prove feature detection
+    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr trainPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr queryPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+
+    pcl::PointCloud<pcl::PointXYZ>::Ptr trainKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
+    pcl::PointCloud<pcl::PointXYZ>::Ptr queryKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
+
+    TDK_2DFeatureDetection mv_2DFeatureDetectionPtr;
+    mv_2DFeatureDetectionPtr.setInputPointCloud(mv_originalPCs[0]);
+    mv_2DFeatureDetectionPtr.getMatchedFeatures(mv_originalPCs[1], trainKeyPoints, queryKeyPoints);
+    mv_2DFeatureDetectionPtr.showMatchedFeatures3D(mv_originalPCs[1], trainKeyPoints, queryKeyPoints);
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fusedCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
+    MatchRegistration(mv_originalPCs[0], mv_originalPCs[1], trainKeyPoints, queryKeyPoints, fusedCloud);
+    qDebug() << "Matching done";
+    //mv_alignedOriginalPCs[0] = fusedCloud;
+
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
+
+    mergedAlignedOriginal = fusedCloud;
+
+    // To visualize point clouds in a different window
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbViewer2 = rgbVis(fusedCloud);
+    while (!rgbViewer2->wasStopped ())
+     {
+       rgbViewer2->spinOnce (100);
+       boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+     }
+
+
+
+//    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
+//                new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
+//    icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
+//    icp->setMaximumIterations (300);
 
 //    icp->setTransformationEpsilon (1e-8);
 
 //    pcl::registration::ELCH<pcl::PointXYZRGB> elch;
 //    elch.setReg (icp);
 
+
+//    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>::iterator it;
 //    for (it = mv_alignedOriginalPCs.begin(); it != mv_alignedOriginalPCs.end(); ++it)
 //        elch.addPointCloud( *it );
 
 //    elch.setLoopEnd (mv_alignedOriginalPCs.size()-1);
 //    elch.compute();
 
-   //vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>::iterator it;
 
 
+//    //Create and setup the Incremental registration object
+//    pcl::registration::IncrementalRegistration<pcl::PointXYZRGB> incremental_icp;
+//    incremental_icp.setRegistration(icp);
 
-    //Create and setup the Incremental registration object
-    //pcl::registration::IncrementalRegistration<pcl::PointXYZRGB> incremental_icp;
-    //incremental_icp.setRegistration(icp);
-
-    //Result pointcloud
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
-    //Temporal pointcloud for transforming the incrementally registered
-    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
-
-
+//    //Result pointcloud
+//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
+//    //Temporal pointcloud for transforming the incrementally registered
+//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
 
 //    for (it = mv_alignedOriginalPCs.begin(); it != mv_alignedOriginalPCs.end(); ++it){
 //        incremental_icp.registerCloud( *it );
 
 //        //Align current pointcloud to previous ones
 //        pcl::transformPointCloud ( *(*it) , *tmp, incremental_icp.getDeltaTransform());
+
+//        *mergedAlignedOriginal += *tmp;
+//    }
+
+
+
 
 //        *mergedAlignedOriginal += *tmp;
 //    }
@@ -746,9 +790,57 @@ TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
     mv_ICP_MaxCorrespondenceDistance = value;
 }
 
-void TDK_ScanRegistration::set_Use2DFeatureDetection(int stateOfCheckbox)
+
+void TDK_ScanRegistration::MatchRegistration(pcl::PointCloud<pcl::PointXYZRGB>::Ptr refCloud,
+                                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampleCloud,
+                                    pcl::PointCloud<pcl::PointXYZ>::Ptr refMatch,
+                                    pcl::PointCloud<pcl::PointXYZ>::Ptr sampleMatch,
+                                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fusedCloud)
 {
-    mv_use2DFeatureDetection = !!stateOfCheckbox;
+    // Define an icp regisration object with default parameter setting
+    pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+    icp.setInputCloud(sampleMatch);
+    icp.setInputTarget(refMatch);
+    icp.setRANSACOutlierRejectionThreshold(0.05);
+    pcl::PointCloud<pcl::PointXYZ> aligned;
+    icp.align (aligned);
+    qDebug() << "Matching of features done";
+
+    // Estimate the rigid transformation
+    Eigen::Matrix4f transMat = icp.getFinalTransformation();
+    qDebug() << "translation z" << transMat(2, 3);
+    //transMat(0, 3) = 0;
+    //transMat(1, 3) = 0;
+    //transMat(2, 3) = 0;
+    qDebug() << "Estimate the rigid transformation";
+
+    // Transform the sample cloud to reference cloud coordinate
+    pcl::transformPointCloud(*sampleCloud, *fusedCloud, transMat);
+    for(int i=0; i<refCloud->size(); i++)
+    {
+            fusedCloud->push_back(refCloud->at(i));
+    }
+    qDebug() << "transformPointCloud";
+
+//    // Registration refinement using ICP with all points
+//    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in (new pcl::PointCloud<pcl::PointXYZ>);
+//    copyColor2XYZ(fusedCloud, cloud_in);
+//    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZ>);
+//    copyColor2XYZ(refCloud, cloud_out);
+//    icp.setInputCloud(cloud_in);
+//    icp.setInputTarget(cloud_out);
+//    icp.align(aligned);
+//    transMat = icp.getFinalTransformation();
+//    pcl::transformPointCloud(*fusedCloud, *fusedCloud, transMat);
+//    qDebug() << "Registration refinement done";
+//    // Fuse with the reference cloud
+//    for(int i=0; i<refCloud->size(); i++)
+//      {
+//        fusedCloud->push_back(refCloud->at(i));
+//      }
+
+//     qDebug() << "Match registration completed";
+
 }
 
 /////////////////////////////////////////////////////
@@ -780,3 +872,34 @@ void tdk_PointCloudXYZRGBtoXYZI(
         out->push_back(pI);
     });
 }
+
+
+
+// Extract color information
+void copyColor2XYZ(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out)
+{
+  for(int i=0; i<cloud_in->size();i++)
+    {
+      pcl::PointXYZ pt;
+      pt.x = cloud_in->at(i).r/255.0;
+      pt.y = cloud_in->at(i).g/255.0;
+      pt.z = cloud_in->at(i).b/255.0;
+      cloud_out->push_back(pt);
+    }
+}
+
+boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
+{
+  // --------------------------------------------
+  // -----Open 3D viewer and add point cloud-----
+  // --------------------------------------------
+  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+  viewer->setBackgroundColor (0, 0, 0);
+  pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
+  viewer->addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "reference cloud");
+  viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "reference cloud");
+  viewer->addCoordinateSystem (0.10);
+  viewer->initCameraParameters ();
+  return (viewer);
+}
+
