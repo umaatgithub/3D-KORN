@@ -161,11 +161,11 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     gridLayout->addWidget(new QLabel("Select registration algorithm : "), 0, 0, 1, 2);
     gridLayout->addWidget(mv_RegistrationComboBox, 0, 2, 1, 2);
     gridLayout->addWidget(mv_RegistrationPushButton, 1, 0, 1, 4);
-    gridLayout->addWidget(myFrame, 2, 0, 1, 4);
-    gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 3, 0, 1, 2);
-    gridLayout->addWidget(mv_MeshAlgorithmComboBox, 3, 2, 1, 2);
-    gridLayout->addWidget(mv_GenerateMeshPushButton, 4, 0, 1, 4);
-    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 5, 0, 1, 4);
+    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 2, 0, 1, 4);
+    gridLayout->addWidget(myFrame, 3, 0, 1, 4);
+    gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 4, 0, 1, 2);
+    gridLayout->addWidget(mv_MeshAlgorithmComboBox, 4, 2, 1, 2);
+    gridLayout->addWidget(mv_GenerateMeshPushButton, 5, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
