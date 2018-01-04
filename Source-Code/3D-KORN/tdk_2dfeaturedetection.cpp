@@ -83,7 +83,7 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
                         static_cast<int>(tempKeyPointTrain.pt.x)
                         );
 
-            CameraSpacePoint tempSpacePointTarget = trainImgCameraSpaceMap.at<CameraSpacePoint>(
+            CameraSpacePoint tempSpacePointTarget = queryImgCameraSpaceMap.at<CameraSpacePoint>(
                         static_cast<int>(tempKeyPointQuery.pt.y),
                         static_cast<int>(tempKeyPointQuery.pt.x)
                         );
@@ -118,7 +118,7 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
                             static_cast<int>(tempKeyPointTrain.pt.x)
                             );
 
-                CameraSpacePoint tempSpacePointTarget = trainImgCameraSpaceMap.at<CameraSpacePoint>(
+                CameraSpacePoint tempSpacePointTarget = queryImgCameraSpaceMap.at<CameraSpacePoint>(
                             static_cast<int>(tempKeyPointQuery.pt.y),
                             static_cast<int>(tempKeyPointQuery.pt.x)
                             );
@@ -393,6 +393,11 @@ void TDK_2DFeatureDetection::matchFeatures(const cv::Mat &rgb_1,
         }
         qDebug() << "Good matches number: " << matches.size();
     }
+
+    std::sort(matches.begin(), matches.end(), [] (const cv::DMatch &elem1,const cv::DMatch &elem2) {
+        return (elem1.distance < elem2.distance);
+    });
+
     qDebug() << "Feature matching is completed.";
 }
 

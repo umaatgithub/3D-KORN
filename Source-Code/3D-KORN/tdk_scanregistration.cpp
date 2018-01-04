@@ -175,6 +175,8 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Process_and_getAlig
         mv_ICPPost_MaxCorrespondanceDistance = 0.15;
     }
 
+    emit mf_SignalStatusChanged(tr("Registration started..."), QColor(Qt::red));
+
     pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
                 new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
     icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
@@ -573,6 +575,11 @@ void
 TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
 {
     mv_ICP_MaxCorrespondenceDistance = value;
+}
+
+void TDK_ScanRegistration::set_Use2DFeatureDetection(int stateOfCheckbox)
+{
+    mv_use2DFeatureDetection = !!stateOfCheckbox;
 }
 
 /////////////////////////////////////////////////////

@@ -13,6 +13,10 @@
 #include <QListWidget>
 #include <QMessageBox>
 #include <QDebug>
+#include <QColor>
+#include <QObject>
+#include <QString>
+#include <QCheckBox>
 
 //Include PCL IO libraries
 #include <pcl/point_cloud.h>
@@ -46,6 +50,7 @@ public:
     QPushButton          *mv_GenerateMeshPushButton;
     QComboBox            *mv_RegistrationComboBox;
     QPushButton          *mv_RegistrationPushButton;
+    QCheckBox            *mv_2DFeatureDetectionCheckBox;
     TDK_ScanRegistration *mv_ScanRegistration;
 
     //Explorer widget
@@ -67,6 +72,7 @@ signals:
     void    mf_SignalPointCloudListUpdated          ();
     void    mf_SignalRegisteredPointCloudListUpdated();
     void    mf_SignalMeshListUpdated                ();
+    void    mf_SignalStatusChanged(QString, QColor);
 
 public slots:
     //Slots to handle register point cloud and generate mesh
@@ -82,6 +88,9 @@ public slots:
     void    mf_SlotUpdatePointCloudDisplay          (QListWidgetItem* item);
     void    mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem* item);
     void    mf_SlotUpdateMeshDisplay                (QListWidgetItem* item);
+
+private slots:
+    void    mf_SlotUpdateStatusBar(QString, QColor);
 };
 
 #endif // TDK_CENTRALWIDGET_H

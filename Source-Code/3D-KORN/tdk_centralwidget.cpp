@@ -19,7 +19,8 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     mv_MeshListTab                  (new QListWidget)                                   ,
     mv_ScanRegistration             (new TDK_ScanRegistration)                          ,
     mv_numberOfPointCloudsSelected  (0)                                                 ,
-    mv_numberOfMeshesSelected       (0)
+    mv_numberOfMeshesSelected       (0)                                                 ,
+    mv_2DFeatureDetectionCheckBox(new QCheckBox)
 {
     mf_setupUI();
 
@@ -42,6 +43,11 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
             this                            , SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
     connect(mv_MeshListTab                  , SIGNAL(itemChanged(QListWidgetItem*)),
             this                            , SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
+
+    connect(mv_ScanRegistration, SIGNAL(mf_SignalStatusChanged(QString, QColor)),
+            this, SLOT(mf_SlotUpdateStatusBar(QString, QColor)));
+    connect(mv_2DFeatureDetectionCheckBox, SIGNAL(stateChanged(int)),
+            mv_ScanRegistration, SLOT(set_Use2DFeatureDetection(int)));
 }
 
 /***************************************************************************
@@ -148,6 +154,10 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     mv_GenerateMeshPushButton->setFixedHeight(22);
     mv_GenerateMeshPushButton->setMinimumWidth(300);
 
+    mv_2DFeatureDetectionCheckBox->setFixedHeight(22);
+    mv_2DFeatureDetectionCheckBox->setMinimumWidth(300);
+    mv_2DFeatureDetectionCheckBox->setText("Use 2D feature matching");
+
     gridLayout->addWidget(new QLabel("Select registration algorithm : "), 0, 0, 1, 2);
     gridLayout->addWidget(mv_RegistrationComboBox, 0, 2, 1, 2);
     gridLayout->addWidget(mv_RegistrationPushButton, 1, 0, 1, 4);
@@ -155,6 +165,7 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 3, 0, 1, 2);
     gridLayout->addWidget(mv_MeshAlgorithmComboBox, 3, 2, 1, 2);
     gridLayout->addWidget(mv_GenerateMeshPushButton, 4, 0, 1, 4);
+    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 5, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
@@ -367,4 +378,9 @@ void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
         mv_numberOfMeshesSelected--;
     }
     mv_PointCloudQVTKWidget->update();
+}
+
+void TDK_CentralWidget::mf_SlotUpdateStatusBar(QString status, QColor statusColor)
+{
+    emit mf_SignalStatusChanged(status, statusColor);
 }
