@@ -33,7 +33,7 @@ TDK_ScanRegistration::TDK_ScanRegistration(
 {
     mv_registerInRealTime = registerInRealTime;
     this->setDefaultParameters();
-    //this->setScannerRotationAxis(scannerCenter);
+    this->setScannerRotationAxis(scannerCenter);
 }
 
 /////////////////////////////////////////////////////
