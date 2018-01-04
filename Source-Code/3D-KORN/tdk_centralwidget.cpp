@@ -201,6 +201,23 @@ void TDK_CentralWidget::mf_SlotRegisterPointCloud()
         }
         TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->Process_and_getAlignedPC()->makeShared());
         emit mf_SignalRegisteredPointCloudListUpdated();
+
+        // prove feature detection
+        //pcl::PointCloud<pcl::PointXYZRGB>::Ptr trainPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr queryPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
+
+//        pcl::PointCloud<pcl::PointXYZ>::Ptr trainKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
+//        pcl::PointCloud<pcl::PointXYZ>::Ptr queryKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
+
+//        TDK_2DFeatureDetection mv_2DFeatureDetectionPtr;
+//        mv_2DFeatureDetectionPtr.setInputPointCloud(TDK_Database::mv_PointCloudsVector[1]);
+//        mv_2DFeatureDetectionPtr.getMatchedFeatures(queryPointCloud, trainKeyPoints, queryKeyPoints);
+//        mv_2DFeatureDetectionPtr.showMatchedFeatures3D(queryPointCloud, trainKeyPoints, queryKeyPoints);
+
+
+
+
+
     }
     else{
         QMessageBox::warning(this, QString("u2.cloud"), QString("Please select at least two point clouds from explorer widget to register."));
@@ -222,9 +239,11 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_PointCloudsVector[i]->makeShared(), pointcloud);
+
                 if(mv_MeshAlgorithmComboBox->currentText() == "Poisson"){TDK_Meshing::mf_Poisson(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Greedy Triangulation"){TDK_Meshing::mf_Greedy_Projection_Triangulation(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Grid Projection"){TDK_Meshing::mf_Grid_Projection(pointcloud,meshPtr);}
+
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
@@ -234,16 +253,20 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_RegisteredPointCloudsVector[i]->makeShared(), pointcloud);
+
                 if(mv_MeshAlgorithmComboBox->currentText() == "Poisson"){TDK_Meshing::mf_Poisson(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Greedy Triangulation"){TDK_Meshing::mf_Greedy_Projection_Triangulation(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Grid Projection"){TDK_Meshing::mf_Grid_Projection(pointcloud,meshPtr);}
+
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
         }
     }
     else{
+
         QMessageBox::warning(this, QString("u2.cloud"), QString("Please select at least one point cloud from explorer widget to generate mesh."));
+
     }
 }
 

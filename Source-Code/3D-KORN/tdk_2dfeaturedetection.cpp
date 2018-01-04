@@ -64,6 +64,19 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
 
     matchFeatures(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, matchesRobust, true);
 
+    std::vector<cv::DMatch> shortMatch;
+    copy(matchesRobust.begin(), matchesRobust.begin() + 4, std::back_insert_iterator<std::vector<cv::DMatch>>(shortMatch));
+    showMatchedFeatures2D(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, matchesRobust);
+    showMatchedFeatures2D(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, shortMatch);
+
+    qDebug() << "Distance check";
+    for (auto it = shortMatch.begin(); it != shortMatch.end(); it++)
+    {
+        qDebug() << it->distance;
+    }
+
+
+
     //we should have at least 4 matches in order to calculate transformation matrix
     if (matchesRobust.size() >= 4)
     {
@@ -105,9 +118,11 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
             qDebug() << "Regular matches number " << matches.size();
 
             //Limit number of selected matches to first 10
-            auto itEnd = (matches.size() >= 10) ? (matches.begin() + 10) : matches.end();
 
-            for(auto it = matches.begin(); it != itEnd; it++)
+            //auto itEnd = (matches.size() >= 10) ? (matches.begin() + 10) : matches.end();
+
+            for(auto it = matches.begin(); it != matches.end(); it++)
+
             {
                 cv::DMatch tempMatch = *it;
                 cv::KeyPoint tempKeyPointTrain = keyPtsTrain[tempMatch.trainIdx];
@@ -394,8 +409,10 @@ void TDK_2DFeatureDetection::matchFeatures(const cv::Mat &rgb_1,
         qDebug() << "Good matches number: " << matches.size();
     }
 
-    std::sort(matches.begin(), matches.end(), [] (const cv::DMatch &elem1,const cv::DMatch &elem2) {
-        return (elem1.distance < elem2.distance);
+
+    std::sort(matches.begin(), matches.end(), [] (cv::DMatch elem1, cv::DMatch elem2) {
+        return elem1.distance < elem2.distance;
+
     });
 
     qDebug() << "Feature matching is completed.";
