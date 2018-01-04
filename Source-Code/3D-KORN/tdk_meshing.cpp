@@ -144,7 +144,6 @@ void TDK_Meshing::mf_Greedy_Projection_Triangulation(const PointCloud<PointXYZ>:
     pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
     tree2->setInputCloud (mv_PointNormal1);
     boost::shared_ptr<pcl::PolygonMesh> triangles (new pcl::PolygonMesh);
-
     pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
 
     // Set typical values for the parameters
