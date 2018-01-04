@@ -16,6 +16,7 @@
 #include <QColor>
 #include <QObject>
 #include <QString>
+#include <QCheckBox>
 
 //Include PCL IO libraries
 #include <pcl/point_cloud.h>
@@ -49,6 +50,7 @@ public:
     QPushButton          *mv_GenerateMeshPushButton;
     QComboBox            *mv_RegistrationComboBox;
     QPushButton          *mv_RegistrationPushButton;
+    QCheckBox            *mv_2DFeatureDetectionCheckBox;
     TDK_ScanRegistration *mv_ScanRegistration;
 
     //Explorer widget

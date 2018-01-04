@@ -87,10 +87,14 @@ public:
 signals:
     void mf_SignalStatusChanged(QString, QColor);
 
+public slots:
+    void set_Use2DFeatureDetection(int);
+
 
 private:
     //Class operation configuration
     bool mv_registerInRealTime;
+    bool mv_use2DFeatureDetection = false;
 
     //Configuration parameters
     float mv_normalRadiusSearch;
