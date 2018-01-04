@@ -16,7 +16,7 @@
 #include <pcl/io/vtk_lib_io.h>
 
 //Include custom libraries
-#include "tdk_scanwindow.h"
+//#include "tdk_scanwindow.h"
 #include "tdk_database.h"
 
 //Defining MainWindow in Ui namespace
@@ -57,8 +57,12 @@ private slots:
 
 private:
     Ui::MainWindow      *ui;                                            //Pointer to Main window in Ui namespace
-    TDK_ScanWindow      *mv_ScanWindow;                                 //Pointer to scan window
+
+    //TDK_ScanWindow      *mv_ScanWindow;                                 //Pointer to scan window
+
+
     QStatusBar *mv_StatusBar;
+
 };
 
 #endif // MAINWINDOW_H
