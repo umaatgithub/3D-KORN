@@ -1,6 +1,12 @@
 #include "tdk_scanregistration.h"
+
 #include <QDebug>
+
 #include <iostream>
+
+#include <algorithm>
+
+
 using namespace std;
 
 TDK_ScanRegistration::TDK_ScanRegistration()
@@ -303,7 +309,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICP(pcl::PointCloud
 
 /////////////////////////////////////////////////////
 
-pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_getAlignedPC()
+pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Process_and_getAlignedPC()
 {
     if(! mv_registerInRealTime){
         mv_registerInRealTime = true;
@@ -319,6 +325,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::postProcess_and_get
 //                new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
 //    icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
 //    icp->setMaximumIterations (300);
+
 
 //    icp->setTransformationEpsilon (1e-8);
 
@@ -739,9 +746,13 @@ TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
     mv_ICP_MaxCorrespondenceDistance = value;
 }
 
+void TDK_ScanRegistration::set_Use2DFeatureDetection(int stateOfCheckbox)
+{
+    mv_use2DFeatureDetection = !!stateOfCheckbox;
+}
+
 /////////////////////////////////////////////////////
-void
-PointCloudXYZRGBtoXYZ(
+void PointCloudXYZRGBtoXYZ(
         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
         pcl::PointCloud<pcl::PointXYZ>::Ptr &out
         )
@@ -753,4 +764,19 @@ PointCloudXYZRGBtoXYZ(
         out->points[i].y = in->points[i].y;
         out->points[i].z = in->points[i].z;
     }
+}
+
+
+void tdk_PointCloudXYZRGBtoXYZI(
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
+        pcl::PointCloud<pcl::PointXYZI>::Ptr &out
+        )
+{
+    for_each(in->begin(),
+            in->end(),
+            [&out] (pcl::PointXYZRGB pRGB) {
+        pcl::PointXYZI pI{};
+        pcl::PointXYZRGBtoXYZI(pRGB, pI);
+        out->push_back(pI);
+    });
 }

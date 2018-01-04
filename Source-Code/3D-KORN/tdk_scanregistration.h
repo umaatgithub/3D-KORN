@@ -1,29 +1,29 @@
 #ifndef TDK_SCANREGISTRATION_H
 #define TDK_SCANREGISTRATION_H
 
-#include <math.h>
-#include <vector>
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <pcl/kdtree/kdtree_flann.h>
-
-#include <pcl/point_types.h>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types_conversion.h>
+#include <math.h>
+#include <pcl/PCLPointCloud2.h>
 #include <pcl/common/transforms.h>
 #include <pcl/features/normal_3d.h>
-
-#include <pcl/filters/voxel_grid.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/point_types_conversion.h>
 #include <pcl/registration/correspondence_estimation_backprojection.h>
 #include <pcl/registration/correspondence_rejection_sample_consensus.h>
-#include <pcl/registration/transformation_estimation_svd.h>
-#include <pcl/registration/icp.h>
 #include <pcl/registration/elch.h>
+#include <pcl/registration/icp.h>
 #include <pcl/registration/incremental_registration.h>
-#include <pcl/PCLPointCloud2.h>
+#include <pcl/registration/transformation_estimation_svd.h>
+#include <vector>
+#include <QColor>
+#include <QObject>
+#include <QString>
+
+#include "tdk_2dfeaturedetection.h"
 
 // From Group 3
 
@@ -66,10 +66,22 @@ void PointCloudXYZRGBtoXYZ(
         const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
         pcl::PointCloud<pcl::PointXYZ>::Ptr &out
         );
+/*!
+ * \brief tdk_PointCloudXYZRGBtoXYZI
+ * \param in pointer for input point cloud
+ * \param out output transformed point cloud
+ *
+ * Function transforms input XYZRGB (colored) point cloud into XYZI (intensity) point cloud
+ */
+void tdk_PointCloudXYZRGBtoXYZI(
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &in,
+        pcl::PointCloud<pcl::PointXYZI>::Ptr &out
+        );
 
 
-class TDK_ScanRegistration
+class TDK_ScanRegistration: public QObject
 {
+    Q_OBJECT
 public:
     TDK_ScanRegistration();
     TDK_ScanRegistration(const bool registerInRealTime);
@@ -90,7 +102,9 @@ public:
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr getRoughlyAlignedPC();
 
 
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr postProcess_and_getAlignedPC();
+
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr Process_and_getAlignedPC();
+
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRotationCompensatedPCs();
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>* getRoughlyAlignedPCs();
 
@@ -138,10 +152,17 @@ public:
     void set_ICP_MaxCorrespondenceDistance(float value);
     void set_PostICP_MaxCorrespondanceDistance(float value);
 
+signals:
+    void mf_SignalStatusChanged(QString, QColor);
+
+public slots:
+    void set_Use2DFeatureDetection(int);
+
 
 private:
     //Class operation configuration
     bool mv_registerInRealTime;
+    bool mv_use2DFeatureDetection = false;
 
     //Configuration parameters
     float mv_normalRadiusSearch;
@@ -166,6 +187,9 @@ private:
     vector<pcl::PointCloud<pcl::PointXYZ>::Ptr> mv_alignedDownSampledPCs;
     vector<Eigen::Matrix4f> mv_transformationMatrices;
     vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> mv_alignedOriginalPCs;
+
+    //feature detection service
+    TDK_2DFeatureDetection mv_2DFeatureDetectionPtr;
 
     //Private class functions
     bool

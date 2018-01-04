@@ -5,6 +5,10 @@
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QColor>
+#include <QObject>
+#include <QString>
+#include <QStatusBar>
 
 //Include PCL libraries
 #include <pcl/io/ply_io.h>
@@ -49,10 +53,16 @@ private slots:
     void    on_actionExportSTL_triggered            ();
     void    on_actionExportVTK_triggered            ();
     void    on_actionAbout_triggered                ();
+    void    mf_SlotUpdateStatusBar(QString, QColor);
 
 private:
     Ui::MainWindow      *ui;                                            //Pointer to Main window in Ui namespace
+
     //TDK_ScanWindow      *mv_ScanWindow;                                 //Pointer to scan window
+
+
+    QStatusBar *mv_StatusBar;
+
 };
 
 #endif // MAINWINDOW_H

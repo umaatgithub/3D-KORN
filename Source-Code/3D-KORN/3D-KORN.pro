@@ -22,6 +22,7 @@ INCLUDEPATH += "C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc"
 INCLUDEPATH += "C:\Program Files\OpenNI2\Include"
 INCLUDEPATH += "C:\Program Files (x86)\Intel\RSSDK\include"
 INCLUDEPATH += "C:\Program Files (x86)\Intel\RSSDK\src\libpxc"
+INCLUDEPATH += "C:\opencv2\build\include"
 
 
 
@@ -35,6 +36,7 @@ LIBS += "-LC:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64"
 LIBS += "-LC:\Program Files\OpenNI2\Lib"
 LIBS += "C:/Program Files (x86)/Intel/RSSDK/lib/x64/*.lib"
 LIBS += "C:/Program Files (x86)/Intel/RSSDK/sample/common/lib/x64/v140/*.lib"
+LIBS += "-LC:\opencv2\build\x64\vc14\lib"
 
 CONFIG(release, debug|release) {
     LIBS += -lpcl_common_release
@@ -211,6 +213,27 @@ CONFIG(release, debug|release) {
 
     LIBS += -lOpenNI2
     LIBS += -lkinect20
+
+    LIBS += -lopencv_highgui2413
+    LIBS += -lopencv_legacy2413
+    LIBS += -lopencv_ocl2413
+    LIBS += -lopencv_ts2413
+    LIBS += -lopencv_imgproc2413
+    LIBS += -lopencv_features2d2413
+    LIBS += -lopencv_video2413
+    LIBS += -lopencv_flann2413
+    LIBS += -lopencv_objdetect2413
+    LIBS += -lopencv_photo2413
+    LIBS += -lopencv_ml2413
+    LIBS += -lopencv_calib3d2413
+    LIBS += -lopencv_core2413
+    #LIBS += -lopencv_viz2413
+    LIBS += -lopencv_videostab2413
+    LIBS += -lopencv_superres2413
+    LIBS += -lopencv_stitching2413
+    LIBS += -lopencv_contrib2413
+    LIBS += -lopencv_nonfree2413
+    LIBS += -lopencv_gpu2413
 }
 
 CONFIG(debug, debug|release) {
@@ -389,6 +412,27 @@ CONFIG(debug, debug|release) {
 
     LIBS += -lOpenNI2
     LIBS += -lkinect20
+
+    LIBS += -lopencv_highgui2413d
+    LIBS += -lopencv_legacy2413d
+    LIBS += -lopencv_ocl2413d
+    LIBS += -lopencv_ts2413d
+    LIBS += -lopencv_imgproc2413d
+    LIBS += -lopencv_features2d2413d
+    LIBS += -lopencv_video2413d
+    LIBS += -lopencv_flann2413d
+    LIBS += -lopencv_objdetect2413d
+    LIBS += -lopencv_photo2413d
+    LIBS += -lopencv_ml2413d
+    LIBS += -lopencv_calib3d2413d
+    LIBS += -lopencv_core2413d
+    #LIBS += -lopencv_viz2413d
+    LIBS += -lopencv_videostab2413d
+    LIBS += -lopencv_superres2413d
+    LIBS += -lopencv_stitching2413d
+    LIBS += -lopencv_contrib2413d
+    LIBS += -lopencv_nonfree2413d
+    LIBS += -lopencv_gpu2413d
 }
 
 SOURCES += main.cpp\
@@ -404,7 +448,9 @@ SOURCES += main.cpp\
     tdk_sensorcontroller.cpp \
     tdk_kinectv2sensor.cpp \
     tdk_turntable.cpp \
-    TDK_PointOperations.cpp
+    tdk_2dfeaturedetection.cpp \
+    tdk_meshing.cpp \
+    tdk_filters.cpp
 
 HEADERS  += mainwindow.h \
     tdk_centralwidget.h \
@@ -418,6 +464,8 @@ HEADERS  += mainwindow.h \
     tdk_sensorcontroller.h \
     tdk_kinectv2sensor.h \
     tdk_turntable.h \
-    TDK_PointOperations.h
+    tdk_2dfeaturedetection.h \
+    tdk_meshing.h \
+    tdk_filters.h
 
 FORMS    += mainwindow.ui

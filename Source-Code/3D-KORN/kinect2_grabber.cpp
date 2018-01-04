@@ -2,6 +2,16 @@
 #include "QDebug"
 using namespace pcl;
 
+const float Kinect2Grabber::cx = 254.878f;
+const float Kinect2Grabber::cy = 205.395f;
+const float Kinect2Grabber::fx = 365.456f;
+const float Kinect2Grabber::fy = 365.456f;
+const float Kinect2Grabber::k1 = 0.0905474f;
+const float Kinect2Grabber::k2 = -0.26819f;
+const float Kinect2Grabber::k3 = 0.0950862f;
+const float Kinect2Grabber::p1 = 0.0f;
+const float Kinect2Grabber::p2 = 0.0f;
+
 Kinect2Grabber::Kinect2Grabber()
     : sensor( nullptr )
     , mapper( nullptr )
@@ -160,6 +170,40 @@ Kinect2Grabber::~Kinect2Grabber() throw()
     SafeRelease( depthReader );
     SafeRelease( infraredSource );
     SafeRelease( infraredReader );
+}
+
+/*!
+ * \brief Kinect2Grabber::convertCameraPointToColorPoint
+ * \param inP input point
+ * \param outP output coordinates from color space
+ *
+ * Method converts camera point coordinates in meters to color point coordinates in pixels
+ */
+void Kinect2Grabber::convertCameraPointToColorPoint(const pcl::PointXYZI &inP,
+                                                    ColorSpacePoint &outP)
+{
+    outP.X = floor(Kinect2Grabber::cx + ((Kinect2Grabber::fx * inP.x)/inP.z));
+    outP.Y = floor(Kinect2Grabber::cy + ((Kinect2Grabber::fy * inP.y)/inP.z));
+}
+
+int Kinect2Grabber::getColorWidth()
+{
+    return colorWidth;
+}
+
+int Kinect2Grabber::getColorHeight()
+{
+    return colorHeight;
+}
+
+int Kinect2Grabber::getDepthWidth()
+{
+    return depthWidth;
+}
+
+int Kinect2Grabber::getDepthHeight()
+{
+    return depthHeight;
 }
 
 void Kinect2Grabber::start()

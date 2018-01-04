@@ -19,7 +19,8 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
     mv_MeshListTab                  (new QListWidget)                                   ,
     mv_ScanRegistration             (new TDK_ScanRegistration)                          ,
     mv_numberOfPointCloudsSelected  (0)                                                 ,
-    mv_numberOfMeshesSelected       (0)
+    mv_numberOfMeshesSelected       (0)                                                 ,
+    mv_2DFeatureDetectionCheckBox(new QCheckBox)
 {
     mf_setupUI();
 
@@ -42,6 +43,11 @@ TDK_CentralWidget::TDK_CentralWidget(QWidget *parent) : QWidget(parent),
             this                            , SLOT(mf_SlotUpdateRegisteredPointCloudDisplay(QListWidgetItem*)));
     connect(mv_MeshListTab                  , SIGNAL(itemChanged(QListWidgetItem*)),
             this                            , SLOT(mf_SlotUpdateMeshDisplay(QListWidgetItem*)));
+
+    connect(mv_ScanRegistration, SIGNAL(mf_SignalStatusChanged(QString, QColor)),
+            this, SLOT(mf_SlotUpdateStatusBar(QString, QColor)));
+    connect(mv_2DFeatureDetectionCheckBox, SIGNAL(stateChanged(int)),
+            mv_ScanRegistration, SLOT(set_Use2DFeatureDetection(int)));
 }
 
 /***************************************************************************
@@ -146,6 +152,10 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     mv_GenerateMeshPushButton->setFixedHeight(22);
     mv_GenerateMeshPushButton->setMinimumWidth(300);
 
+    mv_2DFeatureDetectionCheckBox->setFixedHeight(22);
+    mv_2DFeatureDetectionCheckBox->setMinimumWidth(300);
+    mv_2DFeatureDetectionCheckBox->setText("Use 2D feature matching");
+
     gridLayout->addWidget(new QLabel("Select registration algorithm : "), 0, 0, 1, 2);
     gridLayout->addWidget(mv_RegistrationComboBox, 0, 2, 1, 2);
     gridLayout->addWidget(mv_RegistrationPushButton, 1, 0, 1, 4);
@@ -153,6 +163,7 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 3, 0, 1, 2);
     gridLayout->addWidget(mv_MeshAlgorithmComboBox, 3, 2, 1, 2);
     gridLayout->addWidget(mv_GenerateMeshPushButton, 4, 0, 1, 4);
+    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 5, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
@@ -174,7 +185,7 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
  **************************************************************************/
 void TDK_CentralWidget::mf_SlotRegisterPointCloud()
 {
-    qDebug() << "Check if atleast two point clouds selected and run registration";
+    qDebug() << "Check if at least two point clouds selected and run registration";
     if(mv_numberOfPointCloudsSelected > 1){
         for (int i=0, len = mv_PointCloudListTab->count(); i < len; i++){
             if(mv_PointCloudListTab->item(i)->checkState() == Qt::Checked){
@@ -186,30 +197,30 @@ void TDK_CentralWidget::mf_SlotRegisterPointCloud()
                 mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_RegisteredPointCloudsVector[i], 0);
             }
         }
-        TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
+        TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->Process_and_getAlignedPC()->makeShared());
         emit mf_SignalRegisteredPointCloudListUpdated();
     }
     else{
-        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select atleast two point clouds from explorer widget to register."));
+        QMessageBox::warning(this, QString("u2.cloud"), QString("Please select at least two point clouds from explorer widget to register."));
     }
 }
 
 /***************************************************************************
  * Input argument(s) : void
  * Return type       : void
- * Functionality     : Slot function to handle generate mes.
+ * Functionality     : Slot function to handle generated mesh.
  *
  **************************************************************************/
 void TDK_CentralWidget::mf_SlotGenerateMesh()
 {
-    qDebug() << "Check if atleast one point cloud is selected and run mesh";
+    qDebug() << "Check if at least one point cloud is selected and run mesh";
     if(mv_numberOfPointCloudsSelected > 0){
         for (int i=0, len = mv_PointCloudListTab->count(); i < len; i++){
             if(mv_PointCloudListTab->item(i)->checkState() == Qt::Checked){
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
-                TDK_PointOperations::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_PointCloudsVector[i]->makeShared(), pointcloud);
-                TDK_PointOperations::mf_PoissonMeshes(pointcloud , meshPtr);
+                TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_PointCloudsVector[i]->makeShared(), pointcloud);
+                TDK_Meshing::mf_PoissonMeshes(pointcloud , meshPtr);
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
@@ -218,15 +229,15 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
             if(mv_RegisteredPointCloudListTab->item(i)->checkState() == Qt::Checked){
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
-                TDK_PointOperations::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_RegisteredPointCloudsVector[i]->makeShared(), pointcloud);
-                TDK_PointOperations::mf_PoissonMeshes(pointcloud , meshPtr);
+                TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_RegisteredPointCloudsVector[i]->makeShared(), pointcloud);
+                TDK_Meshing::mf_PoissonMeshes(pointcloud , meshPtr);
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
         }
     }
     else{
-        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select atleast one point cloud from explorer widget to generate mesh."));
+        QMessageBox::warning(this, QString("u2.cloud"), QString("Please select atleast one point cloud from explorer widget to generate mesh."));
     }
 }
 
@@ -361,4 +372,9 @@ void TDK_CentralWidget::mf_SlotUpdateMeshDisplay(QListWidgetItem *item)
         mv_numberOfMeshesSelected--;
     }
     mv_PointCloudQVTKWidget->update();
+}
+
+void TDK_CentralWidget::mf_SlotUpdateStatusBar(QString status, QColor statusColor)
+{
+    emit mf_SignalStatusChanged(status, statusColor);
 }

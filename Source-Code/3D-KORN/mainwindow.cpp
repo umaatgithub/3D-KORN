@@ -11,8 +11,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     ui              (new Ui::MainWindow)
     //mv_ScanWindow   (new TDK_ScanWindow(this))
 {
-
     ui->setupUi(this);
+    mv_StatusBar = this->statusBar();
 
     //Connection to update pointcloud and registered pointcloud list after scan from scan window
 //    connect(mv_ScanWindow           , SIGNAL(mf_SignalDatabasePointCloudUpdated()),
@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent),
     connect(this                    , SIGNAL(mf_SignalDatabaseMeshUpdated()),
             ui->centralWidget       , SLOT(mf_SlotUpdateMeshListTab()));
 
+    connect(ui->centralWidget, SIGNAL(mf_SignalStatusChanged(QString,QColor)), this, SLOT(mf_SlotUpdateStatusBar(QString,QColor)));
 }
 
 /***************************************************************************
@@ -47,6 +48,7 @@ MainWindow::~MainWindow()
  **************************************************************************/
 void MainWindow::on_actionNew_Scan_triggered()
 {
+
 //    mv_ScanWindow->mv_SensorController->mf_InitializeSensors();
 //    if(mv_ScanWindow->mv_SensorController->mf_IsSensorAvailable()){
 //        mv_ScanWindow->mf_setupUI();
@@ -72,6 +74,7 @@ void MainWindow::on_actionNew_Scan_triggered()
 //                    retryFlag = false;
 //                }
 //                break;
+
 
 //            case QMessageBox::Cancel:
 //                retryFlag = false;
@@ -154,7 +157,7 @@ void MainWindow::on_actionExportPCD_triggered()
 {
     TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
     if(centralwidget->mv_numberOfPointCloudsSelected == 0){
-        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select one or more point clouds to export."));
+        QMessageBox::warning(this, QString("u2.cloud"), QString("Please select one or more point clouds to export."));
     }
     else{
         QString directoryName = QFileDialog::getExistingDirectory(this, QString("Export point cloud"),QString(""), QFileDialog::ShowDirsOnly);
@@ -199,7 +202,7 @@ void MainWindow::on_actionExportPLY_triggered()
 {
     TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
     if(centralwidget->mv_numberOfPointCloudsSelected == 0){
-        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select one or more point clouds to export."));
+        QMessageBox::warning(this, QString("u2.cloud"), QString("Please select one or more point clouds to export."));
     }
     else{
         QString directoryName = QFileDialog::getExistingDirectory(this, QString("Export point cloud"),QString(""), QFileDialog::ShowDirsOnly);
@@ -242,6 +245,7 @@ void MainWindow::on_actionExportPLY_triggered()
  **************************************************************************/
 void MainWindow::on_actionExportSTL_triggered()
 {
+
 //    TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
 //    if(centralwidget->mv_numberOfMeshesSelected == 0){
 //        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select one or more meshes to export."));
@@ -251,6 +255,7 @@ void MainWindow::on_actionExportSTL_triggered()
 //        if(directoryName != ""){
 //            QString filePath;
 //            QListWidgetItem* item;
+
 
 //            //Save meshes selected in mesh tab
 //            for(int i = 0, len = centralwidget->mv_MeshListTab->count(); i < len; i++)
@@ -278,7 +283,7 @@ void MainWindow::on_actionExportVTK_triggered()
 
     TDK_CentralWidget* centralwidget = (TDK_CentralWidget*)centralWidget();
     if(centralwidget->mv_numberOfMeshesSelected == 0){
-        QMessageBox::warning(this, QString("3D-KORN"), QString("Please select one or more meshes to export."));
+        QMessageBox::warning(this, QString("u2.cloud"), QString("Please select one or more meshes to export."));
     }
     else{
         QString directoryName = QFileDialog::getExistingDirectory(this, QString("Export mesh"),QString(""), QFileDialog::ShowDirsOnly);
@@ -310,4 +315,17 @@ void MainWindow::on_actionExportVTK_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
 
+}
+
+void MainWindow::mf_SlotUpdateStatusBar(QString status, QColor statusColor)
+{
+    QPalette statusBarPalette;
+    statusBarPalette.setColor( QPalette::WindowText, statusColor );
+    mv_StatusBar->setPalette(statusBarPalette);
+    if(statusColor == Qt::blue){
+        mv_StatusBar->showMessage(status);
+    }
+    else{
+        mv_StatusBar->showMessage(status, 5000);
+    }
 }
