@@ -137,7 +137,7 @@ void TDK_Filters::mf_FilterVoxelGridDownsample(const pcl::PointCloud<PointXYZ>::
 //MLS Filter Smoothing:
 //Input: PointCloud, PointCloud(smoothed), searchradius (sphere radius used for k-space nearest neighbors)
 //Output: void
-void TDK_Filters::mf_FilterSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cloud, pcl::PointCloud<PointXYZ>::Ptr &cloud_smoothed, float searchradius){
+void TDK_Filters::mf_FilterMLSSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cloud, pcl::PointCloud<PointXYZ>::Ptr &cloud_smoothed, float searchradius){
 
     // Start MLS
     // Create a KD-Tree
@@ -152,4 +152,21 @@ void TDK_Filters::mf_FilterSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cloud
     mls.setSearchRadius(searchradius); //Set sphere radius used for k-space nearest neighbors
     mls.process(mls_points);
     pcl::copyPointCloud(mls_points, *cloud_smoothed); //convert from XYZNormals to XYZ
+}
+
+//Laplacian Filter Smoothing:
+//Input: Mesh, Mesh(smoothed)
+//Output: void
+void TDK_Filters::mf_FilterLaplacianSmoothing(const boost::shared_ptr<pcl::PolygonMesh> &triangles, pcl::PolygonMesh::Ptr &mv_MeshesOutput1){
+
+    pcl::MeshSmoothingLaplacianVTK laplacian;
+    laplacian.setInputMesh(triangles);
+    laplacian.setNumIter(20000);
+    laplacian.setConvergence(0.0001);
+    laplacian.setRelaxationFactor(0.0001);
+    laplacian.setFeatureEdgeSmoothing(true);
+    laplacian.setFeatureAngle(M_PI/5);
+    laplacian.setBoundarySmoothing(true);
+    laplacian.process(*mv_MeshesOutput1);
+    qDebug()<<"Triangulation Finished";
 }
