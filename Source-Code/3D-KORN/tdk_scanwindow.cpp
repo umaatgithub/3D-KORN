@@ -436,7 +436,7 @@ void TDK_ScanWindow::mf_SlotStopScan()
 
         if(mv_FlagPointCloudExists){
             emit mf_SignalStatusChanged(QString("Registering point clouds..."), Qt::blue);
-            TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->postProcess_and_getAlignedPC()->makeShared());
+            TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->Process_and_getAlignedPC()->makeShared());
             emit mf_SignalDatabaseRegisteredPointCloudUpdated();
             emit mf_SignalStatusChanged(QString("Registration done."), Qt::green);
         }
