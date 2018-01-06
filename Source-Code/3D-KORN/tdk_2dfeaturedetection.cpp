@@ -49,9 +49,31 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
 
     cv::Mat trainImg, queryImg;
     cv::Mat_<CameraSpacePoint> trainImgCameraSpaceMap, queryImgCameraSpaceMap;
+    ColorSpacePoint maxTrainImgColorCoords,
+                    minTrainImgColorCoords,
+                    maxQueryImgColorCoords,
+                    minQueryImgColorCoords;
 
-    getIntensityImage(mv_TrainPointCloudPtr, trainImg, trainImgCameraSpaceMap);
-    getIntensityImage(queryPc, queryImg, queryImgCameraSpaceMap);
+    getIntensityImage(mv_TrainPointCloudPtr,
+                      trainImg,
+                      trainImgCameraSpaceMap);
+    getIntensityImage(queryPc,
+                      queryImg,
+                      queryImgCameraSpaceMap);
+
+    getImageBoundaries(mv_TrainPointCloudPtr, maxTrainImgColorCoords, minTrainImgColorCoords);
+    getImageBoundaries(queryPc, maxQueryImgColorCoords, minQueryImgColorCoords);
+
+    int maxVerticalShiftPxls = INT_MAX;
+    //calculating maximum possible vertical shift, images should be approximately on the same level
+
+    if ((abs(maxTrainImgColorCoords.Y - maxQueryImgColorCoords.Y) / maxTrainImgColorCoords.Y) < maxVerticalShift)
+    {
+        int trainImgHeight = maxTrainImgColorCoords.Y - minTrainImgColorCoords.Y;
+        int queryImgHeight = maxQueryImgColorCoords.Y - minQueryImgColorCoords.Y;
+
+        maxVerticalShiftPxls = round(maxVerticalShift * std::max(trainImgHeight, queryImgHeight));
+    }
 
     std::vector<cv::DMatch> matchesRobust,
                             matches;
@@ -62,30 +84,17 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
     outKeyPointsTrain->clear();
     outKeyPointsQuery->clear();
 
-    matchFeatures(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, matchesRobust);
-
-    std::vector<cv::DMatch> shortMatch;
-    copy(matchesRobust.begin(), matchesRobust.begin() + 4, std::back_insert_iterator<std::vector<cv::DMatch>>(shortMatch));
-    showMatchedFeatures2D(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, matchesRobust);
-    showMatchedFeatures2D(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, shortMatch);
-
-    qDebug() << "Distance check";
-    for (auto it = shortMatch.begin(); it != shortMatch.end(); it++)
-    {
-        qDebug() << it->distance;
-    }
-
-
-
+    matchFeatures(trainImg,
+                  keyPtsRobustTrain,
+                  queryImg,
+                  keyPtsRobustQuery,
+                  matchesRobust,
+                  maxVerticalShiftPxls);
     //we should have at least 4 matches in order to calculate transformation matrix
     if (matchesRobust.size() >= 4)
     {
         qDebug() << "Robust matches number " << matchesRobust.size();
-
-        //Limit number of selected matches to first 10
-        //auto itEnd = (matchesRobust.size() >= 10) ? (matchesRobust.begin() + 10) : matchesRobust.end();
-        auto itEnd = matchesRobust.end();
-        for(auto it = matchesRobust.begin(); it != itEnd; it++)
+        for(auto it = matchesRobust.begin(); it != matchesRobust.end(); it++)
         {
             cv::DMatch tempMatch = *it;
             cv::KeyPoint tempKeyPointTrain = keyPtsRobustTrain[tempMatch.trainIdx];
@@ -116,13 +125,7 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
         if (matches.size() >= 4)
         {
             qDebug() << "Regular matches number " << matches.size();
-
-            //Limit number of selected matches to first 10
-
-            //auto itEnd = (matches.size() >= 10) ? (matches.begin() + 10) : matches.end();
-
             for(auto it = matches.begin(); it != matches.end(); it++)
-
             {
                 cv::DMatch tempMatch = *it;
                 cv::KeyPoint tempKeyPointTrain = keyPtsTrain[tempMatch.trainIdx];
@@ -330,7 +333,7 @@ void TDK_2DFeatureDetection::matchFeatures(const cv::Mat &rgb_1,
                                            const cv::Mat &rgb_2,
                                            std::vector<cv::KeyPoint> &keyPts_2,
                                            std::vector<cv::DMatch> &matches,
-                                           const bool robustMatch)
+                                           const int maxVertShiftPxls)
 {
     qDebug() << "Feature matching started.";
     //Detect SIFT features
@@ -367,45 +370,43 @@ void TDK_2DFeatureDetection::matchFeatures(const cv::Mat &rgb_1,
     qDebug() << "Descriptors calculated, descriptors type: " << descriptors_1.type();
 
     //-- Feature matching using descriptors
-    cv::FlannBasedMatcher matcher;
+    //cv::FlannBasedMatcher matcher;
+    cv::BFMatcher matcher(cv::NORM_L2, true);
     matcher.match(descriptors_1, descriptors_2, matches);
 
     // SIFT descriptor for CV_32F has type 5
     qDebug() << "Matched descriptors: " << matches.size();
 
-    if (robustMatch)
+    //check whether vertical shift limit was given
+    if (maxVertShiftPxls != INT_MAX)
     {
-        qDebug() << "Robust match. Outliers removal is started.";
+        qDebug() << "Vertical outliers removal is started." << "Max vertical distance = " << maxVertShiftPxls;
 
-        double max_dist = 0;
-        double min_dist = 10000;
-
-        //-- Quick calculation of max and min distances between keypoints
-        for (auto it = matches.begin(); it != matches.end(); it++)
-        {
-            double dist = it->distance;
-            if (dist < min_dist) min_dist = dist;
-            if (dist > max_dist) max_dist = dist;
-        }
-        qDebug() << "max descriptor distance = " << max_dist << ", min descriptor disance = " << min_dist;
-
-        // Only consider matches with small distances
+        // Only consider matches with small vertical distances
         std::vector<cv::DMatch> closestMatches;
 
-        for (auto it = matches.begin(); it != matches.end(); it++)
-        {
-            if (it->distance <= cv::max(2 * min_dist, 0.02))
-            {
-                closestMatches.push_back(*it);
-            }
-        }
+        std::copy_if(matches.begin(), matches.end(),
+                std::back_insert_iterator<std::vector<cv::DMatch>>(closestMatches),
+                [&] (cv::DMatch tempMatch) {
+                        cv::KeyPoint tempKeyPointTrain = keyPts_1[tempMatch.trainIdx];
+                        cv::KeyPoint tempKeyPointQuery = keyPts_2[tempMatch.queryIdx];
+
+                        if (abs(tempKeyPointTrain.pt.y - tempKeyPointQuery.pt.y) <= maxVertShiftPxls)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+            });
 
         matches.clear();
 
-        for (auto it = closestMatches.begin(); it != closestMatches.end(); it++)
-        {
-            matches.push_back(*it);
-        }
+        std::copy(closestMatches.begin(),
+                  closestMatches.end(),
+                  std::back_insert_iterator<std::vector<cv::DMatch>>(matches));
+
         qDebug() << "Good matches number: " << matches.size();
     }
 
@@ -438,4 +439,42 @@ boost::shared_ptr<pcl::visualization::PCLVisualizer> TDK_2DFeatureDetection::rgb
   viewer->addCoordinateSystem (0.10);
   viewer->initCameraParameters ();
   return (viewer);
+}
+
+/*!
+ * \brief TDK_2DFeatureDetection::getImageBoundaries
+ * \param inPointCloud input point cloud
+ * \param maxColorCoords output max values of pixels' coordinates for X, Y axes
+ * \param minColorCoords output min values of pixels' coordinates for X, Y axes
+ *
+ * Method returns max and min values of pixels' coordinates for a given point cloud
+ */
+void TDK_2DFeatureDetection::getImageBoundaries(
+        const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inPointCloud,
+        ColorSpacePoint &maxColorCoords,
+        ColorSpacePoint &minColorCoords)
+{
+    maxColorCoords.X = 0;
+    maxColorCoords.Y = 0;
+    minColorCoords.X = INT_MAX;
+    minColorCoords.Y = INT_MAX;
+
+    qDebug() << "Looking for image boundaries...";
+
+    for (auto it = inPointCloud->begin(); it != inPointCloud->end(); it++)
+    {
+        pcl::PointXYZRGB tempPointXYZRGB = *it;
+        ColorSpacePoint tempColorCoords;
+
+        mv_Kinect2Grabber.convertCameraPointToColorPoint(tempPointXYZRGB, tempColorCoords);
+
+        if ((tempColorCoords.X >= 0 && tempColorCoords.X <= mv_Kinect2Grabber.getDepthWidth()) &&
+            (tempColorCoords.Y >= 0 && tempColorCoords.Y <= mv_Kinect2Grabber.getDepthHeight()))
+        {
+            maxColorCoords.X = std::max(maxColorCoords.X, tempColorCoords.X);
+            maxColorCoords.Y = std::max(maxColorCoords.Y, tempColorCoords.Y);
+            minColorCoords.X = std::min(minColorCoords.X, tempColorCoords.X);
+            minColorCoords.Y = std::min(minColorCoords.Y, tempColorCoords.Y);
+        }
+    }
 }

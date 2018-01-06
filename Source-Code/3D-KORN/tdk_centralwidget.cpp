@@ -163,11 +163,11 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     gridLayout->addWidget(new QLabel("Select registration algorithm : "), 0, 0, 1, 2);
     gridLayout->addWidget(mv_RegistrationComboBox, 0, 2, 1, 2);
     gridLayout->addWidget(mv_RegistrationPushButton, 1, 0, 1, 4);
+    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 2, 0, 1, 4);
     gridLayout->addWidget(myFrame, 3, 0, 1, 4);
     gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 4, 0, 1, 2);
     gridLayout->addWidget(mv_MeshAlgorithmComboBox, 4, 2, 1, 2);
     gridLayout->addWidget(mv_GenerateMeshPushButton, 5, 0, 1, 4);
-    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 2, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
@@ -213,13 +213,9 @@ void TDK_CentralWidget::mf_SlotRegisterPointCloud()
 
         TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->Process_and_getAlignedPC()->makeShared());
         emit mf_SignalRegisteredPointCloudListUpdated();
-
-
-
-
-
     }
-    else{
+    else
+    {
         QMessageBox::warning(this, QString("u2.cloud"), QString("Please select at least two point clouds from explorer widget to register."));
     }
 }
@@ -337,7 +333,8 @@ void TDK_CentralWidget::mf_SlotUpdatePointCloudDisplay(QListWidgetItem *item)
             }
         }
     }
-    else{
+    else
+    {
         qDebug() << item->text() << "Item unchecked";
         mv_PointCloudVisualizer->removePointCloud(item->text().toStdString());
         mv_numberOfPointCloudsSelected--;
