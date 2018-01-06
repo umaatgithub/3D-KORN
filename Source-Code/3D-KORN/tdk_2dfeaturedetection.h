@@ -36,7 +36,7 @@
  * pcl::PointCloud<pcl::PointXYZ>::Ptr queryKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
  *
  * mv_2DFeatureDetectionPtr.setInputPointCloud(trainPointCloud);
- * mv_2DFeatureDetectionPtr.getFeatures(queryPointCloud, trainKeyPoints, queryKeyPoints);
+ * mv_2DFeatureDetectionPtr.getMatchedFeatures(queryPointCloud, trainKeyPoints, queryKeyPoints);
  * mv_2DFeatureDetectionPtr.showMatchedFeatures3D(queryPointCloud, trainKeyPoints, queryKeyPoints)
  */
 
@@ -64,7 +64,7 @@ public:
                                const pcl::PointCloud<pcl::PointXYZ>::Ptr &queryKeyPoints);
 
 private:
-
+    float maxVerticalShift = 0.3;
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr mv_TrainPointCloudPtr;
     pcl::Kinect2Grabber mv_Kinect2Grabber;
 
@@ -77,7 +77,10 @@ private:
                        const cv::Mat &rgb_2,
                        std::vector<cv::KeyPoint> &keyPts_2,
                        std::vector<cv::DMatch> &matches,
-                       const bool robustMatch = false);
+                       const int maxVertShiftPxls = INT_MAX);
+    void getImageBoundaries(const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &inPointCloud,
+                            ColorSpacePoint &maxColorCoords,
+                            ColorSpacePoint &minColorCoords);
 
     boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis(
             const pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud,

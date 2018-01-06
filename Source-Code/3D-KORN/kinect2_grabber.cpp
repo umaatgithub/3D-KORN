@@ -186,6 +186,20 @@ void Kinect2Grabber::convertCameraPointToColorPoint(const pcl::PointXYZI &inP,
     outP.Y = floor(Kinect2Grabber::cy + ((Kinect2Grabber::fy * inP.y)/inP.z));
 }
 
+/*!
+ * \brief Kinect2Grabber::convertCameraPointToColorPoint
+ * \param inP input point
+ * \param outP output coordinates from color space
+ *
+ * Method converts camera point coordinates in meters to color point coordinates in pixels
+ */
+void Kinect2Grabber::convertCameraPointToColorPoint(const pcl::PointXYZRGB &inP,
+                                                    ColorSpacePoint &outP)
+{
+    outP.X = floor(Kinect2Grabber::cx + ((Kinect2Grabber::fx * inP.x)/inP.z));
+    outP.Y = floor(Kinect2Grabber::cy + ((Kinect2Grabber::fy * inP.y)/inP.z));
+}
+
 int Kinect2Grabber::getColorWidth()
 {
     return colorWidth;
