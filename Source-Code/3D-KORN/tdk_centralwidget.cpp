@@ -150,6 +150,7 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     mv_MeshAlgorithmComboBox->addItem("Poisson", "Poisson");
     mv_MeshAlgorithmComboBox->addItem("Greedy Triangulation", "Greedy Triangulation");
     mv_MeshAlgorithmComboBox->addItem("Grid Projection", "Grid Projection");
+    mv_MeshAlgorithmComboBox->addItem("Marching Cubes", "Marching Cubes");
 
     mv_GenerateMeshPushButton->setFixedHeight(22);
     mv_GenerateMeshPushButton->setMinimumWidth(300);
@@ -219,27 +220,32 @@ void TDK_CentralWidget::mf_SlotGenerateMesh()
     if(mv_numberOfPointCloudsSelected > 0){
         for (int i=0, len = mv_PointCloudListTab->count(); i < len; i++){
             if(mv_PointCloudListTab->item(i)->checkState() == Qt::Checked){
+                mf_SlotUpdateStatusBar(tr("Meshing started..."), QColor(Qt::red));
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_PointCloudsVector[i]->makeShared(), pointcloud);
                 if(mv_MeshAlgorithmComboBox->currentText() == "Poisson"){TDK_Meshing::mf_Poisson(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Greedy Triangulation"){TDK_Meshing::mf_Greedy_Projection_Triangulation(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Grid Projection"){TDK_Meshing::mf_Grid_Projection(pointcloud,meshPtr);}
+                else if (mv_MeshAlgorithmComboBox->currentText() == "Marching Cubes"){TDK_Meshing::mf_Marching_Cubes(pointcloud,meshPtr);}
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
         }
         for (int i=0, len = mv_RegisteredPointCloudListTab->count(); i < len; i++){
             if(mv_RegisteredPointCloudListTab->item(i)->checkState() == Qt::Checked){
+                mf_SlotUpdateStatusBar(tr("Meshing started..."), QColor(Qt::red));
                 pcl::PolygonMesh::Ptr meshPtr ( new PolygonMesh );
                 pcl::PointCloud<pcl::PointXYZ>::Ptr pointcloud ( new pcl::PointCloud<pcl::PointXYZ> ());
                 TDK_Meshing::mf_ConvertFromXYZRGBtoXYZ(TDK_Database::mv_RegisteredPointCloudsVector[i]->makeShared(), pointcloud);
                 if(mv_MeshAlgorithmComboBox->currentText() == "Poisson"){TDK_Meshing::mf_Poisson(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Greedy Triangulation"){TDK_Meshing::mf_Greedy_Projection_Triangulation(pointcloud, meshPtr);}
                 else if (mv_MeshAlgorithmComboBox->currentText() == "Grid Projection"){TDK_Meshing::mf_Grid_Projection(pointcloud,meshPtr);}
+                else if (mv_MeshAlgorithmComboBox->currentText() == "Marching Cubes"){TDK_Meshing::mf_Marching_Cubes(pointcloud,meshPtr);}
                 TDK_Database::mf_StaticAddMesh(meshPtr);
                 emit mf_SignalMeshListUpdated();
             }
+        mf_SlotUpdateStatusBar(tr("Meshing finished"), QColor(Qt::darkGreen));
         }
     }
     else{

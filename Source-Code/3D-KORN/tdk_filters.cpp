@@ -101,7 +101,6 @@ void TDK_Filters::mf_FilterStatisticalOutlierRemoval(const pcl::PointCloud<Point
     sor.setMeanK (50);
     sor.setStddevMulThresh (threshold);
     sor.filter (*cloud_filtered);
-
 }
 
 //Statistical outlier removal:
@@ -116,7 +115,6 @@ void TDK_Filters::mf_FilterStatisticalOutlierRemoval(const pcl::PointCloud<Point
     sor.setMeanK (50);
     sor.setStddevMulThresh (threshold);
     sor.filter (*cloud_filtered);
-
 }
 
 
@@ -124,14 +122,25 @@ void TDK_Filters::mf_FilterStatisticalOutlierRemoval(const pcl::PointCloud<Point
 //Voxel grid downsample:
 //Input: PointCloud, PointCloud(filtered), leafsize (size of cubic voxel)
 //Output: void
-void TDK_Filters::mf_FilterVoxelGridDownsample(const pcl::PointCloud<PointXYZ>::Ptr &cloud, pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered, float leafsize){
+void TDK_Filters::mf_FilterVoxelGridDownsample(const pcl::PointCloud<PointXYZ>::Ptr &cloud, pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered, const float &leafsize){
 
       pcl::VoxelGrid<PointXYZ> sor; // Create the filtering object
       qDebug()<<"inside voxelgrid";
       sor.setInputCloud (cloud);
       sor.setLeafSize (leafsize,leafsize, leafsize); //Cubic voxel
       sor.filter (*cloud_filtered);
+}
 
+//Voxel grid downsample:
+//Input: PointCloud, PointCloud(filtered), leafsize (size of cubic voxel)
+//Output: void
+void TDK_Filters::mf_FilterVoxelGridDownsample(const pcl::PointCloud<PointXYZRGB>::Ptr &cloud, pcl::PointCloud<PointXYZRGB>::Ptr &cloud_filtered, const float &leafsize){
+    
+    pcl::VoxelGrid<PointXYZRGB> sor; // Create the filtering object
+    qDebug()<<"inside voxelgrid";
+    sor.setInputCloud (cloud);
+    sor.setLeafSize (leafsize,leafsize, leafsize); //Cubic voxel
+    sor.filter (*cloud_filtered);
 }
 
 //MLS Filter Smoothing:
@@ -152,6 +161,7 @@ void TDK_Filters::mf_FilterMLSSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cl
     mls.setSearchRadius(searchradius); //Set sphere radius used for k-space nearest neighbors
     mls.process(mls_points);
     pcl::copyPointCloud(mls_points, *cloud_smoothed); //convert from XYZNormals to XYZ
+    qDebug()<<"finished MLS Smoothing";
 }
 
 //Laplacian Filter Smoothing:
@@ -168,5 +178,5 @@ void TDK_Filters::mf_FilterLaplacianSmoothing(const boost::shared_ptr<pcl::Polyg
     laplacian.setFeatureAngle(M_PI/5);
     laplacian.setBoundarySmoothing(true);
     laplacian.process(*mv_MeshesOutput1);
-    qDebug()<<"Triangulation Finished";
+    qDebug()<<"Laplacian smoothing Finished";
 }

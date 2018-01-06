@@ -66,7 +66,9 @@ public:
 
     //Function for downsampling using voxel grid
     static void mf_FilterVoxelGridDownsample(const pcl::PointCloud<PointXYZ>::Ptr &cloud,
-                                             pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered, float leafsize);
+                                             pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered, const float &leafsize);
+    static void mf_FilterVoxelGridDownsample(const pcl::PointCloud<PointXYZRGB>::Ptr &cloud,
+                                             pcl::PointCloud<PointXYZRGB>::Ptr &cloud_filtered, const float &leafsize);
 
     //Function for smoothing using MLS
     static void mf_FilterMLSSmoothing(const pcl::PointCloud<PointXYZ>::Ptr &cloud,
