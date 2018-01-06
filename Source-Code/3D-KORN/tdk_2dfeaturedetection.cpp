@@ -97,8 +97,10 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
         for(auto it = matchesRobust.begin(); it != matchesRobust.end(); it++)
         {
             cv::DMatch tempMatch = *it;
-            cv::KeyPoint tempKeyPointTrain = keyPtsRobustTrain[tempMatch.trainIdx];
-            cv::KeyPoint tempKeyPointQuery = keyPtsRobustQuery[tempMatch.queryIdx];
+            //Do not be confused with naming, it is vice versa
+            //The interface and language is not consistent in opencv matcher.
+            cv::KeyPoint tempKeyPointTrain = keyPtsRobustTrain[tempMatch.queryIdx];
+            cv::KeyPoint tempKeyPointQuery = keyPtsRobustQuery[tempMatch.trainIdx];
 
             CameraSpacePoint tempSpacePointTrain = trainImgCameraSpaceMap.at<CameraSpacePoint>(
                         static_cast<int>(tempKeyPointTrain.pt.y),
@@ -128,8 +130,10 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
             for(auto it = matches.begin(); it != matches.end(); it++)
             {
                 cv::DMatch tempMatch = *it;
-                cv::KeyPoint tempKeyPointTrain = keyPtsTrain[tempMatch.trainIdx];
-                cv::KeyPoint tempKeyPointQuery = keyPtsQuery[tempMatch.queryIdx];
+                //The interface and language is not consistent in opencv matcher.
+                //Beware of the naming
+                cv::KeyPoint tempKeyPointTrain = keyPtsTrain[tempMatch.queryIdx];
+                cv::KeyPoint tempKeyPointQuery = keyPtsQuery[tempMatch.trainIdx];
 
                 CameraSpacePoint tempSpacePointTrain = trainImgCameraSpaceMap.at<CameraSpacePoint>(
                             static_cast<int>(tempKeyPointTrain.pt.y),
@@ -388,10 +392,12 @@ void TDK_2DFeatureDetection::matchFeatures(const cv::Mat &rgb_1,
         std::copy_if(matches.begin(), matches.end(),
                 std::back_insert_iterator<std::vector<cv::DMatch>>(closestMatches),
                 [&] (cv::DMatch tempMatch) {
-                        cv::KeyPoint tempKeyPointTrain = keyPts_1[tempMatch.trainIdx];
-                        cv::KeyPoint tempKeyPointQuery = keyPts_2[tempMatch.queryIdx];
+                        //The interface and language is not consistent in opencv matcher.
+                        //Beware of the naming
+                        cv::KeyPoint tempKeyPoint1 = keyPts_1[tempMatch.queryIdx];
+                        cv::KeyPoint tempKeyPoint2 = keyPts_2[tempMatch.trainIdx];
 
-                        if (abs(tempKeyPointTrain.pt.y - tempKeyPointQuery.pt.y) <= maxVertShiftPxls)
+                        if (abs(tempKeyPoint1.pt.y - tempKeyPoint2.pt.y) <= maxVertShiftPxls)
                         {
                             return true;
                         }
