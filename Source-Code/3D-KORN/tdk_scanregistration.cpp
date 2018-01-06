@@ -165,14 +165,14 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::getRoughlyAlignedPC
 
     return mf_outlierRemovalPC(mergedAlignedOriginal, 1.0);
 }
-// A VERY QUICK TEST of our function
+
 
 
 
 
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> &Data ) {
 
-   // PCL_INFO (" \n Loaded %d datasets ... \n", (int)Data.size ());
+    // PCL_INFO (" \n Loaded %d datasets ... \n", (int)Data.size ());
 
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr src (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt (new pcl::PointCloud<pcl::PointXYZRGB>);
@@ -180,42 +180,70 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vecto
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_tgt (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr result1 (new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr result2 (new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr result3 (new pcl::PointCloud<pcl::PointXYZRGB>);
-
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fusedCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
     const float VoxelGridLeafSize = 0.002; // 0.004
 
 
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr data (new pcl::PointCloud<pcl::PointXYZ>);
-    //pcl::PointCloud<pcl::PointXYZ>::Ptr data1 (new pcl::PointCloud<pcl::PointXYZ>);
-
-
-    //PointCloudXYZRGBtoXYZ(Data[0] , data);
     result2 = Data[0];
-
+    std::cout<< "data size"<< Data.size ()<<endl;
     for (size_t i = 1; i < Data.size (); ++i)
     {
 
-        std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
-       // PointCloudXYZRGBtoXYZ(Data[i] , data1);
         cloud_src = result2; // source
         cloud_tgt = Data[i]; // target
 
         src = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_src, VoxelGridLeafSize);
         tgt = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_tgt, VoxelGridLeafSize);
 
-       // result1 = TDK_ScanRegistration::ICPNormal(src, tgt);
+        if (mv_use2DFeatureDetection == true){
+            // DO feature detection and run ICP/ICP Normal on the point clouds
 
-        result1 = TDK_ScanRegistration::ICP(src , tgt);
+            pcl::PointCloud<pcl::PointXYZ>::Ptr trainKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
+            pcl::PointCloud<pcl::PointXYZ>::Ptr queryKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
 
-        *result1 += *cloud_tgt;
+            TDK_2DFeatureDetection mv_2DFeatureDetectionPtr;
+            mv_2DFeatureDetectionPtr.setInputPointCloud(src);
+            mv_2DFeatureDetectionPtr.getMatchedFeatures(tgt, trainKeyPoints, queryKeyPoints);
 
-        result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(result1);
+            std::cout << "FEATURE MATCHING " << std::endl;
+            //mv_2DFeatureDetectionPtr.showMatchedFeatures3D(tgt, trainKeyPoints, queryKeyPoints);
+            MatchRegistration(src, tgt, trainKeyPoints, queryKeyPoints, fusedCloud);
 
-        std::cout << std::endl;
+            std::cout << "MATCHING DONE! " << std::endl;
+
+
+            // To visualize point clouds in a different window
+            //boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbViewer2 = rgbVis(fusedCloud);
+            //            while (!rgbViewer2->wasStopped ())
+            //            {
+            //                rgbViewer2->spinOnce (100);
+            //                boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+            //            }
+
+            *fusedCloud += *cloud_tgt;
+
+            result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(fusedCloud);
+
+
+            std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
+        }
+        else{
+
+            if (mv_ICP_Normals == false)
+                result1 = TDK_ScanRegistration::ICP(src, tgt);
+            else
+                result1 = TDK_ScanRegistration::ICPNormal(src, tgt);
+
+            *result1 += *cloud_tgt;
+
+            result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(result1);
+
+
+        }
     }
 
-   // result3 = FilterObj.Smoothing(result2, 0.02);
 
+    std::cout<< "About to rerurn... it got this far! hehe"<<std::endl;
     return result2;
 
 }
@@ -225,55 +253,59 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vecto
 pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICPNormal(pcl::PointCloud<pcl::PointXYZRGB>::Ptr src, pcl::PointCloud<pcl::PointXYZRGB>::Ptr tgt){
 
 
-        float MaxDistance=0.015;
-        float RansacVar = 0.01;
-        float Iterations = 100;
+    float MaxDistance=0.015;
+    float RansacVar = 0.01;
+    float Iterations = 100;
 
 
-        pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src (new pcl::PointCloud<pcl::PointNormal>);
-        pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_src (new pcl::PointCloud<pcl::PointNormal>);
+    pcl::PointCloud<pcl::PointNormal>::Ptr points_with_normals_tgt (new pcl::PointCloud<pcl::PointNormal>);
 
-        //PointCloudWithNormals::Ptr normals_icp (new PointCloudWithNormals);
+    pcl::PointCloud<pcl::PointNormal>::Ptr normals_icp (new pcl::PointCloud<pcl::PointNormal>);
 
-        pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_norm (new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_norm (new pcl::PointCloud<pcl::PointXYZRGB>);
 
-        pcl::NormalEstimation<pcl::PointXYZRGB, pcl::PointNormal> norm_est;
-        pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB> ());
-        norm_est.setSearchMethod (tree);
-        norm_est.setKSearch (12);
+    pcl::NormalEstimation<pcl::PointXYZRGB, pcl::PointNormal> norm_est;
+    pcl::search::KdTree<pcl::PointXYZRGB>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZRGB> ());
 
-        norm_est.setInputCloud (src);
-        norm_est.compute (*points_with_normals_src);
-        pcl::copyPointCloud (*src, *points_with_normals_src);
+    qDebug() << "Tree and Normal estimation set up!";
+    norm_est.setSearchMethod (tree);
+    norm_est.setKSearch (12);
 
-        norm_est.setInputCloud (tgt);
-        norm_est.compute (*points_with_normals_tgt);
-        pcl::copyPointCloud (*tgt, *points_with_normals_tgt);
+    norm_est.setInputCloud (src);
+    norm_est.compute (*points_with_normals_src);
+    qDebug() << "Normals computed! (1)";
+    pcl::copyPointCloud (*src, *points_with_normals_src);
 
-        pcl::IterativeClosestPointWithNormals<pcl::PointNormal, pcl::PointNormal> reg;
-        reg.setTransformationEpsilon (1e-8);
+    norm_est.setInputCloud (tgt);
+    norm_est.compute (*points_with_normals_tgt);
+    qDebug() << "Normals computed! (2)";
+    pcl::copyPointCloud (*tgt, *points_with_normals_tgt);
 
-        // Set the maximum distance between two correspondences (src<->tgt) to 10cm
-        // Note: adjust this based on the size of your datasets
+    pcl::IterativeClosestPointWithNormals<pcl::PointNormal, pcl::PointNormal> reg;
+    reg.setTransformationEpsilon (1e-8);
 
-        reg.setMaxCorrespondenceDistance (MaxDistance);
-        reg.setRANSACOutlierRejectionThreshold (RansacVar); // 0.05
-        reg.setMaximumIterations (Iterations);
+    reg.setMaxCorrespondenceDistance (MaxDistance);
+    reg.setRANSACOutlierRejectionThreshold (RansacVar); // 0.05
+    reg.setMaximumIterations (Iterations);
 
 
-        reg.setInputSource (points_with_normals_src);
-        reg.setInputTarget (points_with_normals_tgt);
-        //reg.align (*normals_icp);
+    reg.setInputSource (points_with_normals_src);
+    reg.setInputTarget (points_with_normals_tgt);
+    reg.align (*normals_icp);
 
-        std::cout << "Normals converged with score: " << reg.getFitnessScore() << std::endl;
+    qDebug() << "Normals aligned!";
 
-        Eigen::Matrix4f transform_normals = reg.getFinalTransformation ();
-        pcl::transformPointCloud (*src, *cloud_norm, transform_normals);
+    std::cout << "Normals converged with score: " << reg.getFitnessScore() << std::endl;
 
-        std::cout<<cloud_norm<<std::endl;
-        return cloud_norm;
+    Eigen::Matrix4f transform_normals = reg.getFinalTransformation ();
+    qDebug() << "Transformations obtained!";
+    pcl::transformPointCloud (*src, *cloud_norm, transform_normals);
 
-  }
+    std::cout<<cloud_norm<<std::endl;
+    return cloud_norm;
+
+}
 
 
 ///////////////////////////////////////////////////
@@ -298,11 +330,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICP(pcl::PointCloud
     //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
 
     std::cout << "ICP converged with score: " << icp.getFitnessScore() << std::endl;
-    //std::cout << "first Icp converged:" << icp.hasConverged() << " score: " <<
-    //             icp.getFitnessScore() << std::endl;
-    //std::cout << icp.getFinalTransformation() << std::endl;
-    //Eigen::Matrix4f transformation = icp.getFinalTransformation ();
-    //pcl::transformPointCloud (*src, *Final, transformation);
+
     return Final;
 
 }
@@ -317,97 +345,22 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Process_and_getAlig
     }
 
     if(!mv_scannerCenterRotationSet){
-        qDebug() << "ScanRegistration: PostProcessing without prealignment.";
+        //qDebug() << "ScanRegistration: PostProcessing without prealignment.";
         mv_ICPPost_MaxCorrespondanceDistance = 0.15;
     }
 
-
-
-//    emit mf_SignalStatusChanged(tr("Registration started..."), QColor(Qt::red));
-
-//    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
-//                new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
-//    icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
-//    icp->setMaximumIterations (300);
-
-    // prove feature detection
-    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr trainPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr queryPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-
-    pcl::PointCloud<pcl::PointXYZ>::Ptr trainKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
-    pcl::PointCloud<pcl::PointXYZ>::Ptr queryKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
-
-    TDK_2DFeatureDetection mv_2DFeatureDetectionPtr;
-    mv_2DFeatureDetectionPtr.setInputPointCloud(mv_originalPCs[0]);
-    mv_2DFeatureDetectionPtr.getMatchedFeatures(mv_originalPCs[1], trainKeyPoints, queryKeyPoints);
-    mv_2DFeatureDetectionPtr.showMatchedFeatures3D(mv_originalPCs[1], trainKeyPoints, queryKeyPoints);
-
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fusedCloud (new pcl::PointCloud<pcl::PointXYZRGB>);
-    MatchRegistration(mv_originalPCs[0], mv_originalPCs[1], trainKeyPoints, queryKeyPoints, fusedCloud);
-    qDebug() << "Matching done";
-    //mv_alignedOriginalPCs[0] = fusedCloud;
-
-
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
 
-    mergedAlignedOriginal = fusedCloud;
 
-    // To visualize point clouds in a different window
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbViewer2 = rgbVis(fusedCloud);
-    while (!rgbViewer2->wasStopped ())
-     {
-       rgbViewer2->spinOnce (100);
-       boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-     }
+        qDebug() << "ScanRegistration: PostProcessing with feature detection";
 
+        emit mf_SignalStatusChanged(tr("Registration started..."), QColor(Qt::red));
+
+        mergedAlignedOriginal = TDK_ScanRegistration::Register(mv_alignedOriginalPCs);
+
+        emit mf_SignalStatusChanged(tr("Registration done!"), QColor(Qt::red));
 
 
-//    pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>::Ptr icp(
-//                new pcl::IterativeClosestPoint<pcl::PointXYZRGB, pcl::PointXYZRGB>());
-//    icp->setMaxCorrespondenceDistance(mv_ICPPost_MaxCorrespondanceDistance);
-//    icp->setMaximumIterations (300);
-
-//    icp->setTransformationEpsilon (1e-8);
-
-//    pcl::registration::ELCH<pcl::PointXYZRGB> elch;
-//    elch.setReg (icp);
-
-
-//    vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr>::iterator it;
-//    for (it = mv_alignedOriginalPCs.begin(); it != mv_alignedOriginalPCs.end(); ++it)
-//        elch.addPointCloud( *it );
-
-//    elch.setLoopEnd (mv_alignedOriginalPCs.size()-1);
-//    elch.compute();
-
-
-
-//    //Create and setup the Incremental registration object
-//    pcl::registration::IncrementalRegistration<pcl::PointXYZRGB> incremental_icp;
-//    incremental_icp.setRegistration(icp);
-
-//    //Result pointcloud
-//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr mergedAlignedOriginal(new pcl::PointCloud<pcl::PointXYZRGB>());
-//    //Temporal pointcloud for transforming the incrementally registered
-//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr tmp (new pcl::PointCloud<pcl::PointXYZRGB>);
-
-//    for (it = mv_alignedOriginalPCs.begin(); it != mv_alignedOriginalPCs.end(); ++it){
-//        incremental_icp.registerCloud( *it );
-
-//        //Align current pointcloud to previous ones
-//        pcl::transformPointCloud ( *(*it) , *tmp, incremental_icp.getDeltaTransform());
-
-//        *mergedAlignedOriginal += *tmp;
-//    }
-
-
-
-
-//        *mergedAlignedOriginal += *tmp;
-//    }
- // return mf_outlierRemovalPC(mergedAlignedOriginal, 8, 2);
-
-    mergedAlignedOriginal = TDK_ScanRegistration::Register(mv_alignedOriginalPCs);
     return mergedAlignedOriginal;
 }
 
@@ -553,118 +506,6 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr TDK_ScanRegistration::mf_voxelDownSamplePoin
     return downSampledPointCloud;
 }
 
-/////////////////////////////////////////////////////
-
-//pcl::PointCloud<pcl::Normal>::Ptr TDK_ScanRegistration::mf_computeNormals(
-//        const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_in,
-
-//        const float &searchRadius
-//        )
-//{
-//    //Create output pointer
-//    pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-
-//    //Instantiate Normal Estimator
-//    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> norm_est;
-
-//    //Configure estimator
-//    norm_est.setInputCloud (cloud_in);
-//    norm_est.setRadiusSearch (searchRadius);
-
-//    norm_est.compute (*normals);
-
-//    return normals;
-//}
-
-/////////////////////////////////////////////////////
-
-//template <typename PointT>
-//boost::shared_ptr<pcl::PointCloud<PointT>>
-//TDK_ScanRegistration::mf_iterativeClosestPointFinalAlignment(
-//        const boost::shared_ptr<pcl::PointCloud<PointT>> &source,
-//        const boost::shared_ptr<pcl::PointCloud<PointT>> &target,
-//        const float &maxCorrespondenceDistance,
-//        Eigen::Matrix4f &icpTransformation
-//        )
-//{
-//    pcl::IterativeClosestPoint<PointT, PointT> icp;
-
-//    icp.setMaxCorrespondenceDistance(maxCorrespondenceDistance);
-//    icp.setMaximumIterations (300); //Originally 10
-//    icp.setTransformationEpsilon (1e-8);
-
-//    icp.setInputCloud(source);
-//    icp.setInputTarget(target);
-
-//    pcl::PointCloud<PointT>::Ptr alignedSource(new pcl::PointCloud<PointT>);
-//    icp.align(*alignedSource);
-    
-//    icpTransformation = icp.getFinalTransformation();
-//    return alignedSource;
-//}
-
-
-/////////////////////////////////////////////////////
-
-//pcl::CorrespondencesPtr
-//TDK_ScanRegistration::mf_estimateCorrespondences(
-//        const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud1,
-//        const pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud2,
-//        const pcl::PointCloud<pcl::Normal>::Ptr &normals1,
-//        const pcl::PointCloud<pcl::Normal>::Ptr &normals2,
-//        const double &max_distance
-//        )
-//{
-//    pcl::registration::CorrespondenceEstimationBackProjection<pcl::PointXYZ, pcl::PointXYZ, pcl::Normal> corr_est;
-
-//    corr_est.setInputSource(cloud1);
-//    corr_est.setSourceNormals(normals1);
-
-//    corr_est.setInputTarget(cloud2);
-//    corr_est.setTargetNormals(normals2);
-
-//    pcl::CorrespondencesPtr all_correspondences(new pcl::Correspondences());
-//    corr_est.determineReciprocalCorrespondences(*all_correspondences);
-
-//    pcl::registration::CorrespondenceRejectorSampleConsensus<pcl::PointXYZ> rejector;
-
-//    rejector.setInputSource(cloud1);
-//    rejector.setInputTarget(cloud2);
-//    rejector.setInputCorrespondences(all_correspondences);
-
-//    //Add source and target pointcloud data to rejector?
-//    pcl::CorrespondencesPtr remaining_correspondences(new pcl::Correspondences());
-//    rejector.getCorrespondences(*remaining_correspondences);
-
-//    return remaining_correspondences;
-//}
-
-
-/////////////////////////////////////////////////////
-
-//pcl::PointCloud<pcl::PointXYZ>::Ptr
-//TDK_ScanRegistration::mf_SVDInitialAlignment
-//(
-//        const pcl::PointCloud<pcl::PointXYZ>::Ptr &source,
-//        const pcl::PointCloud<pcl::PointXYZ>::Ptr &target,
-//        pcl::CorrespondencesPtr correspondences,
-//        Eigen::Matrix4f &transformation_matrix
-//        )
-//{
-//    transformation_matrix = Eigen::Matrix4f ();
-
-//    //Estimate transformation that converts cloud1 -> cloud2
-//    pcl::registration::TransformationEstimationSVD<pcl::PointXYZ,pcl::PointXYZ> TESVD;
-//    TESVD.estimateRigidTransformation(*source, *target, *correspondences, transformation_matrix);
-
-//    pcl::PointCloud<pcl::PointXYZ>::Ptr alignedSource(new pcl::PointCloud<pcl::PointXYZ>());
-//    pcl::transformPointCloud(*source, *alignedSource, transformation_matrix);
-
-//    return alignedSource;
-//}
-
-
-/////////////////////////////////////////////////////
 
 pcl::PointCloud<pcl::PointXYZ>::Ptr
 TDK_ScanRegistration::mf_outlierRemovalPC(
@@ -792,10 +633,10 @@ TDK_ScanRegistration::set_ICP_MaxCorrespondenceDistance(float value)
 
 
 void TDK_ScanRegistration::MatchRegistration(pcl::PointCloud<pcl::PointXYZRGB>::Ptr refCloud,
-                                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampleCloud,
-                                    pcl::PointCloud<pcl::PointXYZ>::Ptr refMatch,
-                                    pcl::PointCloud<pcl::PointXYZ>::Ptr sampleMatch,
-                                    pcl::PointCloud<pcl::PointXYZRGB>::Ptr fusedCloud)
+                                             pcl::PointCloud<pcl::PointXYZRGB>::Ptr sampleCloud,
+                                             pcl::PointCloud<pcl::PointXYZ>::Ptr refMatch,
+                                             pcl::PointCloud<pcl::PointXYZ>::Ptr sampleMatch,
+                                             pcl::PointCloud<pcl::PointXYZRGB>::Ptr fusedCloud)
 {
     // Define an icp regisration object with default parameter setting
     pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
@@ -816,30 +657,38 @@ void TDK_ScanRegistration::MatchRegistration(pcl::PointCloud<pcl::PointXYZRGB>::
 
     // Transform the sample cloud to reference cloud coordinate
     pcl::transformPointCloud(*sampleCloud, *fusedCloud, transMat);
-    for(int i=0; i<refCloud->size(); i++)
-    {
-            fusedCloud->push_back(refCloud->at(i));
-    }
-    qDebug() << "transformPointCloud";
+    //    for(int i=0; i<refCloud->size(); i++)
+    //    {
+    //            fusedCloud->push_back(refCloud->at(i));
+    //    }
+    //    qDebug() << "transformPointCloud";
 
-//    // Registration refinement using ICP with all points
-//    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in (new pcl::PointCloud<pcl::PointXYZ>);
-//    copyColor2XYZ(fusedCloud, cloud_in);
-//    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZ>);
-//    copyColor2XYZ(refCloud, cloud_out);
-//    icp.setInputCloud(cloud_in);
-//    icp.setInputTarget(cloud_out);
-//    icp.align(aligned);
-//    transMat = icp.getFinalTransformation();
-//    pcl::transformPointCloud(*fusedCloud, *fusedCloud, transMat);
-//    qDebug() << "Registration refinement done";
-//    // Fuse with the reference cloud
-//    for(int i=0; i<refCloud->size(); i++)
-//      {
-//        fusedCloud->push_back(refCloud->at(i));
-//      }
+    // Registration refinement using ICP with all points
 
-//     qDebug() << "Match registration completed";
+    //    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in (new pcl::PointCloud<pcl::PointXYZ>);
+    //    copyColor2XYZ(fusedCloud, cloud_in);
+    //    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZ>);
+    //    copyColor2XYZ(refCloud, cloud_out);
+    //    icp.setInputCloud(cloud_in);
+    //    icp.setInputTarget(cloud_out);
+    //    icp.align(aligned);
+    //    transMat = icp.getFinalTransformation();
+    //    pcl::transformPointCloud(*fusedCloud, *fusedCloud, transMat);
+    //    for(int i=0; i<refCloud->size(); i++)
+    //      {
+    //        fusedCloud->push_back(refCloud->at(i));
+    //      }
+
+    if (mv_ICP_Normals == false)
+        fusedCloud = TDK_ScanRegistration::ICP(fusedCloud , refCloud);
+    else
+        fusedCloud = TDK_ScanRegistration::ICPNormal(fusedCloud , refCloud);
+
+    qDebug() << "Registration refinement done";
+    // Fuse with the reference cloud
+
+
+    qDebug() << "Match registration completed";
 
 }
 
@@ -865,8 +714,8 @@ void tdk_PointCloudXYZRGBtoXYZI(
         )
 {
     for_each(in->begin(),
-            in->end(),
-            [&out] (pcl::PointXYZRGB pRGB) {
+             in->end(),
+             [&out] (pcl::PointXYZRGB pRGB) {
         pcl::PointXYZI pI{};
         pcl::PointXYZRGBtoXYZI(pRGB, pI);
         out->push_back(pI);
@@ -878,28 +727,28 @@ void tdk_PointCloudXYZRGBtoXYZI(
 // Extract color information
 void copyColor2XYZ(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_in, pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out)
 {
-  for(int i=0; i<cloud_in->size();i++)
+    for(int i=0; i<cloud_in->size();i++)
     {
-      pcl::PointXYZ pt;
-      pt.x = cloud_in->at(i).r/255.0;
-      pt.y = cloud_in->at(i).g/255.0;
-      pt.z = cloud_in->at(i).b/255.0;
-      cloud_out->push_back(pt);
+        pcl::PointXYZ pt;
+        pt.x = cloud_in->at(i).r/255.0;
+        pt.y = cloud_in->at(i).g/255.0;
+        pt.z = cloud_in->at(i).b/255.0;
+        cloud_out->push_back(pt);
     }
 }
 
 boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbVis (pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
 {
-  // --------------------------------------------
-  // -----Open 3D viewer and add point cloud-----
-  // --------------------------------------------
-  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-  viewer->setBackgroundColor (0, 0, 0);
-  pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
-  viewer->addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "reference cloud");
-  viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "reference cloud");
-  viewer->addCoordinateSystem (0.10);
-  viewer->initCameraParameters ();
-  return (viewer);
+    // --------------------------------------------
+    // -----Open 3D viewer and add point cloud-----
+    // --------------------------------------------
+    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
+    viewer->setBackgroundColor (0, 0, 0);
+    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(cloud);
+    viewer->addPointCloud<pcl::PointXYZRGB> (cloud, rgb, "reference cloud");
+    viewer->setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "reference cloud");
+    viewer->addCoordinateSystem (0.10);
+    viewer->initCameraParameters ();
+    return (viewer);
 }
 

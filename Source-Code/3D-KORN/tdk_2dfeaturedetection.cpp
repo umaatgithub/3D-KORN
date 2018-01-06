@@ -62,7 +62,7 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
     outKeyPointsTrain->clear();
     outKeyPointsQuery->clear();
 
-    matchFeatures(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, matchesRobust, true);
+    matchFeatures(trainImg, keyPtsRobustTrain, queryImg, keyPtsRobustQuery, matchesRobust);
 
     std::vector<cv::DMatch> shortMatch;
     copy(matchesRobust.begin(), matchesRobust.begin() + 4, std::back_insert_iterator<std::vector<cv::DMatch>>(shortMatch));
@@ -83,8 +83,8 @@ void TDK_2DFeatureDetection::getMatchedFeatures(const pcl::PointCloud<pcl::Point
         qDebug() << "Robust matches number " << matchesRobust.size();
 
         //Limit number of selected matches to first 10
-        auto itEnd = (matchesRobust.size() >= 10) ? (matchesRobust.begin() + 10) : matchesRobust.end();
-
+        //auto itEnd = (matchesRobust.size() >= 10) ? (matchesRobust.begin() + 10) : matchesRobust.end();
+        auto itEnd = matchesRobust.end();
         for(auto it = matchesRobust.begin(); it != itEnd; it++)
         {
             cv::DMatch tempMatch = *it;

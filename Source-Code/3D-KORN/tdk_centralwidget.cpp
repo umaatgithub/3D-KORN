@@ -100,7 +100,7 @@ void TDK_CentralWidget::mf_SetupPointCloudDisplayWidget()
     mv_CentralGridLayout->addWidget(dockWidget, 0, 1, 2, 1);
 
     mv_PointCloudVisualizer.reset (new pcl::visualization::PCLVisualizer ("viewer", false));
-    mv_PointCloudVisualizer->setBackgroundColor (0.1, 0.1, 0.1);
+    mv_PointCloudVisualizer->setBackgroundColor (0.5, 0.5, 0.5);
     mv_PointCloudVisualizer->addCoordinateSystem(1.0);
     mv_PointCloudQVTKWidget->SetRenderWindow ( mv_PointCloudVisualizer->getRenderWindow () );
     mv_PointCloudVisualizer->setupInteractor ( mv_PointCloudQVTKWidget->GetInteractor (), mv_PointCloudQVTKWidget->GetRenderWindow ());
@@ -138,7 +138,9 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     QWidget *widget = new QWidget;
 
     mv_RegistrationComboBox->setFixedHeight(22);
-    mv_RegistrationComboBox->addItem("SVD + ICP", "SVD");
+
+    mv_RegistrationComboBox->addItem("ICP with normals", "ICP with normals");
+    mv_RegistrationComboBox->addItem("ICP", "ICP");
 
     mv_RegistrationPushButton->setFixedHeight(22);
     mv_RegistrationPushButton->setMinimumWidth(300);
@@ -161,11 +163,11 @@ void TDK_CentralWidget::mf_SetupPointCloudOperationsWidget()
     gridLayout->addWidget(new QLabel("Select registration algorithm : "), 0, 0, 1, 2);
     gridLayout->addWidget(mv_RegistrationComboBox, 0, 2, 1, 2);
     gridLayout->addWidget(mv_RegistrationPushButton, 1, 0, 1, 4);
-    gridLayout->addWidget(myFrame, 2, 0, 1, 4);
-    gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 3, 0, 1, 2);
-    gridLayout->addWidget(mv_MeshAlgorithmComboBox, 3, 2, 1, 2);
-    gridLayout->addWidget(mv_GenerateMeshPushButton, 4, 0, 1, 4);
-    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 5, 0, 1, 4);
+    gridLayout->addWidget(myFrame, 3, 0, 1, 4);
+    gridLayout->addWidget(new QLabel("Select mesh algorithm : "), 4, 0, 1, 2);
+    gridLayout->addWidget(mv_MeshAlgorithmComboBox, 4, 2, 1, 2);
+    gridLayout->addWidget(mv_GenerateMeshPushButton, 5, 0, 1, 4);
+    gridLayout->addWidget(mv_2DFeatureDetectionCheckBox, 2, 0, 1, 4);
 
     gridLayout->setRowMinimumHeight(0, 30);
     gridLayout->setHorizontalSpacing(10);
@@ -199,20 +201,18 @@ void TDK_CentralWidget::mf_SlotRegisterPointCloud()
                 mv_ScanRegistration->addNextPointCloud(TDK_Database::mv_RegisteredPointCloudsVector[i], 0);
             }
         }
+
+        if (mv_2DFeatureDetectionCheckBox->checkState() == Qt::Checked)
+           mv_ScanRegistration->mv_use2DFeatureDetection = true;
+        else
+            mv_ScanRegistration->mv_use2DFeatureDetection = false;
+
+        if (mv_RegistrationComboBox->currentText() == "ICP")
+            mv_ScanRegistration->mv_ICP_Normals = false;
+
+
         TDK_Database::mf_StaticAddRegisteredPointCloud(mv_ScanRegistration->Process_and_getAlignedPC()->makeShared());
         emit mf_SignalRegisteredPointCloudListUpdated();
-
-        // prove feature detection
-        //pcl::PointCloud<pcl::PointXYZRGB>::Ptr trainPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-//        pcl::PointCloud<pcl::PointXYZRGB>::Ptr queryPointCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
-
-//        pcl::PointCloud<pcl::PointXYZ>::Ptr trainKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
-//        pcl::PointCloud<pcl::PointXYZ>::Ptr queryKeyPoints(new pcl::PointCloud<pcl::PointXYZ>());
-
-//        TDK_2DFeatureDetection mv_2DFeatureDetectionPtr;
-//        mv_2DFeatureDetectionPtr.setInputPointCloud(TDK_Database::mv_PointCloudsVector[1]);
-//        mv_2DFeatureDetectionPtr.getMatchedFeatures(queryPointCloud, trainKeyPoints, queryKeyPoints);
-//        mv_2DFeatureDetectionPtr.showMatchedFeatures3D(queryPointCloud, trainKeyPoints, queryKeyPoints);
 
 
 
