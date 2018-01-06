@@ -206,19 +206,19 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vecto
             mv_2DFeatureDetectionPtr.getMatchedFeatures(tgt, trainKeyPoints, queryKeyPoints);
 
             std::cout << "FEATURE MATCHING " << std::endl;
-            //mv_2DFeatureDetectionPtr.showMatchedFeatures3D(tgt, trainKeyPoints, queryKeyPoints);
+           // mv_2DFeatureDetectionPtr.showMatchedFeatures3D(tgt, trainKeyPoints, queryKeyPoints);
             MatchRegistration(src, tgt, trainKeyPoints, queryKeyPoints, fusedCloud);
 
             std::cout << "MATCHING DONE! " << std::endl;
 
 
-            // To visualize point clouds in a different window
-            //boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbViewer2 = rgbVis(fusedCloud);
-            //            while (!rgbViewer2->wasStopped ())
-            //            {
-            //                rgbViewer2->spinOnce (100);
-            //                boost::this_thread::sleep (boost::posix_time::microseconds (100000));
-            //            }
+             //To visualize point clouds in a different window
+            boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbViewer2 = rgbVis(fusedCloud);
+                        while (!rgbViewer2->wasStopped ())
+                        {
+                            rgbViewer2->spinOnce (100);
+                            boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+                        }
 
             *fusedCloud += *cloud_tgt;
 
@@ -650,13 +650,12 @@ void TDK_ScanRegistration::MatchRegistration(pcl::PointCloud<pcl::PointXYZRGB>::
     // Estimate the rigid transformation
     Eigen::Matrix4f transMat = icp.getFinalTransformation();
     qDebug() << "translation z" << transMat(2, 3);
-    //transMat(0, 3) = 0;
-    //transMat(1, 3) = 0;
-    //transMat(2, 3) = 0;
     qDebug() << "Estimate the rigid transformation";
 
     // Transform the sample cloud to reference cloud coordinate
     pcl::transformPointCloud(*sampleCloud, *fusedCloud, transMat);
+    //To visualize point clouds in a different window
+
     //    for(int i=0; i<refCloud->size(); i++)
     //    {
     //            fusedCloud->push_back(refCloud->at(i));
@@ -665,30 +664,37 @@ void TDK_ScanRegistration::MatchRegistration(pcl::PointCloud<pcl::PointXYZRGB>::
 
     // Registration refinement using ICP with all points
 
-    //    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in (new pcl::PointCloud<pcl::PointXYZ>);
-    //    copyColor2XYZ(fusedCloud, cloud_in);
-    //    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZ>);
-    //    copyColor2XYZ(refCloud, cloud_out);
-    //    icp.setInputCloud(cloud_in);
-    //    icp.setInputTarget(cloud_out);
-    //    icp.align(aligned);
-    //    transMat = icp.getFinalTransformation();
-    //    pcl::transformPointCloud(*fusedCloud, *fusedCloud, transMat);
-    //    for(int i=0; i<refCloud->size(); i++)
-    //      {
-    //        fusedCloud->push_back(refCloud->at(i));
-    //      }
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_in (new pcl::PointCloud<pcl::PointXYZ>);
+        copyColor2XYZ(fusedCloud, cloud_in);
+        pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_out(new pcl::PointCloud<pcl::PointXYZ>);
+        copyColor2XYZ(refCloud, cloud_out);
+        icp.setInputCloud(cloud_in);
+        icp.setInputTarget(cloud_out);
+        icp.align(aligned);
+        transMat = icp.getFinalTransformation();
+        pcl::transformPointCloud(*fusedCloud, *fusedCloud, transMat);
+        for(int i=0; i<refCloud->size(); i++)
+          {
+            fusedCloud->push_back(refCloud->at(i));
+          }
 
-    if (mv_ICP_Normals == false)
-        fusedCloud = TDK_ScanRegistration::ICP(fusedCloud , refCloud);
-    else
-        fusedCloud = TDK_ScanRegistration::ICPNormal(fusedCloud , refCloud);
+//        boost::shared_ptr<pcl::visualization::PCLVisualizer> rgbViewer2 = rgbVis(fusedCloud);
+//                    while (!rgbViewer2->wasStopped ())
+//                    {
+//                        rgbViewer2->spinOnce (100);
+//                        boost::this_thread::sleep (boost::posix_time::microseconds (100000));
+//                    }
+
+//    if (mv_ICP_Normals == false)
+//        fusedCloud = TDK_ScanRegistration::ICP(refCloud, fusedCloud);
+//    else
+//        fusedCloud = TDK_ScanRegistration::ICPNormal(refCloud, fusedCloud);
+
+
 
     qDebug() << "Registration refinement done";
     // Fuse with the reference cloud
-
-
-    qDebug() << "Match registration completed";
+    //To visualize point clouds in a different window
 
 }
 
