@@ -55,15 +55,15 @@ public:
                                     pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered);
 
     //Second function for pass through filtering
-    static void mf_FilterPassthroughBri(const pcl::PointCloud<PointXYZ>::Ptr &cloud,
-                                        pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered,
-                                        float x1, float x2, float y1, float y2, float z1, float z2);
+    static void mf_FilterPassthroughBri(const pcl::PointCloud<PointXYZRGB>::Ptr &cloud,
+                                        pcl::PointCloud<PointXYZRGB>::Ptr &cloud_filtered,
+                                        float x1 = -0.4, float x2 = 0.4, float y1 = -0.85, float y2 = 1.2, float z1 = 0.1, float z2 = 2.0);
 
     //Function for filtering outliers
     static void mf_FilterStatisticalOutlierRemoval(const pcl::PointCloud<PointXYZ>::Ptr &cloud,
-                                                   const pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered, float threshold);
+                                                   const pcl::PointCloud<PointXYZ>::Ptr &cloud_filtered, float threshold = 2.5);
     static void mf_FilterStatisticalOutlierRemoval(const pcl::PointCloud<PointXYZRGB>::Ptr &cloud,
-                                                   const pcl::PointCloud<PointXYZRGB>::Ptr &cloud_filtered, float threshold);
+                                                   const pcl::PointCloud<PointXYZRGB>::Ptr &cloud_filtered, float threshold = 2.5);
 
     //Function for downsampling using voxel grid
     static void mf_FilterVoxelGridDownsample(const pcl::PointCloud<PointXYZ>::Ptr &cloud,

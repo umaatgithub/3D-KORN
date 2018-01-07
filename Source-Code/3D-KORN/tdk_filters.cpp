@@ -61,13 +61,13 @@ void TDK_Filters::FilterPCPassthrough(const double &ci, const double &minx, cons
 //PassThrough filter attempt 2
 //Input: PointCloud, PointCloud(filtered), x,y,z minimum and maximum
 //Output: void
-void TDK_Filters::mf_FilterPassthroughBri(const  pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud,  pcl::PointCloud<pcl::PointXYZ>::Ptr &cloud_filtered, float x1, float x2, float y1, float y2, float z1, float z2){
+void TDK_Filters::mf_FilterPassthroughBri(const  pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud,  pcl::PointCloud<pcl::PointXYZRGB>::Ptr &cloud_filtered, float x1, float x2, float y1, float y2, float z1, float z2){
 
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filteredz (new  pcl::PointCloud<pcl::PointXYZ>);
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filteredy (new  pcl::PointCloud<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filteredz (new  pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud_filteredy (new  pcl::PointCloud<pcl::PointXYZRGB>);
 
     // Create the passthrough filtering object
-    pcl::PassThrough<PointXYZ> pass;
+    pcl::PassThrough<PointXYZRGB> pass;
 
     qDebug()<<"inside pass through";
 
@@ -113,7 +113,7 @@ void TDK_Filters::mf_FilterStatisticalOutlierRemoval(const pcl::PointCloud<Point
     pcl::StatisticalOutlierRemoval<PointXYZRGB> sor; // Create the filtering object
     qDebug()<<"inside outlier";
     sor.setInputCloud (cloud);
-    sor.setMeanK (50);
+    sor.setMeanK (8);
     sor.setStddevMulThresh (threshold);
     sor.filter (*cloud_filtered);
 }

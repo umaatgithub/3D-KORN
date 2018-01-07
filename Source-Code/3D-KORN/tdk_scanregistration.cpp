@@ -1,4 +1,5 @@
 #include "tdk_scanregistration.h"
+#include "tdk_filters.h"
 
 #include <QDebug>
 
@@ -192,8 +193,9 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vecto
         cloud_src = result2; // source
         cloud_tgt = Data[i]; // target
 
-        src = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_src, VoxelGridLeafSize);
-        tgt = TDK_ScanRegistration::mf_voxelDownSamplePointCloud (cloud_tgt, VoxelGridLeafSize);
+        TDK_Filters::mf_FilterVoxelGridDownsample (cloud_src, src, VoxelGridLeafSize);
+        TDK_Filters::mf_FilterVoxelGridDownsample (cloud_tgt, tgt, VoxelGridLeafSize);
+
 
         if (mv_use2DFeatureDetection == true){
             // DO feature detection and run ICP/ICP Normal on the point clouds
@@ -222,8 +224,9 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vecto
 
             *fusedCloud += *cloud_tgt;
 
-            result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(fusedCloud);
-
+           //result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(fusedCloud);
+            TDK_Filters::mf_FilterStatisticalOutlierRemoval (fusedCloud , result2);
+            //TDK_Filters::mf_FilterPassthroughBri(fusedCloud, result2);
 
             std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
         }
