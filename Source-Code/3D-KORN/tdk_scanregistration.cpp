@@ -235,15 +235,14 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Register(std::vecto
                 result1 = TDK_ScanRegistration::ICPNormal(src, tgt);
 
             *result1 += *cloud_tgt;
-
-            result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(result1);
+            result2 = result1;
+            //result2 =  TDK_ScanRegistration::mf_outlierRemovalPC(result1);
 
 
         }
     }
 
 
-    std::cout<< "About to rerurn... it got this far! hehe"<<std::endl;
     return result2;
 
 }
@@ -327,8 +326,6 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::ICP(pcl::PointCloud
     icp.setInputTarget(tgt);
     icp.align(*Final);
 
-    //std::cout << "ICP between frame " << i << " and " << i+1 << std::endl;
-
     std::cout << "ICP converged with score: " << icp.getFitnessScore() << std::endl;
 
     return Final;
@@ -358,7 +355,7 @@ pcl::PointCloud<pcl::PointXYZRGB>::Ptr TDK_ScanRegistration::Process_and_getAlig
 
         mergedAlignedOriginal = TDK_ScanRegistration::Register(mv_alignedOriginalPCs);
 
-        emit mf_SignalStatusChanged(tr("Registration done!"), QColor(Qt::red));
+        emit mf_SignalStatusChanged(tr("Registration done!"), QColor(Qt::darkGreen));
 
 
     return mergedAlignedOriginal;
@@ -689,7 +686,10 @@ void TDK_ScanRegistration::MatchRegistration(pcl::PointCloud<pcl::PointXYZRGB>::
 //        fusedCloud = TDK_ScanRegistration::ICP(refCloud, fusedCloud);
 //    else
 //        fusedCloud = TDK_ScanRegistration::ICPNormal(refCloud, fusedCloud);
-
+//        for(int i=0; i<refCloud->size(); i++)
+//          {
+//            fusedCloud->push_back(refCloud->at(i));
+//          }
 
 
     qDebug() << "Registration refinement done";
