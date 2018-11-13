@@ -43,6 +43,7 @@ public:
     static std::vector<QString>                                 mv_MeshesName;
     static std::vector<pcl::PolygonMesh::Ptr>                   mv_MeshesVector;
 
+
 };
 
 #endif // TDK_DATABASE_H

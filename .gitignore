@@ -1,0 +1,9 @@
+#ignore IDE files
+.DS_Store
+**/.DS_Store
+Source-Code/3D-KORN/3D-KORN.pro.user
+
+#ignore build folders
+Source-Code/build-3D-KORN-Desktop_Qt_5_9_2_MSVC2015_64bit-Debug/**
+Source-Code/build-3D-KORN-Desktop_Qt_5_9_2_MSVC2015_64bit-Release/**
+Source-Code/build-*/
